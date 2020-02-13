@@ -3,26 +3,29 @@ p = print
 
 def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive=False):
     for i in range(6):
-        p("vmovdqa {}({}), %ymm{}".format(32*(i + a_off), a_mem, i))
-        p("vmovdqa {}({}), %ymm{}".format(32*(i + b_off), b_mem, i+6))
+        p("vmovdqa {}({}), %ymm{}".format(32*(i + a_off), a_mem, i)) # move aligned, LOAD
+        p("vmovdqa {}({}), %ymm{}".format(32*(i + b_off), b_mem, i+6)) # move aligned, LOAD
         if additive:
-            p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + a_off + 11), a_mem, i, i))
-            p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + b_off + 11), b_mem, i+6, i+6))
+            p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + a_off + 11), a_mem, i, i)) # add packed integer
+            p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + b_off + 11), b_mem, i+6, i+6)) # add packed integer
     for i in range(11):
         first = True
         for j in range(min(i+1, 6)):
             if i - j < 6:
                 if first:
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 12 + (i % 2)))
+                    # Multiply Packed Signed Integers and Store Low 16-bit Result
+                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 12 + (i % 2))) 
+
                     first = False
                 else:
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 15))
+                    # Multiply Packed Signed Integers and Store Low 16-bit Result and ADD
+                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 15)) 
                     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(12 + (i % 2), 15, 12 + (i % 2)))
-        p("vmovdqa %ymm{}, {}({})".format(12 + (i % 2), 32*(i + r_off), r_mem))
+        p("vmovdqa %ymm{}, {}({})".format(12 + (i % 2), 32*(i + r_off), r_mem)) #move aligned, STORE
 
     for i in range(5):
-        p("vmovdqa {}({}), %ymm{}".format(32*(6+i + a_off), a_mem, i))
-        p("vmovdqa {}({}), %ymm{}".format(32*(6+i + b_off), b_mem, i+6))
+        p("vmovdqa {}({}), %ymm{}".format(32*(6+i + a_off), a_mem, i)) # move aligned, LOAD
+        p("vmovdqa {}({}), %ymm{}".format(32*(6+i + b_off), b_mem, i+6)) # move aligned, LOAD
         if additive:
             p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(6+i + a_off + 11), a_mem, i, i))
             p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(6+i + b_off + 11), b_mem, i+6, i+6))
@@ -31,21 +34,23 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
         for j in range(min(i+1, 5)):
             if i - j < 5:
                 if first:
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 12 + (i % 2)))
+                    # MUL LOW
+                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 12 + (i % 2))) 
                     first = False
                 else:
+                    # MUL LOW and ADD
                     p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 15))
                     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(12 + (i % 2), 15, 12 + (i % 2)))
-        p("vmovdqa %ymm{}, {}({})".format(12 + (i % 2), 32*(12+i + r_off), r_mem))
+        p("vmovdqa %ymm{}, {}({})".format(12 + (i % 2), 32*(12+i + r_off), r_mem)) # move aligned, STORE
 
     for i in range(5):  # i == 5 is still in place as a[5] resp. b[5]
-        p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + a_off), a_mem, i, i))
-        p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + b_off), b_mem, i+6, i+6))
+        p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + a_off), a_mem, i, i)) #ADD mem, ymm
+        p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + b_off), b_mem, i+6, i+6)) #ADD mem, ymm
         # these additions should not be strictly necessary, as we already computed this earlier
         # recomputing seems more convenient than storing them
         if additive:
-            p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + a_off + 11), a_mem, i, i))
-            p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + b_off + 11), b_mem, i+6, i+6))
+            p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + a_off + 11), a_mem, i, i)) # ADD mem, ymm
+            p("vpaddw {}({}), %ymm{}, %ymm{}".format(32*(i + b_off + 11), b_mem, i+6, i+6)) # ADD mem, ymm
 
     # peel apart the third schoolbook mult so we end with (a+b)(c+d) in registers
     # this prevents us from having to touch the stack at all for t2
@@ -54,15 +59,21 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
     free = 15
     for j in range(6):
         if j == 0:
-            p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, target))
+            # MUL LOW
+            p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, target)) 
         else:
-            p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))
+            # MUL LOW and ADD
+            p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))   
             p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(free, target, target))
     # weird centerpiece, deal with this straight away to free up a register
+
+    # SUB mem, ymm then STORE
+
     p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(5 + r_off), r_mem, target, target))
     p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(17 + r_off), r_mem, target, target))
     p("vmovdqa %ymm{}, {}({})".format(target, 32*(11 + r_off), r_mem))
 
+    # MUL ymm
     # use a[5] for all products we need it for
     for j in range(1, 5):  # note again that we do not compute [10]
         p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(5, 6+ j, 12+j-1))
@@ -75,6 +86,7 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
             if j == 5:
                 continue  # we've already used a[5]
             if i - j < 6:
+                # MUL LOW and ADD
                 p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))
                 p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(free, target, target))
 
@@ -85,9 +97,11 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
         for j in range(min(i+1, 6)):
             if i - j < 6:
                 if first:
+                    # MUL LOW
                     p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, target))
                     first = False
                 else:
+                    # MUL LOW and ADD
                     p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))
                     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(free, target, target))
 
@@ -95,13 +109,14 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
     t2 = [7, 8, 9, 10, 11, None, 12, 13, 14, 15]
 
     for i in range(5):
-        p("vmovdqa {}({}), %ymm{}".format(32*(6+i + r_off), r_mem, i))
-        p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(12+i + r_off), r_mem, i, i))
+        p("vmovdqa {}({}), %ymm{}".format(32*(6+i + r_off), r_mem, i)) # LOAD mem to ymm
+        p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(12+i + r_off), r_mem, i, i)) # SUB mem, ymm
         if i < 4:
-            p("vpsubw %ymm{}, %ymm{}, %ymm{}".format(i, t2[6 + i], i+6))
+            p("vpsubw %ymm{}, %ymm{}, %ymm{}".format(i, t2[6 + i], i+6)) # SUB ymm, ymm
             if i < 3:
-                p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(18+i + r_off), r_mem, i+6, i+6))
-            p("vmovdqa %ymm{}, {}({})".format(i+6, 32*(12+i + r_off), r_mem))
+                p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(18+i + r_off), r_mem, i+6, i+6)) # SUB ymm, ymm
+            p("vmovdqa %ymm{}, {}({})".format(i+6, 32*(12+i + r_off), r_mem)) # STORE ymm to mem
+        # ADD, SUB and STORE
         p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(t2[i], i, i))
         p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(i + r_off), r_mem, i, i))
         p("vmovdqa %ymm{}, {}({})".format(i, 32*(6+i + r_off), r_mem))
