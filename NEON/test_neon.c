@@ -10,7 +10,7 @@ typedef struct Poly
 int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
 {
     /*
-    Load to 16 Q registers 
+    Load to 12 Q registers 
     */
     int16x8_t a0 = vld1q_s16(a->coeffs); // y0
     // int16x8_t a1 = vld1q_s16(a->coeffs + 8); // y0

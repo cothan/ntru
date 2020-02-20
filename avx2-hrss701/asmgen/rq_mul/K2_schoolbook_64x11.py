@@ -14,12 +14,12 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
             if i - j < 6:
                 if first:
                     # Multiply Packed Signed Integers and Store Low 16-bit Result
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 12 + (i % 2))) 
+                    p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 12 + (i % 2))) 
 
                     first = False
                 else:
                     # Multiply Packed Signed Integers and Store Low 16-bit Result and ADD
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 15)) 
+                    p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 15)) 
                     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(12 + (i % 2), 15, 12 + (i % 2)))
         p("vmovdqa %ymm{}, {}({})".format(12 + (i % 2), 32*(i + r_off), r_mem)) #move aligned, STORE
 
@@ -35,11 +35,11 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
             if i - j < 5:
                 if first:
                     # MUL LOW
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 12 + (i % 2))) 
+                    p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 12 + (i % 2))) 
                     first = False
                 else:
                     # MUL LOW and ADD
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 15))
+                    p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, 15))
                     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(12 + (i % 2), 15, 12 + (i % 2)))
         p("vmovdqa %ymm{}, {}({})".format(12 + (i % 2), 32*(12+i + r_off), r_mem)) # move aligned, STORE
 
@@ -60,10 +60,10 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
     for j in range(6):
         if j == 0:
             # MUL LOW
-            p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, target)) 
+            p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, target)) 
         else:
             # MUL LOW and ADD
-            p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))   
+            p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))   
             p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(free, target, target))
     # weird centerpiece, deal with this straight away to free up a register
 
@@ -76,7 +76,7 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
     # MUL ymm
     # use a[5] for all products we need it for
     for j in range(1, 5):  # note again that we do not compute [10]
-        p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(5, 6+ j, 12+j-1))
+        p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(5, 6+ j, 12+j-1))
     # this frees up register %ymm5 which held a[5]
     free = 5
     # finish up [6] to [9] (in registers 12 to 15)
@@ -87,7 +87,7 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
                 continue  # we've already used a[5]
             if i - j < 6:
                 # MUL LOW and ADD
-                p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))
+                p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))
                 p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(free, target, target))
 
     # can now start overwriting b[5], b[4] etc.
@@ -98,11 +98,11 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
             if i - j < 6:
                 if first:
                     # MUL LOW
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, target))
+                    p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, target))
                     first = False
                 else:
                     # MUL LOW and ADD
-                    p("vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))
+                    p("-- vpmullw %ymm{}, %ymm{}, %ymm{}".format(j, 6+ i-j, free))
                     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(free, target, target))
 
     # t2 is now spread all over the registers: (i.e. t[0] in register ymm7)
