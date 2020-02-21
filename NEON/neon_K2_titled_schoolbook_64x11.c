@@ -253,20 +253,20 @@ int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
 
     vst1q_s16(r->coeffs + 320, c0);
 
-    y0 = vaddq_s16(y0, a->coeffs);
-    y6 = vaddq_s16(y6, b->coeffs);
+    y0 = vaddq_s16(y0, vld1q_s16(a->coeffs));
+    y6 = vaddq_s16(y6, vld1q_s16(b->coeffs));
 
-    y1 = vaddq_s16(y1, a->coeffs + 16);
-    y7 = vaddq_s16(y7, b->coeffs + 16);
+    y1 = vaddq_s16(y1, vld1q_s16(a->coeffs + 16));
+    y7 = vaddq_s16(y7, vld1q_s16(b->coeffs + 16));
 
-    y2 = vaddq_s16(y2, a->coeffs + 32);
-    y8 = vaddq_s16(y8, b->coeffs + 32);
+    y2 = vaddq_s16(y2, vld1q_s16(a->coeffs + 32));
+    y8 = vaddq_s16(y8, vld1q_s16(b->coeffs + 32));
 
-    y3 = vaddq_s16(y3, a->coeffs + 48);
-    y9 = vaddq_s16(y9, b->coeffs + 48);
+    y3 = vaddq_s16(y3, vld1q_s16(a->coeffs + 48));
+    y9 = vaddq_s16(y9, vld1q_s16(b->coeffs + 48));
 
-    y4 = vaddq_s16(y4, a->coeffs + 64);
-    y10 = vaddq_s16(y10, b->coeffs + 64);
+    y4 = vaddq_s16(y4,   vld1q_s16(a->coeffs + 64));
+    y10 = vaddq_s16(y10, vld1q_s16(b->coeffs + 64));
 
     // (0, 11) + (1, 10) + (2, 9) + (3, 8) + (4, 7) + (5, 6)
     c0 = vmulq_s16(y0, y11);
@@ -281,17 +281,17 @@ int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
 
     c0 = vmlaq_s16(c0, y5, y6);
 
-    c0 = vsubq_s16(c0, r->coeffs + 80);
+    c0 = vsubq_s16(c0, vld1q_s16(r->coeffs + 80));
 
-    c0 = vsubq_s16(c0, r->coeffs + 272);
+    c0 = vsubq_s16(c0, vld1q_s16(r->coeffs + 272));
 
     vst1q_s16(r->coeffs + 176, c0);
 
-    y12 = vmulq_s16(y5, y7);
-    y13 = vmulq_s16(y5, y8);
-    y14 = vmulq_s16(y5, y9);
-    y15 = vmulq_s16(y5, y10);
-    y5 = vmulq_s16(y1, 11);
+    int16x8_t y12 = vmulq_s16(y5, y7);
+    int16x8_t y13 = vmulq_s16(y5, y8);
+    int16x8_t y14 = vmulq_s16(y5, y9);
+    int16x8_t y15 = vmulq_s16(y5, y10);
+    y5 = vmulq_s16(y1, y11);
 
     y12 = vmlaq_s16(y12, y1, y11);
     y12 = vmlaq_s16(y12, y2, y10);
@@ -323,54 +323,55 @@ int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
     y9 = vmlaq_s16(y9, y2, y6);
 
     y8 = vmulq_s16(y0, y7);
-    y8 = vmlaq_s16(y1, y6);
+    y8 = vmlaq_s16(y8, y1, y6);
 
     y7 = vmulq_s16(y0, y6);
 
-    vst1q_s16(r->coeffs + 96) = y0; 
+    vst1q_s16(r->coeffs + 96, y0); 
 
-    y0 = vsubq_s16(y0, r->coeffs + 192);
+    y0 = vsubq_s16(y0, vld1q_s16(r->coeffs + 192));
     y6 = vsubq_s16(y12, y0);
-    y6 = vsubq_s16(y6, r->coeffs + 288);
+    y6 = vsubq_s16(y6, vld1q_s16(r->coeffs + 288));
     vst1q_s16(r->coeffs + 192, y6);
 
     y0 = vaddq_s16(y0, y7);
-    y0 = vsubq_s16(y0, r->coeffs);
+    y0 = vsubq_s16(y0, vld1q_s16(r->coeffs));
     vst1q_s16(r->coeffs + 96, y0);
 
-    y1 = vsubq_s16(r->coeffs + 112, r->coeffs + 208);
+    y1 = vsubq_s16(vld1q_s16(r->coeffs + 112), vld1q_s16(r->coeffs + 208));
     y7 = vsubq_s16(y13, y1);
-    y7 = vsubq_s16(y7, r->coeffs + 304);
+    y7 = vsubq_s16(y7, vld1q_s16(r->coeffs + 304));
     vst1q_s16(r->coeffs + 208, y7);
 
     y1 = vaddq_s16(y1, y8);
-    y1 = vsubq_s16(y1, r->coeffs + 16);
-    vst1q_s16(r->coeffs + 112);
+    y1 = vsubq_s16(y1, vld1q_s16(r->coeffs + 16));
+    vst1q_s16(r->coeffs + 112, y1);
 
-    y2 = vsubq_s16(r->coeffs +128, r->coeffs + 224);
+    y2 = vsubq_s16(vld1q_s16(r->coeffs +128), vld1q_s16(r->coeffs + 224));
     y8 = vsubq_s16(y14, y2);
-    y8 = vsubq_s16(y8, r->coeffs + 320);
+    y8 = vsubq_s16(y8, vld1q_s16(r->coeffs + 320));
     vst1q_s16(r->coeffs + 224, y8);
 
     y2 = vaddq_s16(y2, y9);
-    y2 = vsubq_s16(y2, r->coeffs + 32);
+    y2 = vsubq_s16(y2, vld1q_s16(r->coeffs + 32));
     vst1q_s16(r->coeffs + 128, y2);
 
-    y3 = vsubq_s16(r->coeffs + 144, r->coeffs + 240);
+    y3 = vsubq_s16(vld1q_s16(r->coeffs + 144), vld1q_s16(r->coeffs + 240));
     y9 = vaddq_s16(y15, y3);
     vst1q_s16(r->coeffs + 240, y9);
 
     y3 = vaddq_s16(y3, y10);
-    y3 = vsubq_s16(y3, r->coeffs + 48);
+    y3 = vsubq_s16(y3, vld1q_s16(r->coeffs + 48));
     vst1q_s16(r->coeffs + 144, y3);
 
-    y4 = vsubq_s16(r->coeffs + 160, r->coeffs + 256);
+    y4 = vsubq_s16(vld1q_s16(r->coeffs + 160), vld1q_s16(r->coeffs + 256));
     y4 = vaddq_s16(y4, y11);
-    y4 = vsubq_s64(y4, r->coeffs + 64);
+    y4 = vsubq_s64(y4, vld1q_s16(r->coeffs + 64));
     vst1q_s16(r->coeffs + 160, y4);
 }
 
 int main()
 {
+    
     return 0;
 }
