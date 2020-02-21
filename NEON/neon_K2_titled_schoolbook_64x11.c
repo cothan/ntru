@@ -356,9 +356,18 @@ int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
     y2 = vsubq_s16(y2, r->coeffs + 32);
     vst1q_s16(r->coeffs + 128, y2);
 
-    
+    y3 = vsubq_s16(r->coeffs + 144, r->coeffs + 240);
+    y9 = vaddq_s16(y15, y3);
+    vst1q_s16(r->coeffs + 240, y9);
 
+    y3 = vaddq_s16(y3, y10);
+    y3 = vsubq_s16(y3, r->coeffs + 48);
+    vst1q_s16(r->coeffs + 144, y3);
 
+    y4 = vsubq_s16(r->coeffs + 160, r->coeffs + 256);
+    y4 = vaddq_s16(y4, y11);
+    y4 = vsubq_s64(y4, r->coeffs + 64);
+    vst1q_s16(r->coeffs + 160, y4);
 }
 
 int main()
