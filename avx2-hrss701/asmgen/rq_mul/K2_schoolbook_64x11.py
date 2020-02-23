@@ -138,7 +138,7 @@ if __name__ == '__main__':
     p("mov $4, %ecx")
 
     p("karatsuba_64x11_loop:")
-    K2_schoolbook_64x11('%rdi', '%rsi', '%rdx')
+    K2_schoolbook_64x11('+r', '%+a', '%+b', additive=True)
     p("add $1408, %rsi")
     p("add $1408, %rdx")
     p("add $2816, %rdi")

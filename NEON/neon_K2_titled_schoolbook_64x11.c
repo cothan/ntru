@@ -291,9 +291,9 @@ int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
     int16x8_t y13 = vmulq_s16(y5, y8);
     int16x8_t y14 = vmulq_s16(y5, y9);
     int16x8_t y15 = vmulq_s16(y5, y10);
-    y5 = vmulq_s16(y1, y11);
-
-    y12 = vmlaq_s16(y12, y1, y11);
+    
+    y12 = vmulq_s16(y1, y11);
+    // y12 = vmlaq_s16(y12, y1, y11);
     y12 = vmlaq_s16(y12, y2, y10);
     y12 = vmlaq_s16(y12, y3, y9);
     y12 = vmlaq_s16(y12, y4, y8);
@@ -327,7 +327,7 @@ int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
 
     y7 = vmulq_s16(y0, y6);
 
-    vst1q_s16(r->coeffs + 96, y0); 
+    y0 = vld1q_s16(r->coeffs + 96); 
 
     y0 = vsubq_s16(y0, vld1q_s16(r->coeffs + 192));
     y6 = vsubq_s16(y12, y0);
@@ -357,7 +357,7 @@ int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
     vst1q_s16(r->coeffs + 128, y2);
 
     y3 = vsubq_s16(vld1q_s16(r->coeffs + 144), vld1q_s16(r->coeffs + 240));
-    y9 = vaddq_s16(y15, y3);
+    y9 = vsubq_s16(y15, y3);
     vst1q_s16(r->coeffs + 240, y9);
 
     y3 = vaddq_s16(y3, y10);
