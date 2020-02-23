@@ -6,8 +6,8 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
         p("vld1q_s16 ({}+{}) = y{}".format(16*(i + a_off), a_mem, i)) # move aligned, LOAD
         p("vld1q_s16 ({}+{}) = y{}".format(16*(i + b_off), b_mem, i+6)) # move aligned, LOAD
         if additive:
-            p("vaddq_s16 {}({}), y{}, y{}".format(16*(i + a_off + 11), a_mem, i, i)) # add packed integer
-            p("vaddq_s16 {}({}), y{}, y{}".format(16*(i + b_off + 11), b_mem, i+6, i+6)) # add packed integer
+            p("vaddq_s16 (vld1q_s16({}+{}), y{}) = y{}".format(16*(i + a_off + 11), a_mem, i, i)) # add packed integer
+            p("vaddq_s16 (vld1q_s16({}+{}), y{}) = y{}".format(16*(i + b_off + 11), b_mem, i+6, i+6)) # add packed integer
     for i in range(11):
         first = True
         for j in range(min(i+1, 6)):
@@ -22,14 +22,14 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
                     p("vmlaq_s16 (y{}, y{}, y{}) = y{}".format(12 + (i % 2), j, 6+ i-j, 12 + (i % 2))) 
                     # p("vpmullw y{}, y{}, y{}".format(j, 6+ i-j, 15)) 
                     # p("vpaddw y{}, y{}, y{}".format(12 + (i % 2), 15, 12 + (i % 2)))
-        p("vst1q_s16 ({}+{}, y{})".format( 16*(i + r_off), r_mem, 12 + (i % 2))) #move aligned, STORE
+        p("vst1q_s16 ({}+{}, y{});".format( 16*(i + r_off), r_mem, 12 + (i % 2))) #move aligned, STORE
 
     for i in range(5):
         p("vld1q_s16 ({}+{}) = y{}".format(16*(6+i + a_off), a_mem, i)) # move aligned, LOAD
         p("vld1q_s16 ({}+{}) = y{}".format(16*(6+i + b_off), b_mem, i+6)) # move aligned, LOAD
         if additive:
-            p("vaddq_s16 ({}+{}, y{}) = y{}".format(16*(6+i + a_off + 11), a_mem, i, i))
-            p("vaddq_s16 ({}+{}, y{}) = y{}".format(16*(6+i + b_off + 11), b_mem, i+6, i+6))
+            p("vaddq_s16 (vld1q_s16({}+{}), y{}) = y{}".format(16*(6+i + a_off + 11), a_mem, i, i))
+            p("vaddq_s16 (vld1q_s16({}+{}), y{}) = y{}".format(16*(6+i + b_off + 11), b_mem, i+6, i+6))
     for i in range(9):
         first = True
         for j in range(min(i+1, 5)):
@@ -44,15 +44,15 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
                     # p("vpmullw y{}, y{}, y{}".format(j, 6+ i-j, 15))
                     # p("vpaddw y{}, y{}, y{}".format(12 + (i % 2), 15, 12 + (i % 2)))
         # p("vmovdqa y{}, {}({})".format(12 + (i % 2), 16*(12+i + r_off), r_mem)) # move aligned, STORE
-        p("vst1q_s16 ({}+{}, y{})".format( 16*(12+i + r_off), r_mem, 12 + (i % 2))) # move aligned, STORE
+        p("vst1q_s16 ({}+{}, y{});".format( 16*(12+i + r_off), r_mem, 12 + (i % 2))) # move aligned, STORE
     for i in range(5):  # i == 5 is still in place as a[5] resp. b[5]
-        p("vaddq_s16 ({}+{}, y{}) = y{}".format(16*(i + a_off), a_mem, i, i)) #ADD mem, ymm
-        p("vaddq_s16 ({}+{}, y{}) = y{}".format(16*(i + b_off), b_mem, i+6, i+6)) #ADD mem, ymm
+        p("vaddq_s16 (vld1q_s16({}+{}), y{}) = y{}".format(16*(i + a_off), a_mem, i, i)) #ADD mem, ymm
+        p("vaddq_s16 (vld1q_s16({}+{}), y{}) = y{}".format(16*(i + b_off), b_mem, i+6, i+6)) #ADD mem, ymm
         # these additions should not be strictly necessary, as we already computed this earlier
         # recomputing seems more convenient than storing them
         if additive:
-            p("vaddq_s16 ({}+{}, y{}) = y{}".format(16*(i + a_off + 11), a_mem, i, i)) # ADD mem, ymm
-            p("vaddq_s16 ({}+{}, y{}) = y{}".format(16*(i + b_off + 11), b_mem, i+6, i+6)) # ADD mem, ymm
+            p("vaddq_s16 (vld1q_s16({}+{}), y{}) = y{}".format(16*(i + a_off + 11), a_mem, i, i)) # ADD mem, ymm
+            p("vaddq_s16 (vld1q_s16({}+{}), y{}) = y{}".format(16*(i + b_off + 11), b_mem, i+6, i+6)) # ADD mem, ymm
 
     # peel apart the third schoolbook mult so we end with (a+b)(c+d) in registers
     # this prevents us from having to touch the stack at all for t2
@@ -72,9 +72,9 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
 
     # SUB mem, ymm then STORE
 
-    p("vsubq_s16 (y{}, {}+{}) = y{}".format(target, 16*(5 + r_off), r_mem,   target))
-    p("vsubq_s16 (y{}, {}+{}) = y{}".format(target, 16*(17 + r_off), r_mem,  target))
-    p("vst1q_s16 ({}+{}, y{})".format(16*(11 + r_off), r_mem, target))
+    p("vsubq_s16 (y{}, vld1q_s16({}+{})) = y{}".format(target, 16*(5 + r_off), r_mem,   target))
+    p("vsubq_s16 (y{}, vld1q_s16({}+{})) = y{}".format(target, 16*(17 + r_off), r_mem,  target))
+    p("vst1q_s16 ({}+{}, y{});".format(16*(11 + r_off), r_mem, target))
 
     # MUL ymm
     # use a[5] for all products we need it for
@@ -116,16 +116,16 @@ def K2_schoolbook_64x11(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive
     for i in range(5):
         p("vld1q_s16 ({}+{}) = y{}".format(16*(6+i + r_off), r_mem, i)) # LOAD mem to ymm
         # p("vpsubw {}({}), y{}, y{}".format(16*(12+i + r_off), r_mem, i, i)) # SUB mem, ymm
-        p("vsubq_s16 (y{}, {}+{} ) = y{}".format(i, 16*(12+i + r_off), r_mem, i)) # SUB mem, ymm
+        p("vsubq_s16 (y{}, vld1q_s16({}+{}) ) = y{}".format(i, 16*(12+i + r_off), r_mem, i)) # SUB mem, ymm
         if i < 4:
             p("vsubq_s16 (y{}, y{}) = y{}".format(t2[6 + i], i, i+6)) # SUB ymm, ymm
             if i < 3:
-                p("vsubq_s16 ( y{}, {}+{})) = y{}".format( i+6, 16*(18+i + r_off), r_mem, i+6)) # SUB ymm, ymm
-            p("vst1q_s16 ({}+{}, y{})".format( 16*(12+i + r_off), r_mem, i+6)) # STORE ymm to mem
+                p("vsubq_s16 ( y{}, vld1q_s16({}+{})) = y{}".format( i+6, 16*(18+i + r_off), r_mem, i+6)) # SUB ymm, ymm
+            p("vst1q_s16 ({}+{}, y{});".format( 16*(12+i + r_off), r_mem, i+6)) # STORE ymm to mem
         # ADD, SUB and STORE
         p("vaddq_s16 (y{}, y{}) = y{}".format(t2[i], i, i))
-        p("vsubq_s16 (y{}, {}+{}) = y{}".format(i, 16*(i + r_off), r_mem, i))
-        p("vst1q_s16 ({}+{}, y{})".format(16*(6+i + r_off), r_mem, i ))
+        p("vsubq_s16 (y{}, vld1q_s16({}+{})) = y{}".format(i, 16*(i + r_off), r_mem, i))
+        p("vst1q_s16 ({}+{}, y{});".format(16*(6+i + r_off), r_mem, i ))
 
 
 if __name__ == '__main__':
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     p("mov $4, %ecx")
 
     p("karatsuba_64x11_loop:")
-    K2_schoolbook_64x11('%rdi', '%rsi', '%rdx')
+    K2_schoolbook_64x11('r->coeffs', 'a->coeffs', 'b->coeffs')
     p("add $1408, %rsi")
     p("add $1408, %rdx")
     p("add $2816, %rdi")
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     p("mov $4, %ecx")
 
     p("karatsuba_64x11_loop_additive:")
-    K2_schoolbook_64x11('%rdi', '%rsi', '%rdx', additive=True)
+    K2_schoolbook_64x11('r->coeffs', 'a->coeffs', 'b->coeffs', additive=True)
     p("add $1408, %rsi")
     p("add $1408, %rdx")
     p("add $2816, %rdi")
