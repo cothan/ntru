@@ -7,14 +7,15 @@ typedef struct Poly
   int16_t coeffs[N];
 } poly;
 
-int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
+int K2_schoolbook_64x11(poly *r,  poly *a,  poly *b)
 {
 
   int16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15;
+  int16x8_t
 
   for (int i = 0; i < 4; i++)
   {
-    for (j = 0; j < 2; j++)
+    for (int j = 0; j < 2; j++)
     {
 
       y0 = vld1q_s16(0 + a->coeffs);
@@ -261,18 +262,19 @@ int K2_schoolbook_64x11(poly *r, const poly *a, const poly *b)
       y4 = vsubq_s16(y4, y9);
       vst1q_s16(160 + r->coeffs, y4);
 
-      r->coeffs += 8;
-      a->coeffs += 8;
-      b->coeffs += 8;
+      // r->coeffs += 8;
+      // a->coeffs += 8;
+      // b->coeffs += 8;
     }
-    a->coeffs += N - 16;
-    b->coeffs += N - 16;
-    r->coeffs += 2 * N - 16;
+    // a->coeffs += N - 16;
+    // b->coeffs += N - 16;
+    // r->coeffs += 2 * N - 16;
   }
 }
 
-void int K2_schoolbook_64x11_addictive(poly *r, const poly *a, const poly *b)
+void K2_schoolbook_64x11_addictive(poly *r,  poly *a,  poly *b)
 {
+    int16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15;
   for (int i = 0; i < 4; i++)
   {
     for (int j = 0; j < 2; j++)
@@ -517,13 +519,13 @@ void int K2_schoolbook_64x11_addictive(poly *r, const poly *a, const poly *b)
       y4 = vsubq_s16(y4, vld1q_s16(64 + r->coeffs));
       vst1q_s16(160 + r->coeffs, y4);
 
-      r->coeffs += 8;
-      a->coeffs += 8;
-      b->coeffs += 8;
+      // r->coeffs += 8;
+      // a->coeffs += 8;
+      // b->coeffs += 8;
     }
-    a->coeffs += N - 16;
-    b->coeffs += N - 16;
-    r->coeffs += 2 * N - 16;
+    // a->coeffs += N - 16;
+    // b->coeffs += N - 16;
+    // r->coeffs += 2 * N - 16;
   }
 }
 
