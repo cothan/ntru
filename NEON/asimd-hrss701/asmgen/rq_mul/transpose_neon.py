@@ -315,8 +315,8 @@ def _transpose_16x16_to_16x16(dst, src, src_off=0, dst_off=0, src_gap=3, dst_gap
         # p("vpermq ${}, y{}, y{}".format(int('01001110', 2), t[i], t[i]))
         # 4,3,2,1 -> 3, 4, 1, 2, swap high vs low
         p("y{} = y_free".format(t[i])) # store low
-        p("y{} = y{}".format(t[i], tt[i])) # high <= low
-        p("y_free = y{}".format(t[i])) # low <= y_free
+        p("y{} = y{}".format(tt[i], t[i])) # high <= low
+        p("y_free = y{}".format(tt[i])) # low <= y_free
 
 
     for i in range(8, 15):  # t[7] is tricky
@@ -333,8 +333,8 @@ def _transpose_16x16_to_16x16(dst, src, src_off=0, dst_off=0, src_gap=3, dst_gap
     # p("vst1q_s16 ({}+{}, y{});".format(0, "rsp", t[7]))
     # p("vst1q_s16 ({}+{}, y{});".format(16, "rsp", tt[7]))
     # p("vmovdqa 0(%rsp), y{}".format(t[7]))
-    p("vld1q_s16 ({} + {}) = y{}".format(0, "rsp" t[7]))
-    p("vld1q_s16 ({} + {}) = y{}".format(16, "rsp" tt[7]))
+    p("vld1q_s16 ({} + {}) = y{}".format(0, "rsp" , t[7]))
+    p("vld1q_s16 ({} + {}) = y{}".format(16, "rsp", tt[7]))
 
     # p("vinserti128 $1, %xmm{}, y{}, y{}".format(t[15], t[7], t[14]))
 
