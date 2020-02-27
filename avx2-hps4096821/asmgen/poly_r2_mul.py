@@ -56,26 +56,24 @@ def karatsuba_256x256(ab, a, b, t0, t1, t2, t3, t4):
 
 def karatsuba_512x512(w, ab, xy, t0, t1, t2, t3, t4, t5, t6):
     """ w: 4 ymm reg. ab: 2 ymm reg. xy: 2 ymm reg. t*: 1 ymm reg """
-    a, b = ab[0], ab[1]
-    x, y = xy[0], xy[1]
+    a, b = ab
+    x, y = xy
 
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(a, b, t5))
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(x, y, t6))
 
-    (w[0], w[1]) = w[0], w[1]
     karatsuba_256x256((w[0], w[1]), a, x, t0, t1, t2, t3, t4)
 
-    (w[2], w[3]) = w[2], w[3]
     karatsuba_256x256((w[2], w[3]), b, y, t0, t1, t2, t3, t4)
 
     karatsuba_256x256((a,b), t5, t6, t0, t1, t2, t3, t4)
 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format((w[0], w[1])[0], a[0], a[0]))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format((w[0], w[1])[1], b[1], b[1]))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format((w[2], w[3])[0], a[0], a[0]))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format((w[2], w[3])[1], b[1], b[1]))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(a[0], w[1], w[1]))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(b[1], w[2], w[2]))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(w[0], a, a))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(w[1], b, b))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(w[2], a, a))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(w[3], b, b))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(a, w[1], w[1]))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(b, w[2], w[2]))
 
 def store_1024(w, ptr="%rdi"):
     p("vmovdqa %ymm{}, {}({})".format(w[0], 32*0, ptr))
