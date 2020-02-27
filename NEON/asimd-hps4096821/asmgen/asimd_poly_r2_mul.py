@@ -1,21 +1,21 @@
 p = print
 
-def mult_128x128(xy, xxyy, x, y, t1, t2, t3):
+def mult_128x128(out, x, y, t1, t2, t3):
     # Guarantee not modify x, y registers
+    xxyy, xy = out
     t01 = xy  # careful about pipelining here
     t02 = xxyy
-    t22 = t3 
 
     p("vmull_p64 (y{}, y{}) = y{}".format(x, y, t01)) # x0, y0 -> t0
 
     p("vmull_high_p64 (y{}, y{}) = y{}".format(x, y, t02)) # x1 * y1 -> t2 
-
+    #####################
     # y0|y1 -> y1| y0
-    p("vextq_p64(y{}, y{}, 8) = y{}".format(y, y, t22))
+    p("vextq_p64(y{}, y{}, 8) = y{}".format(y, y, t3))
     
-    p("vmull_p64 ( y{}, y{} ) = y{}".format(x, t22, t1)) # x0 *  y1 -> t1
+    p("vmull_p64 ( y{}, y{} ) = y{}".format(x, t3, t1)) # x0 *  y1 -> t1
 
-    p("vmull_high_p64 (y{}, y{}) = y{}".format(x, t22, t2)) # x1 * y0 -> t2
+    p("vmull_high_p64 (y{}, y{}) = y{}".format(x, t3, t2)) # x1 * y0 -> t2
 
     # t1 = t1 + t2
     p("vaddq_p64(y{}, y{}) = y{}".format(t1, t2, t1))
@@ -23,29 +23,35 @@ def mult_128x128(xy, xxyy, x, y, t1, t2, t3):
     # temporary register, t2 = 0
     p("0 = y{}".format(t2))
 
+    #####################
     # Aligned t2(16) = (t2, t1)
-    p("vextq_p64(y{}, y{}, 8) = y{}".format(t2, t1, t22))
+    p("vextq_p64(y{}, y{}, 8) = y{}".format(t2, t1, t3))
 
     #  t01 = t2(16) + t01
-    p("vaddq_p64(y{}, y{}) = y{}".format(t22, t01, xy)) # out_low
+    p("vaddq_p64(y{}, y{}) = y{}".format(t3, t01, xy)) # out_low
 
     # Aligned t2(16) = (t1, t2)
-    p("vextq_p64(y{}, y{}, 8) = y{}".format(t1, t2, t22))
+    p("vextq_p64(y{}, y{}, 8) = y{}".format(t1, t2, t3))
 
     # t02 = t2(16) + t02
-    p("vaddq_p64(y{}, y{}) = y{}".format(t22, t02, xxyy)) # out_high
+    p("vaddq_p64(y{}, y{}) = y{}".format(t3, t02, xxyy)) # out_high
+
+    out = (xxyy, xy)
 
 
-def karatsuba_256x256(ab, aabb, t0, t1, t2, t3, t4):
-    """assumes a and b are two xmm low registers"""
-    """assumes aa and bb are two xmm high registers"""
+def karatsuba_256x256(w, ab_low, aabb_high, t0, t1, t2, t3, t4):
+    """output: assumes a and b are two xmm low registers"""
+    """output: assumes aa and bb are two xmm high registers"""
 
-    a, b = ab
-    aa, bb = aabb
+    a, b = ab_low
+    aa, bb = aabb_high
+
     a_mix, b_mix = t0, t0 + 16
-    
     z1, z11 = t1, t1 + 16
 
+    t22 = t2 + 16 
+    t33 = t3 + 16 
+    t44 = t4 + 16 
     # Calling convention
     # a,b: 256 avx2 register (ymm)
     # aa: is high(a) 
@@ -60,7 +66,7 @@ def karatsuba_256x256(ab, aabb, t0, t1, t2, t3, t4):
 
     # aa, bb = high(a), high(b)
     # b = low(out); bb = high(out)
-    mult_128x128(b, bb, aa, bb, t2, t3, t4)
+    mult_128x128((t, b), aa, bb, t2, t3, t4)
 
     # high(a) + low(a)
     # p("vpxor %xmm{}, %xmm{}, %xmm{}".format(a0, a1, a1))  # a1 contains [0][a0 xor a1]
@@ -90,10 +96,17 @@ def karatsuba_256x256(ab, aabb, t0, t1, t2, t3, t4):
 
 
 
-def karatsuba_512x512(w, ab, xy, t0, t1, t2, t3, t4, t5, t6):
+def karatsuba_512x512(w, ww, ab, xy, t0, t1, t2, t3, t4, t5, t6):
     """ w: 4 ymm reg. ab: 2 ymm reg. xy: 2 ymm reg. t*: 1 ymm reg """
-    a, b = ab[0], ab[1]
-    x, y = xy[0], xy[1]
+    """ w: 8 xmm reg. ab: 4 xmm reg. xy: 4 xmm reg. t*: 1 ymm reg """
+    
+    aa, a = ab[0]
+    bb, b = ab[1]
+    xx, x = xy[0] 
+    yy, y = xy[1]
+    
+    # a, b = ab[0], ab[1]
+    # x, y = xy[0], xy[1]
     # a = 4, b = 5
     # x = 6, y = 7
 
@@ -101,17 +114,27 @@ def karatsuba_512x512(w, ab, xy, t0, t1, t2, t3, t4, t5, t6):
     xPy = t6
     # aPb = y13 
     # xPy = y14 
-    p("vpxor y{}, y{}, y{}".format(a, b, aPb))
-    p("vpxor y{}, y{}, y{}".format(x, y, xPy))
+    # p("vpxor y{}, y{}, y{}".format(a, b, t5))
+    # p("vpxor y{}, y{}, y{}".format(x, y, t6))
+    t55 = t5 + 16 
+    t66 = t6 + 16 
+    p("vaddq_p128 (y{}, y{}) = y{}".format(a, b, t5) )
+    p("vaddq_p128 (y{}, y{}) = y{}".format(aa, bb, t55) )
+    p("vaddq_p128 (y{}, y{}) = y{}".format(x, y, t6) )
+    p("vaddq_p128 (y{}, y{}) = y{}".format(xx, yy, t66) )
+
 
     aTx = w[0], w[1]
+    
+
+
     # aTx = (0, 1)
     # (0, 1) - 4 - 6- 8, 9, 10, 11, 12
-    karatsuba_256x256(aTx, a, x, t0, t1, t2, t3, t4)
+    karatsuba_256x256(aTx, a, t0, t1, t2, t3, t4)
 
     bTy = w[2], w[3]
     # bTy = (2, 3)
-    karatsuba_256x256(bTy, b, y, t0, t1, t2, t3, t4)
+    karatsuba_256x256(bTy, b, t0, t1, t2, t3, t4)
 
     aPbTxPy = ab
     # aPbTxPy = (4, 5)
