@@ -8,9 +8,9 @@ def mult_128x128(out, x, y, t1, t2, t3):
 
     p("vmull_high_p64 (y{}, y{}) = y{}".format(x, y, xxyy)) # x1 * y1 -> t2 
     #####################
-    # y0|y1 -> y1| y0
-    p("vextq_p64(y{}, y{}, 8) = y{}".format(y, y, t3))
-    # t3 = y1| y0 
+    # y1| y0 -> y0| y1 
+    p("vextq_p64(y{}, y{}, 1) = y{}".format(y, y, t3))
+    # t3 = y0|y1 
     p("vmull_p64 ( y{}, y{} ) = y{}".format(x, t3, t1)) # x0 *  y1 -> t1
 
     p("vmull_high_p64 (y{}, y{}) = y{}".format(x, t3, t2)) # x1 * y0 -> t2
@@ -23,13 +23,13 @@ def mult_128x128(out, x, y, t1, t2, t3):
     #####################
     # t3 is free
     # Aligned t3 = (t2, t1)
-    p("vextq_p64(y{}, y{}, 8) = y{}".format(t2, t1, t3))
+    p("vextq_p64(y{}, y{}, 1) = y{}".format(t1, t2, t3))
 
     #  xy = t2(16) + xy
     p("vaddq_p64(y{}, y{}) = y{}".format(t3, xy, xy)) # out_low
 
     # Aligned t2(16) = (t1, t2)
-    p("vextq_p64(y{}, y{}, 8) = y{}".format(t1, t2, t3))
+    p("vextq_p64(y{}, y{}, 1) = y{}".format(t2, t1, t3))
 
     # xxyy = t2(16) + xxyy
     p("vaddq_p64(y{}, y{}) = y{}".format(t3, xxyy, xxyy)) # out_high
@@ -140,12 +140,29 @@ def load_1024(w, ptr="%rdi"):
 
     w = (w00, w0, w11, w1, w22, w2, w33, w3)
 
-def vec256_sr53(r, a, t):
-    p("vpand mask1110(%rip), y{}, y{}".format(a, r))
-    p("vpsllq ${}, y{}, y{}".format(11, r, r))
-    p("vpermq ${}, y{}, y{}".format(int('00''11''10''01', 2), r, r))
-    p("vpsrlq ${}, y{}, y{}".format(53, a, t))
-    p("vpxor y{}, y{}, y{}".format(t, r, r))
+def vec256_sr53(r_out, a_in, t0, t1):
+    rr, r = r_out
+    aa, a = a_in
+
+    p("0xffffffffffffffff0000000000000000 = y{}".format(t0))
+    p("vandq_u16 (y{}, y{}) = y{}".format(a, t0, r))
+
+    # No choice, shift left by 11
+    # rr = aa
+    p("y{} << 11 = y{}".format(aa, rr))
+    p("y{} << 11 = y{}".format(r, r))
+
+    # t0 = a3|a2 , t1 = a1|a4
+    p("vextq_p64 (y{}, y{}, 1) = y{}".format(r, rr, t0) )
+    p("vextq_p64 (y{}, y{}, 1) = y{}".format(rr, r, t1) )
+
+    p("y{} >> 53 = y{}".format(a, r))
+    p("y{} >> 53 = y{}".format(aa, rr)
+
+    p("vaddq_p128  (y{}, y{}) = {}".format(r, t0, r) )
+    p("vaddq_p128  (y{}, y{}) = {}".format(rr, t1, rr ))
+
+    r_out = (rr, r)
 
 def vec256_sl203(r, a, t):
     p("vpand mask0001(%rip), y{}, y{}".format(a, r))
