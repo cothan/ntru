@@ -157,17 +157,31 @@ def vec256_sr53(r_out, a_in, t0, t1):
     p("vextq_p64 (y{}, y{}, 1) = y{}".format(rr, r, t1) )
 
     p("y{} >> 53 = y{}".format(a, r))
-    p("y{} >> 53 = y{}".format(aa, rr)
+    p("y{} >> 53 = y{}".format(aa, rr))
 
     p("vaddq_p128  (y{}, y{}) = {}".format(r, t0, r) )
     p("vaddq_p128  (y{}, y{}) = {}".format(rr, t1, rr ))
 
     r_out = (rr, r)
 
-def vec256_sl203(r, a, t):
-    p("vpand mask0001(%rip), y{}, y{}".format(a, r))
-    p("vpermq ${}, y{}, y{}".format(int('00''11''10''01', 2), r, r))
-    p("vpsllq ${}, y{}, y{}".format(11, r, r))
+def vec256_sl203(r_out, a_in, t0, t1):
+    _, a = a_in
+    rr, r = r_out
+
+    # p("vpand mask0001(%rip), y{}, y{}".format(a, r))
+    # rr| r = 0 | r & 0xf
+    p("0 = y{}".format(rr))
+    p("y{} & 0xffffffffffffffff = y{}".format(a, r))
+
+    # p("vpermq ${}, y{}, y{}".format(int('00''11''10''01', 2), r, r))
+    p("vextq_p64 (y{}, y{}, 1) = y{}".format(r, rr, t0) )
+    p("vextq_p64 (y{}, y{}, 1) = y{}".format(rr, r, t1) )
+
+    # p("vpsllq ${}, y{}, y{}".format(11, r, r))
+    p("y{} << 11 = y{}".format(t0, r))
+    p("y{} << 11 = y{}".format(t1, rr))
+
+    r_out = (rr, r)
 
 def mul512_and_accumulate(s, r, t):
     # multiply r by x^512, reduce mod x^821-1, add to s
