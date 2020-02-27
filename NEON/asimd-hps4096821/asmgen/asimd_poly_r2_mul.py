@@ -1,52 +1,93 @@
 p = print
 
-def mult_128x128(xy, x, y, t1, t2):
-    t0 = xy  # careful about pipelining here
-    p("vpclmulqdq $1, %xmm{}, %xmm{}, %xmm{}".format(x, y, t0))  # x0 * y1
-    p("vpclmulqdq $16, %xmm{}, %xmm{}, %xmm{}".format(x, y, t1))  # x1 * y0
-    p("vpclmulqdq $17, %xmm{}, %xmm{}, %xmm{}".format(x, y, t2))  # x1 * y1
-    p("vpxor %xmm{}, %xmm{}, %xmm{}".format(t0, t1, t1))
-    p("vpclmulqdq $0, %xmm{}, %xmm{}, %xmm{}".format(x, y, t0))  # x0 * y0
+def mult_128x128(xy, xxyy, x, y, t1, t2, t3):
+    # Guarantee not modify x, y registers
+    t01 = xy  # careful about pipelining here
+    t02 = xxyy
+    t22 = t3 
 
-    p("vpermq $16, y{}, y{}".format(t1, t1))  # 00 [01 00] 00
-    p("vinserti128 $1, %xmm{}, y{}, y{}".format(t2, t2, t2))  # move low of t2 to high
+    p("vmull_p64 (y{}, y{}) = y{}".format(x, y, t01)) # x0, y0 -> t0
 
-    # TODO can we do this without masks?
-    p("vpand mask0011(%rip), y{}, y{}".format(t0, t0))
-    p("vpand mask0110(%rip), y{}, y{}".format(t1, t1))
-    p("vpand mask1100(%rip), y{}, y{}".format(t2, t2))
+    p("vmull_high_p64 (y{}, y{}) = y{}".format(x, y, t02)) # x1 * y1 -> t2 
 
-    p("vpxor y{}, y{}, y{}".format(t0, t1, t1))
-    p("vpxor y{}, y{}, y{}".format(t1, t2, xy))
+    # y0|y1 -> y1| y0
+    p("vextq_p64(y{}, y{}, 8) = y{}".format(y, y, t22))
+    
+    p("vmull_p64 ( y{}, y{} ) = y{}".format(x, t22, t1)) # x0 *  y1 -> t1
+
+    p("vmull_high_p64 (y{}, y{}) = y{}".format(x, t22, t2)) # x1 * y0 -> t2
+
+    # t1 = t1 + t2
+    p("vaddq_p64(y{}, y{}) = y{}".format(t1, t2, t1))
+
+    # temporary register, t2 = 0
+    p("0 = y{}".format(t2))
+
+    # Aligned t2(16) = (t2, t1)
+    p("vextq_p64(y{}, y{}, 8) = y{}".format(t2, t1, t22))
+
+    #  t01 = t2(16) + t01
+    p("vaddq_p64(y{}, y{}) = y{}".format(t22, t01, xy)) # out_low
+
+    # Aligned t2(16) = (t1, t2)
+    p("vextq_p64(y{}, y{}, 8) = y{}".format(t1, t2, t22))
+
+    # t02 = t2(16) + t02
+    p("vaddq_p64(y{}, y{}) = y{}".format(t22, t02, xxyy)) # out_high
 
 
-def karatsuba_256x256(ab, a, b, t0, t1, t2, t3, t4):
-    """assumes a and b are two ymm registers"""
-    z0, z2 = ab
-    a0, a1 = a, t0
-    b0, b1 = b, t1
-    z1 = t2
-    p("vextracti128 $1, y{}, %xmm{}".format(a, a1))
-    p("vextracti128 $1, y{}, %xmm{}".format(b, b1))
-    mult_128x128(z2, a1, b1, t3, t4)
+def karatsuba_256x256(ab, aabb, t0, t1, t2, t3, t4):
+    """assumes a and b are two xmm low registers"""
+    """assumes aa and bb are two xmm high registers"""
 
-    p("vpxor %xmm{}, %xmm{}, %xmm{}".format(a0, a1, a1))  # a1 contains [0][a0 xor a1]
-    p("vpxor %xmm{}, %xmm{}, %xmm{}".format(b0, b1, b1))
-    mult_128x128(z1, a1, b1, t3, t4)
-    mult_128x128(z0, a0, b0, t3, t4)
+    a, b = ab
+    aa, bb = aabb
+    a_mix, b_mix = t0, t0 + 16
+    
+    z1, z11 = t1, t1 + 16
 
-    p("vpxor y{}, y{}, y{}".format(z1, z2, z1))
-    p("vpxor y{}, y{}, y{}".format(z1, z0, z1))
+    # Calling convention
+    # a,b: 256 avx2 register (ymm)
+    # aa: is high(a) 
+    # bb: is high(b)
+    # a is low(a)
+    # b is low(b)
+    
+    # aa = a1 = high(a)
+    # bb = b1 = high(b)
+    # p("vextracti128 $1, y{}, %xmm{}".format(a, a1))
+    # p("vextracti128 $1, y{}, %xmm{}".format(b, b1))
 
-    # put top half of z1 into t (contains [0][z1top])
-    p("vpxor y{}, y{}, y{}".format(t0, t0, t0))
-    p("vextracti128 $1, y{}, %xmm{}".format(z1, t0))
-    p("vpxor y{}, y{}, y{}".format(z2, t0, z2))  # compose into z2
+    # aa, bb = high(a), high(b)
+    # b = low(out); bb = high(out)
+    mult_128x128(b, bb, aa, bb, t2, t3, t4)
 
-    p("vpxor y{}, y{}, y{}".format(t0, t0, t0))
-    p("vinserti128 $1, %xmm{}, y{}, y{}".format(z1, t0, t0))
-    p("vpxor y{}, y{}, y{}".format(t0, z0, z0))
-    # ~512bit result is now in z2 and z0
+    # high(a) + low(a)
+    # p("vpxor %xmm{}, %xmm{}, %xmm{}".format(a0, a1, a1))  # a1 contains [0][a0 xor a1]
+    p("vaddq_p64 (y{}, y{}) = y{}".format(aa, a, a_mix))
+
+    # p("vpxor %xmm{}, %xmm{}, %xmm{}".format(b0, b1, b1))
+    p("vaddq_p64 (y{}, y{}) = y{}".format(bb, b, b_mix))
+
+    mult_128x128(z1, z11, a_mix, b_mix, t2, t3, t4)
+    # Copy
+    p("y{} = y{}".format(aa, a_mix))
+    mult_128x128(a, aa, a_mix, b, t2, t3, t4)
+
+    # p("vpxor y{}, y{}, y{}".format(z1, b, z1))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(a, z1, z1))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(b, z1, z1))
+    
+    # p("vpxor y{}, y{}, y{}".format(z1, a, z1))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(aa, z11, z11))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(bb, z11, z11))
+
+    p("vaddq_p128 (y{}, y{}) = y{}".format(b, z11, b))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(a, z1, a))
+
+    ab = (a, b)
+    aabb = (aa, bb)
+
 
 
 def karatsuba_512x512(w, ab, xy, t0, t1, t2, t3, t4, t5, t6):
