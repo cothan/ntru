@@ -88,8 +88,12 @@ def load_1024(w, ptr="%rdi"):
     p("vmovdqa {}({}), %ymm{}".format(32*3, ptr, w[3]))
 
 def vec256_sr53(r, a, t):
+    # aa|0a & ff|f0 = aa | a&0xf0 
+    # rr = aa, r = a & 0xf0
     p("vpand mask1110(%rip), %ymm{}, %ymm{}".format(a, r))
+
     p("vpsllq ${}, %ymm{}, %ymm{}".format(11, r, r))
+    
     p("vpermq ${}, %ymm{}, %ymm{}".format(int('00''11''10''01', 2), r, r))
     p("vpsrlq ${}, %ymm{}, %ymm{}".format(53, a, t))
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t, r, r))
