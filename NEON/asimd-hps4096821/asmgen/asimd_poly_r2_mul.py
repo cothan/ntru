@@ -37,7 +37,7 @@ def mult_128x128(out, x, y, t1, t2, t3):
     out = (xxyy, xy)
 
 
-def karatsuba_256x256(ab, a_in, b_in, t0, t1, t2, t3, t4):
+def karatsuba_256x256(ab, a_in, b_in, t0, t1, t2, t3, t4, t5, t6):
     """output: assumes a and b are two xmm low registers"""
     """output: assumes aa and bb are two xmm high registers"""
 
@@ -48,8 +48,8 @@ def karatsuba_256x256(ab, a_in, b_in, t0, t1, t2, t3, t4):
     aa, a = a_in
     bb, b = b_in
 
-    t22 = t2 + 16 
-    t33 = t3 + 16 
+    t22 = t5 
+    t33 = t6 
     
     # aa, bb = high(a), high(b)
     # b = low(out); t22 = high(out)
@@ -74,56 +74,41 @@ def karatsuba_256x256(ab, a_in, b_in, t0, t1, t2, t3, t4):
     ab = (z00, z0, z22, z2)
 
 
-def karatsuba_512x512(w, ww, ab, xy, t0, t1, t2, t3, t4, t5, t6):
+def karatsuba_512x512(w, ab_in, xy_in, t0, t1, t2, t3, t4, t5, t6, t7, t8, t55, t66):
     """ w: 4 ymm reg. ab: 2 ymm reg. xy: 2 ymm reg. t*: 1 ymm reg """
     """ w: 8 xmm reg. ab: 4 xmm reg. xy: 4 xmm reg. t*: 1 ymm reg """
+    w00, w0, w11, w1, w22, w2, w33, w3 = w 
     
-    aa, a = ab[0]
-    bb, b = ab[1]
-    xx, x = xy[0] 
-    yy, y = xy[1]
-    
-    # a, b = ab[0], ab[1]
-    # x, y = xy[0], xy[1]
-    # a = 4, b = 5
-    # x = 6, y = 7
+    (aa, a, bb, b) = ab_in
+    (xx, x, yy, y) = xy_in
 
-    aPb = t5
-    xPy = t6
-    # aPb = y13 
-    # xPy = y14 
-    # p("vpxor y{}, y{}, y{}".format(a, b, t5))
-    # p("vpxor y{}, y{}, y{}".format(x, y, t6))
-    t55 = t5 + 16 
-    t66 = t6 + 16 
-    p("vaddq_p128 (y{}, y{}) = y{}".format(a, b, t5) )
-    p("vaddq_p128 (y{}, y{}) = y{}".format(aa, bb, t55) )
-    p("vaddq_p128 (y{}, y{}) = y{}".format(x, y, t6) )
-    p("vaddq_p128 (y{}, y{}) = y{}".format(xx, yy, t66) )
+    p("vaddq_p128 (y{}, y{}) = y{}".format(a, b, t5))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(aa, bb, t55))
 
+    p("vaddq_p128 (y{}, y{}) = y{}".format(x, y, t6))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(xx, yy, t66))
 
-    aTx = w[0], w[1]
-    
+    karatsuba_256x256( (w00, w0, w11, w1), (aa, a), (xx, x), t0, t1, t2, t3, t4, t7, t8)
+    karatsuba_256x256( (w22, w2, w33, w3), (bb, b), (yy, y), t0, t1, t2, t3, t4, t7, t8)
+    karatsuba_256x256( (aa, a, bb, b), (t55, t5), (t66, t6), t0, t1, t2, t3, t4, t7, t8)
 
+    p("vaddq_p128 (y{}, y{}) = y{}".format(w00, aa, aa))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(w0, a, a))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(w11, bb, bb))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(w1, b, b))
 
-    # aTx = (0, 1)
-    # (0, 1) - 4 - 6- 8, 9, 10, 11, 12
-    karatsuba_256x256(aTx, a, t0, t1, t2, t3, t4)
+    p("vaddq_p128 (y{}, y{}) = y{}".format(w22, aa, aa))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(w2, a, a))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(w33, bb, bb))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(w3, b, b))
 
-    bTy = w[2], w[3]
-    # bTy = (2, 3)
-    karatsuba_256x256(bTy, b, t0, t1, t2, t3, t4)
+    p("vaddq_p128 (y{}, y{}) = y{}".format(aa, w11, w11))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(a, w1, w1))
 
-    aPbTxPy = ab
-    # aPbTxPy = (4, 5)
-    karatsuba_256x256(aPbTxPy, aPb, xPy, t0, t1, t2, t3, t4)
+    p("vaddq_p128 (y{}, y{}) = y{}".format(bb, w22, w22))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(b, w2, w2))
 
-    p("vpxor y{}, y{}, y{}".format(aTx[0], aPbTxPy[0], aPbTxPy[0]))
-    p("vpxor y{}, y{}, y{}".format(aTx[1], aPbTxPy[1], aPbTxPy[1]))
-    p("vpxor y{}, y{}, y{}".format(bTy[0], aPbTxPy[0], aPbTxPy[0]))
-    p("vpxor y{}, y{}, y{}".format(bTy[1], aPbTxPy[1], aPbTxPy[1]))
-    p("vpxor y{}, y{}, y{}".format(aPbTxPy[0], w[1], w[1]))
-    p("vpxor y{}, y{}, y{}".format(aPbTxPy[1], w[2], w[2]))
+    w = (w00, w0, w11, w1, w22, w2, w33, w3)
 
 def store_1024(w, ptr="%rdi"):
     p("vmovdqa y{}, {}({})".format(w[0], 32*0, ptr))
