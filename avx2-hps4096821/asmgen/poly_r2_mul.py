@@ -23,26 +23,25 @@ def mult_128x128(xy, x, y, t1, t2):
 def karatsuba_256x256(ab, a, b, t0, t1, t2, t3, t4):
     """assumes a and b are two ymm registers"""
     z0, z2 = ab
-    z1 = t2
     p("vextracti128 $1, %ymm{}, %xmm{}".format(a, t0))
     p("vextracti128 $1, %ymm{}, %xmm{}".format(b, t1))
     mult_128x128(z2, t0, t1, t3, t4)
 
     p("vpxor %xmm{}, %xmm{}, %xmm{}".format(a, t0, t0))  # t0 contains [0][a xor t0]
     p("vpxor %xmm{}, %xmm{}, %xmm{}".format(b, t1, t1))
-    mult_128x128(z1, t0, t1, t3, t4)
+    mult_128x128(t2, t0, t1, t3, t4)
     mult_128x128(z0, a, b, t3, t4)
 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(z1, z2, z1))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(z1, z0, z1))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t2, z2, t2))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t2, z0, t2))
 
-    # put top half of z1 into t (contains [0][z1top])
+    # put top half of t2 into t (contains [0][z1top])
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0))
-    p("vextracti128 $1, %ymm{}, %xmm{}".format(z1, t0))
+    p("vextracti128 $1, %ymm{}, %xmm{}".format(t2, t0))
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(z2, t0, z2))  # compose into z2
 
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0))
-    p("vinserti128 $1, %xmm{}, %ymm{}, %ymm{}".format(z1, t0, t0))
+    p("vinserti128 $1, %xmm{}, %ymm{}, %ymm{}".format(t2, t0, t0))
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, z0, z0))
     # ~512bit result is now in z2 and z0
 
