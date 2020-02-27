@@ -74,13 +74,16 @@ def karatsuba_256x256(ab, a_in, b_in, t0, t1, t2, t3, t4, t5, t6):
     ab = (z00, z0, z22, z2)
 
 
-def karatsuba_512x512(w, ab_in, xy_in, t0, t1, t2, t3, t4, t5, t6, t7, t8, t55, t66):
+def karatsuba_512x512(w, ab_in, xy_in, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10):
     """ w: 4 ymm reg. ab: 2 ymm reg. xy: 2 ymm reg. t*: 1 ymm reg """
     """ w: 8 xmm reg. ab: 4 xmm reg. xy: 4 xmm reg. t*: 1 ymm reg """
     w00, w0, w11, w1, w22, w2, w33, w3 = w 
-    
+
     (aa, a, bb, b) = ab_in
     (xx, x, yy, y) = xy_in
+
+    t55 = t9
+    t66 = t10
 
     p("vaddq_p128 (y{}, y{}) = y{}".format(a, b, t5))
     p("vaddq_p128 (y{}, y{}) = y{}".format(aa, bb, t55))
@@ -111,16 +114,31 @@ def karatsuba_512x512(w, ab_in, xy_in, t0, t1, t2, t3, t4, t5, t6, t7, t8, t55, 
     w = (w00, w0, w11, w1, w22, w2, w33, w3)
 
 def store_1024(w, ptr="%rdi"):
-    p("vmovdqa y{}, {}({})".format(w[0], 32*0, ptr))
-    p("vmovdqa y{}, {}({})".format(w[1], 32*1, ptr))
-    p("vmovdqa y{}, {}({})".format(w[2], 32*2, ptr))
-    p("vmovdqa y{}, {}({})".format(w[3], 32*3, ptr))
+    w00, w0, w11, w1, w22, w2, w33, w3 = w 
+    p("vst1q_p16 ({} + {}, y{});".format(16*0, ptr, w00))
+    p("vst1q_p16 ({} + {}, y{});".format(16*1, ptr, w0))
+    p("vst1q_p16 ({} + {}, y{});".format(16*2, ptr, w11))
+    p("vst1q_p16 ({} + {}, y{});".format(16*3, ptr, w1))
+
+    p("vst1q_p16 ({} + {}, y{});".format(16*4, ptr, w22))
+    p("vst1q_p16 ({} + {}, y{});".format(16*5, ptr, w2))
+    p("vst1q_p16 ({} + {}, y{});".format(16*6, ptr, w33))
+    p("vst1q_p16 ({} + {}, y{});".format(16*7, ptr, w3))
+
+    w = (w00, w0, w11, w1, w22, w2, w33, w3)
 
 def load_1024(w, ptr="%rdi"):
-    p("vmovdqa {}({}), y{}".format(32*0, ptr, w[0]))
-    p("vmovdqa {}({}), y{}".format(32*1, ptr, w[1]))
-    p("vmovdqa {}({}), y{}".format(32*2, ptr, w[2]))
-    p("vmovdqa {}({}), y{}".format(32*3, ptr, w[3]))
+    w00, w0, w11, w1, w22, w2, w33, w3 = w
+    p("vld1q_p16 ({} + {}) = y{}".format(16*0, ptr, w00) ) 
+    p("vld1q_p16 ({} + {}) = y{}".format(16*1, ptr, w0) ) 
+    p("vld1q_p16 ({} + {}) = y{}".format(16*2, ptr, w11) )
+    p("vld1q_p16 ({} + {}) = y{}".format(16*3, ptr, w1) )  
+    p("vld1q_p16 ({} + {}) = y{}".format(16*4, ptr, w22) ) 
+    p("vld1q_p16 ({} + {}) = y{}".format(16*5, ptr, w2) ) 
+    p("vld1q_p16 ({} + {}) = y{}".format(16*6, ptr, w33) ) 
+    p("vld1q_p16 ({} + {}) = y{}".format(16*7, ptr, w3) ) 
+
+    w = (w00, w0, w11, w1, w22, w2, w33, w3)
 
 def vec256_sr53(r, a, t):
     p("vpand mask1110(%rip), y{}, y{}".format(a, r))
