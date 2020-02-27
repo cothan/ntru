@@ -25,6 +25,7 @@ def karatsuba_256x256(ab, a, b, t0, t1, t2, t3, t4):
     z0, z2 = ab
     p("vextracti128 $1, %ymm{}, %xmm{}".format(a, t0))
     p("vextracti128 $1, %ymm{}, %xmm{}".format(b, t1))
+    # t0 = aa, t1 = bb
     mult_128x128(z2, t0, t1, t3, t4)
 
     p("vpxor %xmm{}, %xmm{}, %xmm{}".format(a, t0, t0))  # t0 contains [0][a xor t0]
@@ -32,17 +33,25 @@ def karatsuba_256x256(ab, a, b, t0, t1, t2, t3, t4):
     mult_128x128(t2, t0, t1, t3, t4)
     mult_128x128(z0, a, b, t3, t4)
 
+    # t22|t2 ^ z22|z2 = t22^z22 | t2 ^ z2 
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t2, z2, t2))
+    # t22|t2 ^ z00|z0 = t22^z00 | t2 ^ z0 
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t2, z0, t2))
 
+    ###
+
     # put top half of t2 into t (contains [0][z1top])
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0))
-    p("vextracti128 $1, %ymm{}, %xmm{}".format(t2, t0))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0)) # t0 = 0 | 0
+    p("vextracti128 $1, %ymm{}, %xmm{}".format(t2, t0)) # t0 = t22 | 0
+    # 
+    # z22|z2 ^ t22|0 = z22^t22|z2  
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(z2, t0, z2))  # compose into z2
 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0))
-    p("vinserti128 $1, %xmm{}, %ymm{}, %ymm{}".format(t2, t0, t0))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, z0, z0))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0)) # t0 = 0|0
+    p("vinserti128 $1, %xmm{}, %ymm{}, %ymm{}".format(t2, t0, t0)) #t0 = t2 | 0
+    # z00 | z0 ^ t00| t0 = z00 ^ t2 | z0 ^ 0 
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, z0, z0)) 
+    
     # ~512bit result is now in z2 and z0
 
 def karatsuba_512x512(w, ab, xy, t0, t1, t2, t3, t4, t5, t6):
