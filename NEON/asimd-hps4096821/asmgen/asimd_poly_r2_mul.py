@@ -3,97 +3,75 @@ p = print
 def mult_128x128(out, x, y, t1, t2, t3):
     # Guarantee not modify x, y registers
     xxyy, xy = out
-    t01 = xy  # careful about pipelining here
-    t02 = xxyy
+    
+    p("vmull_p64 (y{}, y{}) = y{}".format(x, y, xy)) # x0, y0 -> t0
 
-    p("vmull_p64 (y{}, y{}) = y{}".format(x, y, t01)) # x0, y0 -> t0
-
-    p("vmull_high_p64 (y{}, y{}) = y{}".format(x, y, t02)) # x1 * y1 -> t2 
+    p("vmull_high_p64 (y{}, y{}) = y{}".format(x, y, xxyy)) # x1 * y1 -> t2 
     #####################
     # y0|y1 -> y1| y0
     p("vextq_p64(y{}, y{}, 8) = y{}".format(y, y, t3))
-    
+    # t3 = y1| y0 
     p("vmull_p64 ( y{}, y{} ) = y{}".format(x, t3, t1)) # x0 *  y1 -> t1
 
     p("vmull_high_p64 (y{}, y{}) = y{}".format(x, t3, t2)) # x1 * y0 -> t2
 
     # t1 = t1 + t2
     p("vaddq_p64(y{}, y{}) = y{}".format(t1, t2, t1))
-
-    # temporary register, t2 = 0
+    # t2 is free
     p("0 = y{}".format(t2))
 
     #####################
-    # Aligned t2(16) = (t2, t1)
+    # t3 is free
+    # Aligned t3 = (t2, t1)
     p("vextq_p64(y{}, y{}, 8) = y{}".format(t2, t1, t3))
 
-    #  t01 = t2(16) + t01
-    p("vaddq_p64(y{}, y{}) = y{}".format(t3, t01, xy)) # out_low
+    #  xy = t2(16) + xy
+    p("vaddq_p64(y{}, y{}) = y{}".format(t3, xy, xy)) # out_low
 
     # Aligned t2(16) = (t1, t2)
     p("vextq_p64(y{}, y{}, 8) = y{}".format(t1, t2, t3))
 
-    # t02 = t2(16) + t02
-    p("vaddq_p64(y{}, y{}) = y{}".format(t3, t02, xxyy)) # out_high
+    # xxyy = t2(16) + xxyy
+    p("vaddq_p64(y{}, y{}) = y{}".format(t3, xxyy, xxyy)) # out_high
 
     out = (xxyy, xy)
 
 
-def karatsuba_256x256(w, ab_low, aabb_high, t0, t1, t2, t3, t4):
+def karatsuba_256x256(ab, a_in, b_in, t0, t1, t2, t3, t4):
     """output: assumes a and b are two xmm low registers"""
     """output: assumes aa and bb are two xmm high registers"""
 
-    a, b = ab_low
-    aa, bb = aabb_high
-
-    a_mix, b_mix = t0, t0 + 16
-    z1, z11 = t1, t1 + 16
+    # z00, z0 = a 
+    # z22, z2 = b 
+    z00, z0, z22, z2 = ab
+    
+    aa, a = a_in
+    bb, b = b_in
 
     t22 = t2 + 16 
     t33 = t3 + 16 
-    t44 = t4 + 16 
-    # Calling convention
-    # a,b: 256 avx2 register (ymm)
-    # aa: is high(a) 
-    # bb: is high(b)
-    # a is low(a)
-    # b is low(b)
     
-    # aa = a1 = high(a)
-    # bb = b1 = high(b)
-    # p("vextracti128 $1, y{}, %xmm{}".format(a, a1))
-    # p("vextracti128 $1, y{}, %xmm{}".format(b, b1))
-
     # aa, bb = high(a), high(b)
-    # b = low(out); bb = high(out)
-    mult_128x128((t, b), aa, bb, t2, t3, t4)
+    # b = low(out); t22 = high(out)
+    mult_128x128((z22, z2), aa, bb, t2, t3, t4)
 
-    # high(a) + low(a)
-    # p("vpxor %xmm{}, %xmm{}, %xmm{}".format(a0, a1, a1))  # a1 contains [0][a0 xor a1]
-    p("vaddq_p64 (y{}, y{}) = y{}".format(aa, a, a_mix))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(aa, a, t0))
+    p("vaddq_p128 (y{}, y{}) = y{}".format(bb, b, t1))
+    
+    mult_128x128( (t22, t2), t0, t1, t3, t33, t4)
+    mult_128x128( (z00, z0), a, b, t3, t33, t4)
 
-    # p("vpxor %xmm{}, %xmm{}, %xmm{}".format(b0, b1, b1))
-    p("vaddq_p64 (y{}, y{}) = y{}".format(bb, b, b_mix))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(t22, z22, t22))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(t2, z2, t2))
 
-    mult_128x128(z1, z11, a_mix, b_mix, t2, t3, t4)
-    # Copy
-    p("y{} = y{}".format(aa, a_mix))
-    mult_128x128(a, aa, a_mix, b, t2, t3, t4)
-
-    # p("vpxor y{}, y{}, y{}".format(z1, b, z1))
-    p("vaddq_p128  (y{}, y{}) = y{}".format(a, z1, z1))
-    p("vaddq_p128  (y{}, y{}) = y{}".format(b, z1, z1))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(t22, z00, t22))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(t2, z0, t2))
     
     # p("vpxor y{}, y{}, y{}".format(z1, a, z1))
-    p("vaddq_p128  (y{}, y{}) = y{}".format(aa, z11, z11))
-    p("vaddq_p128  (y{}, y{}) = y{}".format(bb, z11, z11))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(z22, t22, z22))
+    p("vaddq_p128  (y{}, y{}) = y{}".format(z00, t2, z00))
 
-    p("vaddq_p128 (y{}, y{}) = y{}".format(b, z11, b))
-    p("vaddq_p128 (y{}, y{}) = y{}".format(a, z1, a))
-
-    ab = (a, b)
-    aabb = (aa, bb)
-
+    ab = (z00, z0, z22, z2)
 
 
 def karatsuba_512x512(w, ww, ab, xy, t0, t1, t2, t3, t4, t5, t6):
