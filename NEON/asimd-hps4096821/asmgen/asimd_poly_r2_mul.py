@@ -3,6 +3,7 @@ p = print
 
 def mult_128x128(out, x, y, t1, t2, t3):
     # Guarantee not modify x, y registers
+    p("#include <arm_neon.h>\n")
     p("// mult128x128 BEGIN")
     xxyy, xy = out
 
@@ -326,35 +327,12 @@ def mul1024_and_accumulate(s, r, t):
     p("// mul1024_and_accumulate END")
 
 if __name__ == '__main__':
-    p(".data")
-    p(".section .rodata")
-    p(".align 32")
+    p("void poly_R2_mul(poly *c, const poly *a, const poly *b){")
+    p("poly16x8_t y0, y1, y2, y3, y4, y5, y6, y7;")
+    p("poly16x8_t y8, y9, y10, y11, y12, y13, y14, y15;")
+    p("poly16x8_t y16, y17, y18, y19, y20, y21, y22, y23;")
+    p("poly16x8_t y24, y25, y26, y27, y28, y29, y30, y31;")
 
-    p("mask1100:")
-    for i in [0]*8 + [65535]*8:
-        p(".word {}".format(i))
-    p("mask0110:")
-    for i in [0]*4 + [65535]*8 + [0]*4:
-        p(".word {}".format(i))
-    p("mask0011:")
-    for i in [65535]*8 + [0]*8:
-        p(".word {}".format(i))
-    p("mask0001:")
-    for i in [65535]*4 + [0]*12:
-        p(".word {}".format(i))
-    p("mask1110:")
-    for i in [0]*4 + [65535]*12:
-        p(".word {}".format(i))
-    p("low53:")
-    for i in [65535]*3 + [31] + [0]*12:
-        p(".word {}".format(i))
-
-    p(".text")
-    p(".hidden poly_R2_mul")
-    p(".global poly_R2_mul")
-    p(".att_syntax prefix")
-
-    p("poly_R2_mul:")
     # rdi holds result, rsi holds a, rdx holds b
     # TODO: allow rdi=rsi
 
@@ -482,4 +460,4 @@ if __name__ == '__main__':
     mul512_and_accumulate(S, R, (t0, t3, t4, t5, t6, t7, t8, t9))
     store_1024(S, "c->coeffs")
 
-    # p("ret")
+    p("}")
