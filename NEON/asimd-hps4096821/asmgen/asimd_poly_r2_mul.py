@@ -330,10 +330,10 @@ if __name__ == '__main__':
     p("#include <arm_neon.h>\n")
 
     p("void poly_R2_mul(unsigned char *c, unsigned char *a, unsigned char *b){")
-    p("poly16x8_t y0, y1, y2, y3, y4, y5, y6, y7;")
-    p("poly16x8_t y8, y9, y10, y11, y12, y13, y14, y15;")
-    p("poly16x8_t y16, y17, y18, y19, y20, y21, y22, y23;")
-    p("poly16x8_t y24, y25, y26, y27, y28, y29, y30, y31;")
+    p("poly8x16_t y0, y1, y2, y3, y4, y5, y6, y7;")
+    p("poly8x16_t y8, y9, y10, y11, y12, y13, y14, y15;")
+    p("poly8x16_t y16, y17, y18, y19, y20, y21, y22, y23;")
+    p("poly8x16_t y24, y25, y26, y27, y28, y29, y30, y31;")
 
     # rdi holds result, rsi holds a, rdx holds b
     # TODO: allow rdi=rsi
