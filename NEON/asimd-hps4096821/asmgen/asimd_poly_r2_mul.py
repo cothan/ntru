@@ -3,7 +3,7 @@ p = print
 
 def mult_128x128(out, x, y, t1, t2, t3):
     # Guarantee not modify x, y registers
-    p("#include <arm_neon.h>\n")
+    
     p("// mult128x128 BEGIN")
     xxyy, xy = out
 
@@ -21,7 +21,7 @@ def mult_128x128(out, x, y, t1, t2, t3):
     # t1 = t1 + t2
     p("vaddq_p64(y{}, y{}) = y{}".format(t1, t2, t1))
     # t2 is free
-    p("0 = y{}".format(t2))
+    p("vdupq_n_p64 (0) = y{}".format(t2))
 
     #####################
     # t3 is free
@@ -132,15 +132,15 @@ def store_1024(w, ptr="%rdi"):
     p("// store_1024 BEGIN")
 
     (w00, w0), (w11, w1), (w22, w2), (w33, w3) = w
-    p("vst1q_p16 ({} + {}, y{});".format(16*0, ptr, w00))
-    p("vst1q_p16 ({} + {}, y{});".format(16*1, ptr, w0))
-    p("vst1q_p16 ({} + {}, y{});".format(16*2, ptr, w11))
-    p("vst1q_p16 ({} + {}, y{});".format(16*3, ptr, w1))
+    p("vst1q_p8 ({} + {}, y{});".format(16*0, ptr, w00))
+    p("vst1q_p8 ({} + {}, y{});".format(16*1, ptr, w0))
+    p("vst1q_p8 ({} + {}, y{});".format(16*2, ptr, w11))
+    p("vst1q_p8 ({} + {}, y{});".format(16*3, ptr, w1))
 
-    p("vst1q_p16 ({} + {}, y{});".format(16*4, ptr, w22))
-    p("vst1q_p16 ({} + {}, y{});".format(16*5, ptr, w2))
-    p("vst1q_p16 ({} + {}, y{});".format(16*6, ptr, w33))
-    p("vst1q_p16 ({} + {}, y{});".format(16*7, ptr, w3))
+    p("vst1q_p8 ({} + {}, y{});".format(16*4, ptr, w22))
+    p("vst1q_p8 ({} + {}, y{});".format(16*5, ptr, w2))
+    p("vst1q_p8 ({} + {}, y{});".format(16*6, ptr, w33))
+    p("vst1q_p8 ({} + {}, y{});".format(16*7, ptr, w3))
 
     # w = (w00, w0, w11, w1, w22, w2, w33, w3)
     p("// store_1024 END")
@@ -149,14 +149,14 @@ def load_1024(w, ptr="%rdi"):
     p("// load_1024 BEGIN")
 
     (w00, w0), (w11, w1), (w22, w2), (w33, w3) = w
-    p("vld1q_p16 ({} + {}) = y{}".format(16*0, ptr, w00))
-    p("vld1q_p16 ({} + {}) = y{}".format(16*1, ptr, w0))
-    p("vld1q_p16 ({} + {}) = y{}".format(16*2, ptr, w11))
-    p("vld1q_p16 ({} + {}) = y{}".format(16*3, ptr, w1))
-    p("vld1q_p16 ({} + {}) = y{}".format(16*4, ptr, w22))
-    p("vld1q_p16 ({} + {}) = y{}".format(16*5, ptr, w2))
-    p("vld1q_p16 ({} + {}) = y{}".format(16*6, ptr, w33))
-    p("vld1q_p16 ({} + {}) = y{}".format(16*7, ptr, w3))
+    p("vld1q_p8 ({} + {}) = y{}".format(16*0, ptr, w00))
+    p("vld1q_p8 ({} + {}) = y{}".format(16*1, ptr, w0))
+    p("vld1q_p8 ({} + {}) = y{}".format(16*2, ptr, w11))
+    p("vld1q_p8 ({} + {}) = y{}".format(16*3, ptr, w1))
+    p("vld1q_p8 ({} + {}) = y{}".format(16*4, ptr, w22))
+    p("vld1q_p8 ({} + {}) = y{}".format(16*5, ptr, w2))
+    p("vld1q_p8 ({} + {}) = y{}".format(16*6, ptr, w33))
+    p("vld1q_p8 ({} + {}) = y{}".format(16*7, ptr, w3))
 
     # w = (w00, w0, w11, w1, w22, w2, w33, w3)
     p("// load_1024 END")
@@ -327,7 +327,9 @@ def mul1024_and_accumulate(s, r, t):
     p("// mul1024_and_accumulate END")
 
 if __name__ == '__main__':
-    p("void poly_R2_mul(poly *c, const poly *a, const poly *b){")
+    p("#include <arm_neon.h>\n")
+
+    p("void poly_R2_mul(unsigned char *c, unsigned char *a, unsigned char *b){")
     p("poly16x8_t y0, y1, y2, y3, y4, y5, y6, y7;")
     p("poly16x8_t y8, y9, y10, y11, y12, y13, y14, y15;")
     p("poly16x8_t y16, y17, y18, y19, y20, y21, y22, y23;")
@@ -351,17 +353,17 @@ if __name__ == '__main__':
     Z = (t12, t13)
 
     # load a 
-    p("vld1q_p16 ({} + {}) = y{}".format(0*16, "a->coeffs", A[0]))
-    p("vld1q_p16 ({} + {}) = y{}".format(1*16, "a->coeffs", A[1]))
+    p("vld1q_p8 ({} + {}) = y{}".format(0*16, "a", A[0]))
+    p("vld1q_p8 ({} + {}) = y{}".format(1*16, "a", A[1]))
     # load b 
-    p("vld1q_p16 ({} + {}) = y{}".format(2*16, "a->coeffs", B[0]))
-    p("vld1q_p16 ({} + {}) = y{}".format(3*16, "a->coeffs", B[1]))
+    p("vld1q_p8 ({} + {}) = y{}".format(2*16, "a", B[0]))
+    p("vld1q_p8 ({} + {}) = y{}".format(3*16, "a", B[1]))
     # load w 
-    p("vld1q_p16 ({} + {}) = y{}".format(0*16, "b->coeffs", W[0]))
-    p("vld1q_p16 ({} + {}) = y{}".format(1*16, "b->coeffs", W[1]))
+    p("vld1q_p8 ({} + {}) = y{}".format(0*16, "b", W[0]))
+    p("vld1q_p8 ({} + {}) = y{}".format(1*16, "b", W[1]))
     # load x 
-    p("vld1q_p16 ({} + {}) = y{}".format(2*16, "b->coeffs", X[0]))
-    p("vld1q_p16 ({} + {}) = y{}".format(3*16, "b->coeffs", X[1]))
+    p("vld1q_p8 ({} + {}) = y{}".format(2*16, "b", X[0]))
+    p("vld1q_p8 ({} + {}) = y{}".format(3*16, "b", X[1]))
 
     # p("vmovdqa {}(%rsi), y{}".format(0, a))
     # p("vmovdqa {}(%rsi), y{}".format(32, b))
@@ -385,44 +387,44 @@ if __name__ == '__main__':
 
 
     # store_1024((t1, r[1], r[2], t2))
-    store_1024((T1, R[1], R[2], T2), ptr="c->coeffs")
+    store_1024((T1, R[1], R[2], T2), ptr="c")
 
     # add r * x^512 mod x^821-1 to output
     S = (A, B, W, X)
-    load_1024(S, ptr="c->coeffs")
+    load_1024(S, ptr="c")
 
     # mul512_and_accumulate(s, r, (t1, t2, t3, t4))
     mul512_and_accumulate(S, R, (t0, t3, t4, t5, t6, t7, t8, t9))
-    store_1024(S, "c->coeffs")
+    store_1024(S, "c")
 
     
     # p("vmovdqa {}(%rsi), y{}".format(64, c))
     # Load c 
-    p("vld1q_p16 ({} + {}) = y{}".format(4*16, "a->coeffs", A[0]))
-    p("vld1q_p16 ({} + {}) = y{}".format(5*16, "a->coeffs", A[1]))
+    p("vld1q_p8 ({} + {}) = y{}".format(4*16, "a", A[0]))
+    p("vld1q_p8 ({} + {}) = y{}".format(5*16, "a", A[1]))
 
     # Load d 
     # p("vmovdqa {}(%rsi), y{}".format(96, d))
-    p("vld1q_p16 ({} + {}) = y{}".format(6*16, "a->coeffs", B[0]))
-    p("vld1q_p16 ({} + {}) = y{}".format(7*16, "a->coeffs", B[1]))
+    p("vld1q_p8 ({} + {}) = y{}".format(6*16, "a", B[0]))
+    p("vld1q_p8 ({} + {}) = y{}".format(7*16, "a", B[1]))
 
     # Load y 
     # p("vmovdqa {}(%rdx), y{}".format(64, y))
-    p("vld1q_p16 ({} + {}) = y{}".format(4*16, "b->coeffs", W[0]))
-    p("vld1q_p16 ({} + {}) = y{}".format(5*16, "b->coeffs", W[1]))
+    p("vld1q_p8 ({} + {}) = y{}".format(4*16, "b", W[0]))
+    p("vld1q_p8 ({} + {}) = y{}".format(5*16, "b", W[1]))
 
     # Load Z
     # p("vmovdqa {}(%rdx), y{}".format(96, z))
-    p("vld1q_p16 ({} + {}) = y{}".format(6*16, "b->coeffs", X[0]))
-    p("vld1q_p16 ({} + {}) = y{}".format(7*16, "b->coeffs", X[1]))
+    p("vld1q_p8 ({} + {}) = y{}".format(6*16, "b", X[0]))
+    p("vld1q_p8 ({} + {}) = y{}".format(7*16, "b", X[1]))
 
     karatsuba_512x512(R, (A, B), (W, X), t0, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12)
 
     S = (A, B, W, X)
-    load_1024(S, "c->coeffs")
+    load_1024(S, "c")
     mul512_and_accumulate(S, R, (t0, t3, t4, t5, t6, t7, t8, t9))
     mul1024_and_accumulate(S, R, (t0, t3, t4, t5, t6, t7))
-    store_1024(S, "c->coeffs")
+    store_1024(S, "c")
 
     # used all free registers during accumulate, reload inputs
     ## a, b, w, x = 4, 5, 6, 7
@@ -432,8 +434,8 @@ if __name__ == '__main__':
     ## t5, t6, t7, t8 = 12, 13, 14, 15
     # t0, t3, t4, t5 = 16, 17, 18, 19
 
-    load_1024((A, B, C, D), "a->coeffs")
-    load_1024((W, X, Y, X), "b->coeffs")
+    load_1024((A, B, C, D), "a")
+    load_1024((W, X, Y, X), "b")
 
     # p("vpxor y{}, y{}, y{}".format(a, c, a))
     p("vaddq_p128(y{}, y{}) = y{}".format(A[0], C[0], A[0]))
@@ -456,8 +458,8 @@ if __name__ == '__main__':
     # multiply by 512 and reduce mod x^821 - 1
     # s = (c, d, y, z)
     S = (A, B, W, X)
-    load_1024(S, "c->coeffs")
+    load_1024(S, "c")
     mul512_and_accumulate(S, R, (t0, t3, t4, t5, t6, t7, t8, t9))
-    store_1024(S, "c->coeffs")
+    store_1024(S, "c")
 
     p("}")
