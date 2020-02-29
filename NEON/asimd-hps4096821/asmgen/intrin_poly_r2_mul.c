@@ -1,19 +1,19 @@
 #include <arm_neon.h>
 
-void poly_R2_mul(poly *c, const poly *a, const poly *b)
+void poly_R2_mul(unsigned char *c, unsigned char *a, unsigned char *b)
 {
-    poly16x8_t y0, y1, y2, y3, y4, y5, y6, y7;
-    poly16x8_t y8, y9, y10, y11, y12, y13, y14, y15;
-    poly16x8_t y16, y17, y18, y19, y20, y21, y22, y23;
-    poly16x8_t y24, y25, y26, y27, y28, y29, y30, y31;
-    y8 = vld1q_p16(0 + a->coeffs);
-    y9 = vld1q_p16(16 + a->coeffs);
-    y10 = vld1q_p16(32 + a->coeffs);
-    y11 = vld1q_p16(48 + a->coeffs);
-    y12 = vld1q_p16(0 + b->coeffs);
-    y13 = vld1q_p16(16 + b->coeffs);
-    y14 = vld1q_p16(32 + b->coeffs);
-    y15 = vld1q_p16(48 + b->coeffs);
+    poly8x16_t y0, y1, y2, y3, y4, y5, y6, y7;
+    poly8x16_t y8, y9, y10, y11, y12, y13, y14, y15;
+    poly8x16_t y16, y17, y18, y19, y20, y21, y22, y23;
+    poly8x16_t y24, y25, y26, y27, y28, y29, y30, y31;
+    y8 = vld1q_p8(0 + a);
+    y9 = vld1q_p8(16 + a);
+    y10 = vld1q_p8(32 + a);
+    y11 = vld1q_p8(48 + a);
+    y12 = vld1q_p8(0 + b);
+    y13 = vld1q_p8(16 + b);
+    y14 = vld1q_p8(32 + b);
+    y15 = vld1q_p8(48 + b);
     // karatsuba_512x512 BEGIN
     y21 = vaddq_p128(y9, y11);
     y25 = vaddq_p128(y8, y10);
@@ -27,7 +27,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y8, y20);
     y19 = vmull_high_p64(y8, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y3 = vaddq_p64(y20, y3);
     y20 = vextq_p64(y19, y18, 1);
@@ -42,7 +42,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -55,7 +55,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y9, y20);
     y24 = vmull_high_p64(y9, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y1 = vaddq_p64(y20, y1);
     y20 = vextq_p64(y24, y19, 1);
@@ -76,7 +76,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y10, y20);
     y19 = vmull_high_p64(y10, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y7 = vaddq_p64(y20, y7);
     y20 = vextq_p64(y19, y18, 1);
@@ -91,7 +91,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -104,7 +104,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y11, y20);
     y24 = vmull_high_p64(y11, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y5 = vaddq_p64(y20, y5);
     y20 = vextq_p64(y24, y19, 1);
@@ -125,7 +125,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y25, y20);
     y19 = vmull_high_p64(y25, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y11 = vaddq_p64(y20, y11);
     y20 = vextq_p64(y19, y18, 1);
@@ -140,7 +140,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -153,7 +153,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y21, y20);
     y24 = vmull_high_p64(y21, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y9 = vaddq_p64(y20, y9);
     y20 = vextq_p64(y24, y19, 1);
@@ -197,24 +197,24 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y30 = y25 & y6;
     y31 = y7;
     // store_1024 BEGIN
-    vst1q_p16(0 + c->coeffs, y28);
-    vst1q_p16(16 + c->coeffs, y29);
-    vst1q_p16(32 + c->coeffs, y2);
-    vst1q_p16(48 + c->coeffs, y3);
-    vst1q_p16(64 + c->coeffs, y4);
-    vst1q_p16(80 + c->coeffs, y5);
-    vst1q_p16(96 + c->coeffs, y30);
-    vst1q_p16(112 + c->coeffs, y31);
+    vst1q_p8(0 + c, y28);
+    vst1q_p8(16 + c, y29);
+    vst1q_p8(32 + c, y2);
+    vst1q_p8(48 + c, y3);
+    vst1q_p8(64 + c, y4);
+    vst1q_p8(80 + c, y5);
+    vst1q_p8(96 + c, y30);
+    vst1q_p8(112 + c, y31);
     // store_1024 END
     // load_1024 BEGIN
-    y8 = y28;  // vld1q_p16(0 + c->coeffs);
-    y9 = y29;  // vld1q_p16(16 + c->coeffs);
-    y10 = y2;  // vld1q_p16(32 + c->coeffs);
-    y11 = y3;  // vld1q_p16(48 + c->coeffs);
-    y12 = y4;  // vld1q_p16(64 + c->coeffs);
-    y13 = y5;  // vld1q_p16(80 + c->coeffs);
-    y14 = y30; // vld1q_p16(96 + c->coeffs);
-    y15 = y31; // vld1q_p16(112 + c->coeffs);
+    y8 = vld1q_p8(0 + c);
+    y9 = vld1q_p8(16 + c);
+    y10 = vld1q_p8(32 + c);
+    y11 = vld1q_p8(48 + c);
+    y12 = vld1q_p8(64 + c);
+    y13 = vld1q_p8(80 + c);
+    y14 = vld1q_p8(96 + c);
+    y15 = vld1q_p8(112 + c);
     // load_1024 END
     // mul512_and_accumulate BEGIN
     y12 = vaddq_p128(y0, y12);
@@ -287,23 +287,23 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y13 = vaddq_p128(y19, y13);
     // mul512_and_accumulate END
     // store_1024 BEGIN
-    vst1q_p16(0 + c->coeffs, y8);
-    vst1q_p16(16 + c->coeffs, y9);
-    vst1q_p16(32 + c->coeffs, y10);
-    vst1q_p16(48 + c->coeffs, y11);
-    vst1q_p16(64 + c->coeffs, y12);
-    vst1q_p16(80 + c->coeffs, y13);
-    vst1q_p16(96 + c->coeffs, y14);
-    vst1q_p16(112 + c->coeffs, y15);
+    vst1q_p8(0 + c, y8);
+    vst1q_p8(16 + c, y9);
+    vst1q_p8(32 + c, y10);
+    vst1q_p8(48 + c, y11);
+    vst1q_p8(64 + c, y12);
+    vst1q_p8(80 + c, y13);
+    vst1q_p8(96 + c, y14);
+    vst1q_p8(112 + c, y15);
     // store_1024 END
-    y8 = vld1q_p16(64 + a->coeffs);
-    y9 = vld1q_p16(80 + a->coeffs);
-    y10 = vld1q_p16(96 + a->coeffs);
-    y11 = vld1q_p16(112 + a->coeffs);
-    y12 = vld1q_p16(64 + b->coeffs);
-    y13 = vld1q_p16(80 + b->coeffs);
-    y14 = vld1q_p16(96 + b->coeffs);
-    y15 = vld1q_p16(112 + b->coeffs);
+    y8 = vld1q_p8(64 + a);
+    y9 = vld1q_p8(80 + a);
+    y10 = vld1q_p8(96 + a);
+    y11 = vld1q_p8(112 + a);
+    y12 = vld1q_p8(64 + b);
+    y13 = vld1q_p8(80 + b);
+    y14 = vld1q_p8(96 + b);
+    y15 = vld1q_p8(112 + b);
     // karatsuba_512x512 BEGIN
     y21 = vaddq_p128(y9, y11);
     y25 = vaddq_p128(y8, y10);
@@ -317,7 +317,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y8, y20);
     y19 = vmull_high_p64(y8, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y3 = vaddq_p64(y20, y3);
     y20 = vextq_p64(y19, y18, 1);
@@ -332,7 +332,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -345,7 +345,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y9, y20);
     y24 = vmull_high_p64(y9, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y1 = vaddq_p64(y20, y1);
     y20 = vextq_p64(y24, y19, 1);
@@ -366,7 +366,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y10, y20);
     y19 = vmull_high_p64(y10, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y7 = vaddq_p64(y20, y7);
     y20 = vextq_p64(y19, y18, 1);
@@ -381,7 +381,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -394,7 +394,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y11, y20);
     y24 = vmull_high_p64(y11, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y5 = vaddq_p64(y20, y5);
     y20 = vextq_p64(y24, y19, 1);
@@ -415,7 +415,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y25, y20);
     y19 = vmull_high_p64(y25, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y11 = vaddq_p64(y20, y11);
     y20 = vextq_p64(y19, y18, 1);
@@ -430,7 +430,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -443,7 +443,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y21, y20);
     y24 = vmull_high_p64(y21, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y9 = vaddq_p64(y20, y9);
     y20 = vextq_p64(y24, y19, 1);
@@ -470,14 +470,14 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y5 = vaddq_p128(y11, y5);
     // karatsuba_512x512 END
     // load_1024 BEGIN
-    y8 = vld1q_p16(0 + c->coeffs);
-    y9 = vld1q_p16(16 + c->coeffs);
-    y10 = vld1q_p16(32 + c->coeffs);
-    y11 = vld1q_p16(48 + c->coeffs);
-    y12 = vld1q_p16(64 + c->coeffs);
-    y13 = vld1q_p16(80 + c->coeffs);
-    y14 = vld1q_p16(96 + c->coeffs);
-    y15 = vld1q_p16(112 + c->coeffs);
+    y8 = vld1q_p8(0 + c);
+    y9 = vld1q_p8(16 + c);
+    y10 = vld1q_p8(32 + c);
+    y11 = vld1q_p8(48 + c);
+    y12 = vld1q_p8(64 + c);
+    y13 = vld1q_p8(80 + c);
+    y14 = vld1q_p8(96 + c);
+    y15 = vld1q_p8(112 + c);
     // load_1024 END
     // mul512_and_accumulate BEGIN
     y12 = vaddq_p128(y0, y12);
@@ -648,34 +648,34 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y15 = vaddq_p128(y19, y15);
     // mul1024_and_accumulate END
     // store_1024 BEGIN
-    vst1q_p16(0 + c->coeffs, y8);
-    vst1q_p16(16 + c->coeffs, y9);
-    vst1q_p16(32 + c->coeffs, y10);
-    vst1q_p16(48 + c->coeffs, y11);
-    vst1q_p16(64 + c->coeffs, y12);
-    vst1q_p16(80 + c->coeffs, y13);
-    vst1q_p16(96 + c->coeffs, y14);
-    vst1q_p16(112 + c->coeffs, y15);
+    vst1q_p8(0 + c, y8);
+    vst1q_p8(16 + c, y9);
+    vst1q_p8(32 + c, y10);
+    vst1q_p8(48 + c, y11);
+    vst1q_p8(64 + c, y12);
+    vst1q_p8(80 + c, y13);
+    vst1q_p8(96 + c, y14);
+    vst1q_p8(112 + c, y15);
     // store_1024 END
     // load_1024 BEGIN
-    y8 = vld1q_p16(0 + a->coeffs);
-    y9 = vld1q_p16(16 + a->coeffs);
-    y10 = vld1q_p16(32 + a->coeffs);
-    y11 = vld1q_p16(48 + a->coeffs);
-    y20 = vld1q_p16(64 + a->coeffs);
-    y21 = vld1q_p16(80 + a->coeffs);
-    y22 = vld1q_p16(96 + a->coeffs);
-    y23 = vld1q_p16(112 + a->coeffs);
+    y8 = vld1q_p8(0 + a);
+    y9 = vld1q_p8(16 + a);
+    y10 = vld1q_p8(32 + a);
+    y11 = vld1q_p8(48 + a);
+    y20 = vld1q_p8(64 + a);
+    y21 = vld1q_p8(80 + a);
+    y22 = vld1q_p8(96 + a);
+    y23 = vld1q_p8(112 + a);
     // load_1024 END
     // load_1024 BEGIN
-    y12 = vld1q_p16(0 + b->coeffs);
-    y13 = vld1q_p16(16 + b->coeffs);
-    y14 = vld1q_p16(32 + b->coeffs);
-    y15 = vld1q_p16(48 + b->coeffs);
-    y24 = vld1q_p16(64 + b->coeffs);
-    y25 = vld1q_p16(80 + b->coeffs);
-    y14 = vld1q_p16(96 + b->coeffs);
-    y15 = vld1q_p16(112 + b->coeffs);
+    y12 = vld1q_p8(0 + b);
+    y13 = vld1q_p8(16 + b);
+    y14 = vld1q_p8(32 + b);
+    y15 = vld1q_p8(48 + b);
+    y24 = vld1q_p8(64 + b);
+    y25 = vld1q_p8(80 + b);
+    y14 = vld1q_p8(96 + b);
+    y15 = vld1q_p8(112 + b);
     // load_1024 END
     y8 = vaddq_p128(y8, y20);
     y9 = vaddq_p128(y9, y21);
@@ -698,7 +698,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y8, y20);
     y19 = vmull_high_p64(y8, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y3 = vaddq_p64(y20, y3);
     y20 = vextq_p64(y19, y18, 1);
@@ -713,7 +713,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -726,7 +726,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y9, y20);
     y24 = vmull_high_p64(y9, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y1 = vaddq_p64(y20, y1);
     y20 = vextq_p64(y24, y19, 1);
@@ -747,7 +747,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y10, y20);
     y19 = vmull_high_p64(y10, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y7 = vaddq_p64(y20, y7);
     y20 = vextq_p64(y19, y18, 1);
@@ -762,7 +762,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -775,7 +775,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y11, y20);
     y24 = vmull_high_p64(y11, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y5 = vaddq_p64(y20, y5);
     y20 = vextq_p64(y24, y19, 1);
@@ -796,7 +796,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y18 = vmull_p64(y25, y20);
     y19 = vmull_high_p64(y25, y20);
     y18 = vaddq_p64(y18, y19);
-    y19 = 0;
+    y19 = vdupq_n_p64(0);
     y20 = vextq_p64(y18, y19, 1);
     y11 = vaddq_p64(y20, y11);
     y20 = vextq_p64(y19, y18, 1);
@@ -811,7 +811,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y16, y20);
     y24 = vmull_high_p64(y16, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y18 = vaddq_p64(y20, y18);
     y20 = vextq_p64(y24, y19, 1);
@@ -824,7 +824,7 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y19 = vmull_p64(y21, y20);
     y24 = vmull_high_p64(y21, y20);
     y19 = vaddq_p64(y19, y24);
-    y24 = 0;
+    y24 = vdupq_n_p64(0);
     y20 = vextq_p64(y19, y24, 1);
     y9 = vaddq_p64(y20, y9);
     y20 = vextq_p64(y24, y19, 1);
@@ -851,14 +851,14 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y5 = vaddq_p128(y11, y5);
     // karatsuba_512x512 END
     // load_1024 BEGIN
-    y8 = vld1q_p16(0 + c->coeffs);
-    y9 = vld1q_p16(16 + c->coeffs);
-    y10 = vld1q_p16(32 + c->coeffs);
-    y11 = vld1q_p16(48 + c->coeffs);
-    y12 = vld1q_p16(64 + c->coeffs);
-    y13 = vld1q_p16(80 + c->coeffs);
-    y14 = vld1q_p16(96 + c->coeffs);
-    y15 = vld1q_p16(112 + c->coeffs);
+    y8 = vld1q_p8(0 + c);
+    y9 = vld1q_p8(16 + c);
+    y10 = vld1q_p8(32 + c);
+    y11 = vld1q_p8(48 + c);
+    y12 = vld1q_p8(64 + c);
+    y13 = vld1q_p8(80 + c);
+    y14 = vld1q_p8(96 + c);
+    y15 = vld1q_p8(112 + c);
     // load_1024 END
     // mul512_and_accumulate BEGIN
     y12 = vaddq_p128(y0, y12);
@@ -931,13 +931,13 @@ void poly_R2_mul(poly *c, const poly *a, const poly *b)
     y13 = vaddq_p128(y19, y13);
     // mul512_and_accumulate END
     // store_1024 BEGIN
-    vst1q_p16(0 + c->coeffs, y8);
-    vst1q_p16(16 + c->coeffs, y9);
-    vst1q_p16(32 + c->coeffs, y10);
-    vst1q_p16(48 + c->coeffs, y11);
-    vst1q_p16(64 + c->coeffs, y12);
-    vst1q_p16(80 + c->coeffs, y13);
-    vst1q_p16(96 + c->coeffs, y14);
-    vst1q_p16(112 + c->coeffs, y15);
+    vst1q_p8(0 + c, y8);
+    vst1q_p8(16 + c, y9);
+    vst1q_p8(32 + c, y10);
+    vst1q_p8(48 + c, y11);
+    vst1q_p8(64 + c, y12);
+    vst1q_p8(80 + c, y13);
+    vst1q_p8(96 + c, y14);
+    vst1q_p8(112 + c, y15);
     // store_1024 END
 }
