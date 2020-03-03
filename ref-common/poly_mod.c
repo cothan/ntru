@@ -43,6 +43,8 @@ void poly_Rq_to_S3(poly *r, const poly *a)
     r->coeffs[i] += MODQ(a->coeffs[i]);
   }
 
-  poly_mod_3_Phi_n(r);
+  // poly_mod_3_Phi_n(r);
+  for(i=0; i <NTRU_N; i++)
+    r->coeffs[i] = mod3(r->coeffs[i] + 2*r->coeffs[NTRU_N-1]);
 }
 
