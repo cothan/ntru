@@ -1,7 +1,7 @@
 p = print
 
 
-def mod3(a, r=13, t=14, c=15, length=2):
+def mod3(a, r, t, c, xff, xf, x3, length):
     # R is output
     A = []
     R = []
@@ -16,12 +16,12 @@ def mod3(a, r=13, t=14, c=15, length=2):
         C.append(c[i])
     # r = (a >> 8) + (a & 0xff); // r mod 255 == a mod 255
 
-    p("vdupq_n_u16(0xff) = y{}".format(T[0]))
+    # p("vdupq_n_u16(0xff) = y{}".format(T[0]))
     for i in range(length):
         # R = a >> 8
         p("vshrq_n_u16 (y{}, {}) = y{}".format(A[i], 8, R[i]))
         # A = a & 0xff
-        p("vandq_u16 (y{}, y{}) = y{}".format(A[i], T[0], A[i]))
+        p("vandq_u16 (y{}, y{}) = y{}".format(A[i], xff, A[i]))
         # R = A + R
         p("vaddq_u16 (y{}, y{}) = y{}".format(A[i], R[i], R[i]))
 
@@ -31,12 +31,12 @@ def mod3(a, r=13, t=14, c=15, length=2):
 
     # r = (r >> 4) + (r & 0xf); // r' mod 15 == r mod 15
 
-    p("vdupq_n_u16(0xf) = y{}".format(T[0]))
+    # p("vdupq_n_u16(0xf) = y{}".format(T[0]))
     for i in range(length):
         # A = r >> 4
         p("vshrq_n_u16 (y{}, {}) = y{}".format(R[i], 4, A[i]))
         # R = r & 0xf
-        p("vandq_u16 (y{}, y{}) = y{}".format(R[i], T[0], R[i]))
+        p("vandq_u16 (y{}, y{}) = y{}".format(R[i], xf, R[i]))
         # R = A + R
         p("vaddq_u16 (y{}, y{}) = y{}".format(A[i], R[i], R[i]))
 
@@ -46,13 +46,13 @@ def mod3(a, r=13, t=14, c=15, length=2):
 
     # r = (r >> 2) + (r & 0x3); // r' mod 3 == r mod 3
     # r = (r >> 2) + (r & 0x3); // r' mod 3 == r mod 3
-    p("vdupq_n_u16(0x3) = y{}".format(T[0]))
+    # p("vdupq_n_u16(0x3) = y{}".format(T[0]))
     for _ in range(2):
         for i in range(length):
             # A = r >> 2
             p("vshrq_n_u16 (y{}, {}) = y{}".format(R[i], 2, A[i]))
             # R = r & 0x3
-            p("vandq_u16 (y{}, y{}) = y{}".format(R[i], T[0], R[i]))
+            p("vandq_u16 (y{}, y{}) = y{}".format(R[i], x3, R[i]))
             # R = A + R
             p("vaddq_u16 (y{}, y{}) = y{}".format(A[i], R[i], R[i]))
 
@@ -64,10 +64,10 @@ def mod3(a, r=13, t=14, c=15, length=2):
     # p("vpsubw mask_3(%rip), %ymm{}, %ymm{}".format(r, t))
     # for i in range(length):
     if length == 2:
-        p("vsubq_s16 (y{}, y{}) = y{}".format(R[1], T[0], T[1]))
-        p("vsubq_s16 (y{}, y{}) = y{}".format(R[0], T[0], T[0]))
+        p("vsubq_s16 (y{}, y{}) = y{}".format(R[0], x3, T[0]))
+        p("vsubq_s16 (y{}, y{}) = y{}".format(R[1], x3, T[1]))
     else:
-        p("vsubq_s16 (y{}, y{}) = y{}".format(R[0], T[0], T[0]))
+        p("vsubq_s16 (y{}, y{}) = y{}".format(R[0], x3, T[0]))
 
     #   c = t >> 15;  t is signed, so shift arithmetic
     # p("vpsraw $15, %ymm{}, %ymm{}".format(t, c))
