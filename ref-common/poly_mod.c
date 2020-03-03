@@ -37,10 +37,12 @@ void poly_Rq_to_S3(poly *r, const poly *a)
   int i;
 
   /* Center coeffs around 3Q: [0, Q-1] -> [3Q - Q/2, 3Q + Q/2) */
+  uint16_t t; 
   for(i=0; i<NTRU_N; i++)
   {
-    r->coeffs[i] = ((MODQ(a->coeffs[i]) >> (NTRU_LOGQ-1)) ^ 3) << NTRU_LOGQ;
-    r->coeffs[i] += MODQ(a->coeffs[i]);
+    t = MODQ(a->coeffs[i]);
+    r->coeffs[i] = ((t >> (NTRU_LOGQ-1)) ^ 3) << NTRU_LOGQ;
+    r->coeffs[i] += t;
   }
 
   // poly_mod_3_Phi_n(r);
