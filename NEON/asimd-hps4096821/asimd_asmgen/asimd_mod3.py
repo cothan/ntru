@@ -52,7 +52,7 @@ def mod3(a, r, t, c, xff, xf, x3, length):
             # A = r >> 2
             p("vshrq_n_u16 (y{}, {}) = y{}".format(R[i], 2, A[i]))
             # R = r & 0x3
-            p("vandq_u16 (y{}, y{}) = y{}".format(R[i], x3, R[i]))
+            p("vandq_u16 (y{}, (uint16x8_t) y{}) = y{}".format(R[i], x3, R[i]))
             # R = A + R
             p("vaddq_u16 (y{}, y{}) = y{}".format(A[i], R[i], R[i]))
 
@@ -61,30 +61,23 @@ def mod3(a, r, t, c, xff, xf, x3, length):
     # p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(r, a, r))
 
     #   t = r - 3;
-    # p("vpsubw mask_3(%rip), %ymm{}, %ymm{}".format(r, t))
-    # for i in range(length):
-    if length == 2:
-        p("vsubq_s16 (y{}, y{}) = y{}".format(R[0], x3, T[0]))
-        p("vsubq_s16 (y{}, y{}) = y{}".format(R[1], x3, T[1]))
-    else:
-        p("vsubq_s16 (y{}, y{}) = y{}".format(R[0], x3, T[0]))
+    for i in range(length):
+        p("vsubq_s16 ( (int16x8_t) y{}, y{}) = y{}".format(R[i], x3, T[i]))
 
     #   c = t >> 15;  t is signed, so shift arithmetic
-    # p("vpsraw $15, %ymm{}, %ymm{}".format(t, c))
     for i in range(length):
         p("vshrq_n_s16 (y{}, {}) = y{}".format(T[i], 15, C[i]))
-    # p("vshrq_n_s16 (y{}, {}) = y{}".format(T[1], 15, C[1]))
 
     #   return (c&r) ^ (~c&t);
     for i in range(length):
         # A = C & R
-        p("vandq_u16 (y{}, y{}) = y{}".format(C[i], R[i], A[i]))
+        p("vandq_u16 ( (uint16x8_t) y{}, y{}) = y{}".format(C[i], R[i], A[i]))
         # C = ~C
         p("vmvnq_s16 (y{}) = y{}".format(C[i], C[i]))
         # T = C & T
-        p("vandq_u16 (y{}, y{}) = y{}".format(C[i], T[i], T[i]))
+        p("vandq_s16 (y{}, y{}) = y{}".format(C[i], T[i], T[i]))
         # R = A ^ T
-        p("veorq_u16 (y{}, y{}) = y{}".format(A[i], T[i], R[i]))
+        p("veorq_u16 (y{}, (uint16x8_t) y{}) = y{}".format(A[i], T[i], R[i]))
 
     # p("vpandn %ymm{}, %ymm{}, %ymm{}".format(t, c, a))
     # p("vpand %ymm{}, %ymm{}, %ymm{}".format(c, r, t))
