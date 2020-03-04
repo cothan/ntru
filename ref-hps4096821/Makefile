@@ -1,5 +1,5 @@
 CC = /usr/bin/cc
-CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie
+CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie -g3
 CFLAGS += -Wall -Wextra -Wpedantic
 
 SRC = crypto_sort_int32.c \
