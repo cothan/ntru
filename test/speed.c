@@ -66,7 +66,7 @@ int main()
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = cpucycles();
+    t[i] = clock();
     crypto_kem_keypair(pks+i*NTRU_PUBLICKEYBYTES,
                        sks+i*NTRU_SECRETKEYBYTES);
   }
