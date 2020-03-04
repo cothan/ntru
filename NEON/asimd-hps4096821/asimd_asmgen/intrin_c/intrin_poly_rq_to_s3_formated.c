@@ -1,3 +1,4 @@
+#include "../../poly.h"
 #include <arm_neon.h>
 
 void poly_Rq_to_S3(poly *r, const poly *a) {

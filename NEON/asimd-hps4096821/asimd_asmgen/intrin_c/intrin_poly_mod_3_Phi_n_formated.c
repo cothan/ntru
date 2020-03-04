@@ -1,3 +1,4 @@
+#include "../../poly.h"
 #include <arm_neon.h>
 
 void poly_mod_3_Phi_n(poly *r) {

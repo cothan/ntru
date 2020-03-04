@@ -1,3 +1,4 @@
+#include "../../poly.h"
 #include <arm_neon.h>
 
 void poly_R2_mul(unsigned char *c, unsigned char *a, unsigned char *b) {
