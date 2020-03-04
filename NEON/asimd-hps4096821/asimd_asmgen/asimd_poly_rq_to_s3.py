@@ -41,6 +41,7 @@ MODQ = 10
 retval = (11, 12)
 xff, xf = 13, 14
 zero = 15
+x33 = 16
 
 p('#include "../../poly.h"')
 p("#include <arm_neon.h>\n")
@@ -48,15 +49,17 @@ p("#include <arm_neon.h>\n")
 p("void poly_Rq_to_S3(poly *r, const poly *a){")
 
 p(" uint16x8_t y0, y1, y2, y3; ")
-p(" int16x8_t y4, y5, y6, y7, y8;")
-p(" uint16x8_t y9, y10, y11, y12, y13, y14, y15; ")
+p(" int16x8_t y4, y5, y6, y7, y16;")
+p(" uint16x8_t y8, y9, y10, y11, y12, y13, y14, y15; ")
 
 
 
 # zero 
-p("vdupq_n_s16(0x3) = y{}".format(zero))
+p("vdupq_n_s16(0x0) = y{}".format(zero))
 # x3 = 3
 p("vdupq_n_u16(0x3) = y{}".format(x3))
+# x33 = 3
+p("vdupq_n_s16(0x3) = y{}".format(x33))
 # MODQ = 4095 = 0xfff
 p("vdupq_n_u16(0xfff) = y{}".format(MODQ))
 # xff 
@@ -119,7 +122,7 @@ for i in range(0, NTRU_N32 // 16):
         # reval = mod3(r)
         
         p("// MOD3 ")
-        mod3(r, retval, t, c, xff, xf, x3 ,length=1)
+        mod3(r, retval, t, c, xff, xf, x33 ,length=1)
         p("// DONE MOD3 ")
         # Store retval 
         p("vst1q_u16 ({} + {}, y{});".format(i*16 , "r->coeffs"   , retval[0]))
@@ -150,7 +153,7 @@ for i in range(0, NTRU_N32 // 16):
         # reval = mod3(r)
         
         p("// MOD3 ")
-        mod3(r, retval, t, c, xff, xf, x3 ,length=2)
+        mod3(r, retval, t, c, xff, xf, x33 ,length=2)
         p("// DONE MOD3 ")
         # Store retval 
         p("vst1q_u16 ({} + {}, y{});".format(i*16 , "r->coeffs"   , retval[0]))
