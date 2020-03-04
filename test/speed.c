@@ -1,7 +1,6 @@
 #include "../kem.h"
 #include "../params.h"
-// #include "../cpucycles.h"
-#include <time.h>
+ #include "../cpucycles.h"
 #include "../randombytes.h"
 #include "../poly.h"
 #include "../sample.h"
@@ -66,7 +65,7 @@ int main()
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     crypto_kem_keypair(pks+i*NTRU_PUBLICKEYBYTES,
                        sks+i*NTRU_SECRETKEYBYTES);
   }
@@ -74,14 +73,14 @@ int main()
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     crypto_kem_enc(cts+i*NTRU_CIPHERTEXTBYTES, key_b, pks+i*NTRU_PUBLICKEYBYTES);
   }
   print_results("ntru_encaps: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     crypto_kem_dec(key_a, cts+i*NTRU_CIPHERTEXTBYTES, sks+i*NTRU_SECRETKEYBYTES);
   }
   print_results("ntru_decaps: ", t, NTESTS);
@@ -95,14 +94,14 @@ int main()
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_Rq_mul(&r, &a, &b);
   }
   print_results("poly_Rq_mul: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_S3_mul(&r, &a, &b);
   }
   print_results("poly_S3_mul: ", t, NTESTS);
@@ -114,21 +113,21 @@ int main()
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_Rq_inv(&r, &a);
   }
   print_results("poly_Rq_inv: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_S3_inv(&r, &a);
   }
   print_results("poly_S3_inv: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     randombytes(fgbytes, NTRU_SAMPLE_FG_BYTES);
   }
   print_results("randombytes for fg: ", t, NTESTS);
@@ -136,14 +135,14 @@ int main()
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     randombytes(rmbytes, NTRU_SAMPLE_RM_BYTES);
   }
   print_results("randombytes for rm: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     sample_iid(&a, fgbytes);
   }
   print_results("sample_iid: ", t, NTESTS);
@@ -151,7 +150,7 @@ int main()
 #ifdef NTRU_HRSS
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     sample_iid_plus(&a, fgbytes);
   }
   print_results("sample_iid_plus: ", t, NTESTS);
@@ -160,7 +159,7 @@ int main()
 #ifdef NTRU_HPS
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     sample_fixed_type(&a, fgbytes);
   }
   print_results("sample_fixed_type: ", t, NTESTS);
@@ -168,42 +167,42 @@ int main()
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_lift(&a, &b);
   }
   print_results("poly_lift: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_Rq_to_S3(&a, &b);
   }
   print_results("poly_Rq_to_S3: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_Rq_sum_zero_tobytes(cts, &a);
   }
   print_results("poly_Rq_sum_zero_tobytes: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_Rq_sum_zero_frombytes(&a, cts);
   }
   print_results("poly_Rq_sum_zero_frombytes: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_S3_tobytes(cts, &b);
   }
   print_results("poly_S3_tobytes: ", t, NTESTS);
 
   for(i=0; i<NTESTS; i++)
   {
-    t[i] = clock();
+    t[i] = cpucycles();
     poly_S3_frombytes(&b, cts);
   }
   print_results("poly_S3_frombytes: ", t, NTESTS);
