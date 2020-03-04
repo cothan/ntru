@@ -50,6 +50,7 @@ static void print_results(const char *s, unsigned long long *t, size_t tlen)
 
 int main()
 {
+
   unsigned char key_a[32], key_b[32];
   poly r, a, b;
   unsigned char* pks = (unsigned char*) malloc(NTESTS*NTRU_PUBLICKEYBYTES);
@@ -57,7 +58,7 @@ int main()
   unsigned char* cts = (unsigned char*) malloc(NTESTS*NTRU_CIPHERTEXTBYTES);
   unsigned char fgbytes[NTRU_SAMPLE_FG_BYTES];
   unsigned char rmbytes[NTRU_SAMPLE_RM_BYTES];
-  clock_t t[NTESTS];
+  long long t[NTESTS];
   uint16_t a1 = 0;
   int i;
 

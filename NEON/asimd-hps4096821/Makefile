@@ -53,8 +53,8 @@ test/test_ntru: $(SRC_URAND) $(HDR_URAND) test/test_ntru.c
 test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_pack.c
 
-test/speed: $(SRC_URAND) $(HDR_URAND)  test/speed.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/speed.c
+test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c
 
 test/ram: $(SRC_URAND) $(OBJS) $(HDR_URAND) test/ram.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) test/ram.c
