@@ -11,7 +11,7 @@ SRC = crypto_sort_int32.c \
       poly.c \
       poly_lift.c \
       asimd_asmgen/intrin_c/intrin_poly_mod_3_Phi_n_formated.c \
-      asimd_asmgen/intrin_c/asimd_poly_mod_q_Phi_n.py \
+      asimd_asmgen/intrin_c/intrin_poly_mod_q_Phi_n_formated.c \
       asimd_asmgen/intrin_c/intrin_poly_rq_to_s3_formated.c \
       poly_r2_inv.c \
       poly_rq_mul.c \
