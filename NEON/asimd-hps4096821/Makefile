@@ -10,12 +10,14 @@ SRC = crypto_sort_int32.c \
       packq.c \
       poly.c \
       poly_lift.c \
-      poly_mod.c \
+      asimd_asmgen/intrin_c/intrin_poly_mod_3_Phi_n_formated.c \
+      asimd_asmgen/intrin_c/asimd_poly_mod_q_Phi_n.py \
+      asimd_asmgen/intrin_c/intrin_poly_rq_to_s3_formated.c \
       poly_r2_inv.c \
       poly_rq_mul.c \
       poly_s3_inv.c \
       sample.c \
-      sample_iid.c \
+      asimd_asmgen/intrin_c/intrin_sample_iid_formated.c \
       verify.c
 
 HDR = crypto_hash_sha3256.h \
