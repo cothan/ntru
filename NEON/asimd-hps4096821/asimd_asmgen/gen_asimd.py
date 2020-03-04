@@ -9,7 +9,7 @@ filename = ['asimd_poly_mod_3_Phi_n.py','asimd_poly_mod_q_Phi_n.py','asimd_poly_
 # for i in filename:
 #     name, extension = i.split('.')
 #     # print (name, extension)
-#     system("python3 {} > intrin_{}.c".format(i, name))
+#     system("python3 {} > intrin_{}.c".format(i, name[6:]))
 
 # for i in filename:
 #     name, extension = i.split('.')
