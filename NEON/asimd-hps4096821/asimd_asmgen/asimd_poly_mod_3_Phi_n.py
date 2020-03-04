@@ -8,22 +8,25 @@ retval = (2, 3)
 t = (4, 5)
 c = (6, 7)
 
+x3 = 8
+
 zero = 11
-x3 = 12
 xf = 13
 xff = 14
 last = 15
 
+p('#include "../../poly.h"')
 p("#include <arm_neon.h>\n")
 
 p("void poly_mod_3_Phi_n(poly *r){")
 
-p(" uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7; ")
-p(" uint16x8_t y8, y9, y10, y11, y12, y13, y14, y15; ")
+p(" uint16x8_t y0, y1, y2, y3; ")
+p(" int16x8_t y4, y5, y6, y7, y8;")
+p(" uint16x8_t y9, y10, y11, y12, y13, y14, y15; ")
 
 
 # three = 3
-p("vdupq_n_u16(0x3) = y{}".format(x3))
+p("vdupq_n_s16(0x3) = y{}".format(x3))
 # xff 
 p("vdupq_n_u16(0xff) = y{}".format(xff))
 # xf 

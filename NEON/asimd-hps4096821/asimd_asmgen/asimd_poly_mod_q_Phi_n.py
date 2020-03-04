@@ -6,6 +6,7 @@ r = (0, 1)
 last = 2
 zero = 3
 
+p(' #include "../../poly.h"')
 p("#include <arm_neon.h>\n")
 
 p("void poly_mod_q_Phi_n(poly *r){")
