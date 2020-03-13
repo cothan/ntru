@@ -19,6 +19,8 @@ def transpose(r1, r2, size=1):
 def p(o):
     print("==========")
     for i in range(0, len(o), 2):
+        if (i == 16):
+            print("")
         print(o[i], o[i+1])
 
 
@@ -103,6 +105,8 @@ def transpose16x16(m):
 
 m = [list(range(8*i, 8*i+8)) for i in range(192)]
 
+p(m[:32])
+p(transpose16x16(m[:32]))
 
 def transpose48x16_to_16x44(m):
     assert(len(m) == 96)
@@ -126,5 +130,5 @@ def transpose16x96_to_96x16(m):
         n = transpose16x16(m[i:i+32])
         p(n)
 
-transpose16x96_to_96x16(m)
+# transpose16x96_to_96x16(m)
 
