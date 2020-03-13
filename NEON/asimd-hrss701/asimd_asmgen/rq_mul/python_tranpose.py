@@ -3,17 +3,12 @@ import monkeyhex
 
 def flatten(l): return [item for sublist in l for item in sublist]
 
-
-m = [list(range(8*i, 8*i+8)) for i in range(32)]
-
-
 def transpose(r1, r2, size=1):
     # assert(len(r1) == len(r2) == 8)
 
     n1, n2 = [], []
     for i in range(int(len(r2)/(2*size))):
 
-        # TODO: Insert NEON ASM HERE, depend on SIZE
         n1.insert(2*i, r1[2*i*size: 2*i*size + size])
         n1.insert(2*i + 1, r2[2*i*size: 2*i*size + size])
         n2.insert(2*i, r1[2*i*size + size: 2*i*size + 2*size])
@@ -21,9 +16,11 @@ def transpose(r1, r2, size=1):
 
     return flatten(n1), flatten(n2)
 
+def p(o):
+    print("==========")
+    for i in range(0, len(o), 2):
+        print(o[i], o[i+1])
 
-for i in range(0, len(m), 2):
-    print(m[i], m[i+1])
 
 
 def transpose4x4x1(m):
@@ -104,24 +101,30 @@ def transpose16x16(m):
 
     return n
 
+m = [list(range(8*i, 8*i+8)) for i in range(192)]
 
-print("============")
-for i in transpose8x8(m[0:16:2]):
-    print(i)
 
-print("============")
-for i in transpose8x8(m[1:16:2]):
-    print(i)
+def transpose48x16_to_16x44(m):
+    assert(len(m) == 96)
 
-print("============")
-for i in transpose8x8(m[16::2]):
-    print(i)
+    n = transpose16x16(m[::3])
+    k = transpose16x16(m[1::3])
+    o = transpose16x16(m[2::3])
 
-print("============")
-for i in transpose8x8(m[17::2]):
-    print(i)
+    p(n)
+    p(k)
+    p(o)
 
-print("============")
-out = transpose16x16(m)
-for i in range(0, len(out), 2):
-    print(out[i], out[i+1])
+    
+# transpose48x16_to_16x44(m[:96])
+
+def transpose16x96_to_96x16(m):
+    assert(len(m) == 192)
+
+    for i in range(0, len(m), 32):
+        print("==========")
+        n = transpose16x16(m[i:i+32])
+        p(n)
+
+transpose16x96_to_96x16(m)
+
