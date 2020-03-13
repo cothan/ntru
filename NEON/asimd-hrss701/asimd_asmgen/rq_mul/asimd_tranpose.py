@@ -94,17 +94,18 @@ def transpose8x8(o, n, m, t):
     return o
 
 
-def load_8(dst, src, start=0):
-    for i in range(8):
-        p("y{} = vld1q_u16({} + {});".format(dst[i], src, i*16 + start))
+def load_8(dst, src, srcoff=0, src_gap=3):
+    for i in range(0, 8, 2):
+        p("y{} = vld1q_u16({} + {});".format(dst[i], src,   8*(src_gap*i + srcoff) ))
+        p("y{} = vld1q_u16({} + {});".format(dst[i+1], src, 8*(src_gap*i + srcoff) + 8))
 
 
-def store_8(dst, src, start=8):
-    for i in range(8):
-        p("vst1q_u16({} + {}, y{});".format(dst, i*16 + start, src[i]))
+def store_8(dst, src, dstoff=8, dst_gap=1, length=8):
+    for i in range(0, length):
+        p("vst1q_u16({} + {}, y{});".format(dst, 8*(i*dst_gap + dstoff), src[i]) )
 
 
-def transpose16x16(dst, src, string):
+def transpose16x16(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1):
     i = 0
     m = list(range(i, i + 8))
     i += 8
@@ -118,23 +119,34 @@ def transpose16x16(dst, src, string):
     i += 8
 
 
-
-    load_8(m, string, start=0 + src)
+    # A1
+    load_8(m, src, 0 + srcoff, src_gap)
     o = transpose8x8(o, n, m, t)
-    store_8(string, o, start=0 + dst)
+    store_8(dst, o, dstoff, dst_gap)
 
-    load_8(m, string, start=136 + src)
+    # A4
+    load_8(m, src, 136 + srcoff, src_gap)
     o = transpose8x8(o, n, m, t)
-    store_8(string, o, start=136 + dst)
+    store_8(dst, o, 136 + dstoff, dst_gap)
 
-    load_8(m, string, start=8 + src)
+    # A2
+    load_8(m, src, 8 + srcoff, src_gap)
     o = transpose8x8(o, n, m, t)
 
-    load_8(m, string, start=128 + src)
+    # A3 
+    load_8(m, src, 128 + srcoff, src_gap)
     u = transpose8x8(u, n, m, t)
 
-    store_8(string, u, start=8 + dst)
-    store_8(string, o, start=128 + dst)
+    # store A3 to A2
+    store_8(dst, u, 8 + dstoff, dst_gap)
+
+    # store A2 to A3
+    store_8(dst, o, 128 + dstoff, dst_gap)
 
 
-transpose16x16(0, 0, "coeffs")
+def transpose48x16_to_16x44(dst, src, dstoff=0, srcoff=0):
+    for n in range(3):
+        p(dstoff + n*16, srcoff + n*16)
+        transpose16x16(dst, src, dstoff=dstoff+n*16, srcoff=16*n + srcoff)
+    
+transpose48x16_to_16x44("out", "in")
