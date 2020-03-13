@@ -32,5 +32,4 @@ long long cpucycles(void)
   return result;
 }
 
-
-#endif 
+#endif
