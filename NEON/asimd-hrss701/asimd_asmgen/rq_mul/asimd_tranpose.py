@@ -104,7 +104,7 @@ def store_8(dst, src, start=8):
         p("vst1q_u16({} + {}, y{});".format(dst, i*16 + start, src[i]))
 
 
-def transpose16x16(dst, src):
+def transpose16x16(dst, src, string):
     i = 0
     m = list(range(i, i + 8))
     i += 8
@@ -117,24 +117,24 @@ def transpose16x16(dst, src):
     u = list(range(i, i+8))
     i += 8
 
-    
 
-    load_8(m, "r->coeffs", start=0 + src)
+
+    load_8(m, string, start=0 + src)
     o = transpose8x8(o, n, m, t)
-    store_8("r->coeffs", o, start=0 + dst)
+    store_8(string, o, start=0 + dst)
 
-    load_8(m, "r->coeffs", start=136 + src)
+    load_8(m, string, start=136 + src)
     o = transpose8x8(o, n, m, t)
-    store_8("r->coeffs", o, start=136 + dst)
+    store_8(string, o, start=136 + dst)
 
-    load_8(m, "r->coeffs", start=8 + src)
+    load_8(m, string, start=8 + src)
     o = transpose8x8(o, n, m, t)
 
-    load_8(m, "r->coeffs", start=128 + src)
+    load_8(m, string, start=128 + src)
     u = transpose8x8(u, n, m, t)
 
-    store_8("r->coeffs", u, start=8 + dst)
-    store_8("r->coeffs", o, start=128 + dst)
+    store_8(string, u, start=8 + dst)
+    store_8(string, o, start=128 + dst)
 
 
-transpose16x16(0, 0)
+transpose16x16(0, 0, "coeffs")
