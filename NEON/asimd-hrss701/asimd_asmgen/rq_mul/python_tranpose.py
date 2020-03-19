@@ -66,8 +66,9 @@ def transpose4x4x4(m):
 
 
 def transpose8x8(m):
-    # for i in range(0, len(m)):
-    #     print(m[i])
+    print("m: {} -> {}".format(m[0], m[-1]))
+    for i in range(0, len(m)):
+        print("m{}: ".format(i), m[i])
     assert(len(m) == 8)
     n = range(4)
     o = range(4)
@@ -91,9 +92,13 @@ def transpose16x16(m):
     k = range(8)
     j = range(8)
 
+    print("========A1")
     n = transpose8x8(m[0:16:2])
+    print("========A3")
     k = transpose8x8(m[16::2])
+    print("========A2")
     o = transpose8x8(m[1:16:2])
+    print("========A4")
     j = transpose8x8(m[17::2])
 
     n = zip(n, k)
@@ -105,11 +110,14 @@ def transpose16x16(m):
 
 m = [list(range(8*i, 8*i+8)) for i in range(192)]
 
-p(m[:32])
-p(transpose16x16(m[:32]))
+# p(m[:32])
+# p(transpose16x16(m[:32]))
 
 def transpose48x16_to_16x44(m):
     assert(len(m) == 96)
+
+    p(m[::3])
+    print("==============")
 
     n = transpose16x16(m[::3])
     k = transpose16x16(m[1::3])
@@ -120,7 +128,7 @@ def transpose48x16_to_16x44(m):
     p(o)
 
     
-# transpose48x16_to_16x44(m[:96])
+transpose48x16_to_16x44(m[:96])
 
 def transpose16x96_to_96x16(m):
     assert(len(m) == 192)

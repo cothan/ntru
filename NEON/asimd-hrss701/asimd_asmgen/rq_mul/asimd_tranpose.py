@@ -176,15 +176,15 @@ def transpose16x16_1(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1, length=
 
     # A4
     p("// 16x16: LD A4")
-    load_8(m, src, 136*src_gap + srcoff, src_gap, length)
+    load_8(m, src, 136*src_gap + srcoff, src_gap)
     p("// Transpose 8x8")
     o = transpose8x8(o, n, m, t)
     p("// 16x16: STR A4")
-    store_8(dst, o, 136 + dstoff, dst_gap, length)
+    store_8(dst, o, 136*src_gap + dstoff -16, dst_gap, length)
 
     # A2
     p("// 16x16: LD A2")
-    load_8(m, src, 8*src_gap + srcoff, src_gap, length)
+    load_8(m, src, 8*src_gap + srcoff, src_gap)
     p("// Transpose 8x8")
     o = transpose8x8(o, n, m, t)
 
@@ -200,18 +200,17 @@ def transpose16x16_1(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1, length=
 
     # store A2 to A3
     p("// 16x16: STR A3<-A2")
-    store_8(dst, o, 128 + dstoff, dst_gap, length)
+    store_8(dst, o, 128*src_gap + dstoff, dst_gap, length)
 
 
 def transpose48x16_to_16x44(dst, src):
     for n in range(3):
         if n == 2:
-            l = 8
+            l = 4
         else:
             l = 8
         p("// -------------- n = {}".format(n))
-        #transpose16x16_1(dst, src, dstoff=n*256, srcoff=8*n, src_gap=3, dst_gap=1, length=l)
-        transpose16x16_1(dst, src, dstoff=n*256, srcoff=8*n, src_gap=3, dst_gap=1, length=l)
+        transpose16x16_1(dst, src, dstoff=n*128, srcoff=8*n, src_gap=3, dst_gap=1, length=l)
 
 
     
@@ -227,8 +226,8 @@ print("""#include <arm_neon.h>
 int main()
 {
 	uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, y32, y33, y34, y35;
-	uint16_t in[SIZE]; 
-    uint16_t out[SIZE]; 
+	uint16_t in[SIZE] ={0}; 
+    uint16_t out[SIZE] ={0}; 
 	for (uint16_t i = 0; i < SIZE; i++)
 	{
 		in[i] = i;
