@@ -94,15 +94,14 @@ def transpose8x8(o, n, m, t):
     return o
 
 
-def load_8(dst, src, srcoff=0, src_gap=3):
-    for i in range(0, 8, 2):
-        p("y{} = vld1q_u16({} + {});".format(dst[i], src,   8*(src_gap*i + srcoff) ))
-        p("y{} = vld1q_u16({} + {});".format(dst[i+1], src, 8*(src_gap*i + srcoff) + 8))
+def load_8(dst, src, srcoff=0, src_gap=1, length=8):
+    for i in range(length):
+        p("y{} = vld1q_u16({} + {});".format(dst[i], src,   16*(src_gap*i) + srcoff) )
 
 
-def store_8(dst, src, dstoff=8, dst_gap=1, length=8):
+def store_8(dst, src, dstoff=0, dst_gap=1, length=8):
     for i in range(0, length):
-        p("vst1q_u16({} + {}, y{});".format(dst, 8*(i*dst_gap + dstoff), src[i]) )
+        p("vst1q_u16({} + {}, y{});".format(dst, 16*(i*dst_gap) + dstoff, src[i]))
 
 
 def transpose16x16(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1):
@@ -118,35 +117,146 @@ def transpose16x16(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1):
     u = list(range(i, i+8))
     i += 8
 
-
     # A1
-    load_8(m, src, 0 + srcoff, src_gap)
+    p("// 16x16: LD A1")
+    load_8(m, src,  srcoff, src_gap)
+    p("// Transpose 8x8")
     o = transpose8x8(o, n, m, t)
+    p("// 16x16: STR A1")
     store_8(dst, o, dstoff, dst_gap)
 
     # A4
+    p("// 16x16: LD A4")
     load_8(m, src, 136 + srcoff, src_gap)
+    p("// Transpose 8x8")
     o = transpose8x8(o, n, m, t)
-    store_8(dst, o, 136 + dstoff, dst_gap)
+    p("// 16x16: STR A4")
+    store_8(dst, o, 136 + dstoff, dst_gap, length=4)
 
     # A2
+    p("// 16x16: LD A2")
     load_8(m, src, 8 + srcoff, src_gap)
+    p("// Transpose 8x8")
     o = transpose8x8(o, n, m, t)
 
-    # A3 
+    # A3
+    p("// 16x16: LD A3")
     load_8(m, src, 128 + srcoff, src_gap)
+    p("// Transpose 8x8")
     u = transpose8x8(u, n, m, t)
 
     # store A3 to A2
+    p("// 16x16: STR A2<-A3")
     store_8(dst, u, 8 + dstoff, dst_gap)
 
     # store A2 to A3
+    p("// 16x16: STR A3<-A2")
     store_8(dst, o, 128 + dstoff, dst_gap)
 
+def transpose16x16_1(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1, length=8):
+    i = 0
+    m = list(range(i, i + 8))
+    i += 8
+    n = list(range(i, i+8))
+    i += 8
+    o = list(range(i, i + 8))
+    i += 8
+    t = list(range(i, i + 4))
+    i += 4
+    u = list(range(i, i+8))
+    i += 8
 
-def transpose48x16_to_16x44(dst, src, dstoff=0, srcoff=0):
+    # A1
+    p("// 16x16: LD A1")
+    load_8(m, src,  srcoff, src_gap)
+    p("// Transpose 8x8")
+    o = transpose8x8(o, n, m, t)
+    p("// 16x16: STR A1")
+    store_8(dst, o, dstoff, dst_gap)
+
+    # A4
+    p("// 16x16: LD A4")
+    load_8(m, src, 136*src_gap + srcoff, src_gap, length)
+    p("// Transpose 8x8")
+    o = transpose8x8(o, n, m, t)
+    p("// 16x16: STR A4")
+    store_8(dst, o, 136 + dstoff, dst_gap, length)
+
+    # A2
+    p("// 16x16: LD A2")
+    load_8(m, src, 8*src_gap + srcoff, src_gap, length)
+    p("// Transpose 8x8")
+    o = transpose8x8(o, n, m, t)
+
+    # A3
+    p("// 16x16: LD A3")
+    load_8(m, src, 128*src_gap + srcoff, src_gap)
+    p("// Transpose 8x8")
+    u = transpose8x8(u, n, m, t)
+
+    # store A3 to A2
+    p("// 16x16: STR A2<-A3")
+    store_8(dst, u, 8*dst_gap + dstoff, dst_gap)
+
+    # store A2 to A3
+    p("// 16x16: STR A3<-A2")
+    store_8(dst, o, 128 + dstoff, dst_gap, length)
+
+
+def transpose48x16_to_16x44(dst, src):
     for n in range(3):
-        p(dstoff + n*16, srcoff + n*16)
-        transpose16x16(dst, src, dstoff=dstoff+n*16, srcoff=16*n + srcoff)
+        if n == 2:
+            l = 8
+        else:
+            l = 8
+        p("// -------------- n = {}".format(n))
+        #transpose16x16_1(dst, src, dstoff=n*256, srcoff=8*n, src_gap=3, dst_gap=1, length=l)
+        transpose16x16_1(dst, src, dstoff=n*256, srcoff=8*n, src_gap=3, dst_gap=1, length=l)
+
+
     
+
+
+
+
+print("""#include <arm_neon.h>
+#include <stdio.h>
+
+#define SIZE 48*16
+
+int main()
+{
+	uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, y32, y33, y34, y35;
+	uint16_t in[SIZE]; 
+    uint16_t out[SIZE]; 
+	for (uint16_t i = 0; i < SIZE; i++)
+	{
+		in[i] = i;
+	}
+for (uint16_t i = 0; i < SIZE; i++)
+	{
+		if (i % 16 == 0)
+		printf("\\n");
+
+		printf("%4d ", in[i]);
+	}
+""")
+
+# transpose16x16("out", "in")
 transpose48x16_to_16x44("out", "in")
+
+print("""
+printf("\\n=======================\\n");
+
+for (uint16_t i = 0; i < SIZE; i++)
+	{
+		if (i % 16 == 0)
+		printf("\\n");
+
+		printf("%4d ", out[i]);
+	}
+printf("\\n=======================\\n");
+}
+""")
+
+
