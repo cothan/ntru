@@ -14,6 +14,7 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
     # - (b[0:22] + b[22:44]) before 3rd K2-step
     # - output of third 22x22 multiplication
 
+    # =====================================================================
     SALT = '{:16x}'.format(random.randint(0, 2**128))  # prevent duplicate labels
 
     p("subq ${}, %rsp".format((44 + 44 + 96 + 22 + 22 + 22 + 44) * 32))
@@ -25,9 +26,12 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
     b_in_rsp = a_in_rsp + 22
     t2_in_rsp = b_in_rsp + 22
 
+    # uint64_t tmp[9408/8];
+
     t0 = 0
     t1 = 1
     p("mov $4, %ecx")
+    # =====================================================================
     p("karatsuba_loop_{}:".format(SALT))
 
     if transpose:
@@ -51,6 +55,7 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
         b_mem = b_real
         r_mem = r_real
 
+    # =====================================================================
     p("innerloop_{}:".format(SALT))
 
     mul_64x11(r_mem, a_mem, b_mem, r_off, a_off, b_off)
@@ -58,10 +63,10 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
     mul_64x11('%rsp', a_mem, b_mem, a_b_summed, a_off, b_off, additive=True)
 
     # r->coeffs[21] = t2.coeffs[10] - r->coeffs[10] - r->coeffs[32];
-    p("vmovdqa {}(%rsp), %ymm{}".format(32*(10+a_b_summed), t0))
-    p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(10+r_off), r_mem, t0, t0))
-    p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(32+r_off), r_mem, t0, t0))
-    p("vmovdqa %ymm{}, {}({})".format(t0, 32*(21+r_off), r_mem))
+    p("vmovdqa {}(%rsp), %ymm{}".format(32*(10+a_b_summed), t0)) # t0 
+    p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(10+r_off), r_mem, t0, t0)) # t1, t0 
+    p("vpsubw {}({}), %ymm{}, %ymm{}".format(32*(32+r_off), r_mem, t0, t0)) # t2, t0 
+    p("vmovdqa %ymm{}, {}({})".format(t0, 32*(21+r_off), r_mem)) # t0
 
     for i in range(10):
         # r->coeffs[11 + i] -= r->coeffs[22 + i];
@@ -84,12 +89,15 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
         p("vmovdqa %ymm{}, {}({})".format(t1, 32*(22+i+r_off), r_mem))
 
     p("neg %ecx")  # abuse ecx as toggle so we can do the above loop twice
+    # =====================================================================
     p("jns done_{}".format(SALT))
     p("add ${}, {}".format(32 * 22, a_mem))
     if a_mem != b_mem:  # we would not want to modify the same pointer twice
         p("add ${}, {}".format(32 * 22, b_mem))
     p("add ${}, {}".format(32 * 44, r_mem))
+    # =====================================================================
     p("jmp innerloop_{}".format(SALT))
+    # =====================================================================
     p("done_{}:".format(SALT))  # this label is used so we do not do unnecessary additions on the last loop
 
     p("sub ${}, {}".format(32 * 22, a_mem))
@@ -177,6 +185,7 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
     p("add ${}, {}".format(2*16 * coeffs, b_real))
     p("add ${}, {}".format(2*16 * coeffs*2, r_real))
     p("dec %ecx")
+    # =====================================================================
     p("jnz karatsuba_loop_{}".format(SALT))
     # restore the original value of r_real to prevent caller confusion
     p("sub ${}, {}".format(4 * (2*16 * coeffs*2), r_real))
