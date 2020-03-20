@@ -128,7 +128,7 @@ def transpose48x16_to_16x44(m):
     p(o)
 
     
-transpose48x16_to_16x44(m[:96])
+# transpose48x16_to_16x44(m[:96])
 
 def transpose16x96_to_96x16(m):
     assert(len(m) == 192)
@@ -138,5 +138,5 @@ def transpose16x96_to_96x16(m):
         n = transpose16x16(m[i:i+32])
         p(n)
 
-# transpose16x96_to_96x16(m)
+transpose16x96_to_96x16(m)
 
