@@ -204,14 +204,14 @@ def transpose16x16_1(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1, length=
     store_8(dst, o, 128*src_gap + dstoff, dst_gap, length)
 
 
-def transpose48x16_to_16x44(dst, src):
+def transpose48x16_to_16x44(dst, src, src_off=0, dst_off=0):
     for n in range(3):
         if n == 2:
             l = 4
         else:
             l = 8
         p("// -------------- n = {}".format(n))
-        transpose16x16_1(dst, src, dstoff=n*128, srcoff=8*n, src_gap=3, dst_gap=1, length=l)
+        transpose16x16_1(dst, src, dstoff=dst_off + n*128, srcoff=src_off + 8*n, src_gap=3, dst_gap=1, length=l)
 
 
 def transpose16x16_2(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1, length=8):
@@ -264,7 +264,7 @@ def transpose16x16_2(dst, src, dstoff=0, srcoff=0, src_gap=1, dst_gap=1, length=
     store_8(dst, o, 128*dst_gap + dstoff, dst_gap, length)
 
 
-def transpose16x96_to_96x16(dst, src):
+def transpose16x96_to_96x16(dst, src, src_off=0, dst_off=0):
     l = 8
     for n in range(6):
         if n < 6:
@@ -273,7 +273,7 @@ def transpose16x96_to_96x16(dst, src):
             l = 4
         gap44 = 0 if n < 3 else 4
         p("// -------------- n = {}".format(n))
-        transpose16x16_2(dst, src, dstoff=n*16, srcoff=n*256 - gap44*16, src_gap=1, dst_gap=6, length=l)
+        transpose16x16_2(dst, src, dstoff=dst_off + n*16, srcoff=dst_off + n*256 - gap44*16, src_gap=1, dst_gap=6, length=l)
 
 
 if __name__ == '__main__':
