@@ -90,6 +90,7 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
 
     p("neg %ecx")  # abuse ecx as toggle so we can do the above loop twice
     # =====================================================================
+    # TODO: handle this 
     p("jns done_{}".format(SALT))
     p("add ${}, {}".format(32 * 22, a_mem))
     if a_mem != b_mem:  # we would not want to modify the same pointer twice
@@ -186,10 +187,8 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
     p("add ${}, {}".format(2*16 * coeffs*2, r_real))
     p("dec %ecx")
     # =====================================================================
-    p("jnz karatsuba_loop_{}".format(SALT))
-    # restore the original value of r_real to prevent caller confusion
-    p("sub ${}, {}".format(4 * (2*16 * coeffs*2), r_real))
-    p("add ${}, %rsp".format((44 + 44 + 96 + 22 + 22 + 22 + 44) * 32))
+    # TODO: handle this 
+    p("jnz karatsuba_loop_{}".format(SALT))additive2 + 22 + 22 + 44) * 32))
 
 if __name__ == '__main__':
     p(".data")
