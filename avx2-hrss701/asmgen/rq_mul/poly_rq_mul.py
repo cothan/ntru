@@ -9,16 +9,21 @@ def karatsuba_eval(dst, dst_off, coeff, src, t0, t1):
     p("vmovdqa %ymm{}, {}({})".format(src[0], (dst_off+3*0+coeff)*32, dst))  # a[0:]
     p("vmovdqa %ymm{}, {}({})".format(src[1], (dst_off+3*1+coeff)*32, dst))  # a[44:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(src[0], src[1], t0))
+    
     p("vmovdqa %ymm{}, {}({})".format(t0,     (dst_off+3*2+coeff)*32, dst))  # s1[0:]
     p("vmovdqa %ymm{}, {}({})".format(src[2], (dst_off+3*3+coeff)*32, dst))  # a[88:]
     p("vmovdqa %ymm{}, {}({})".format(src[3], (dst_off+3*4+coeff)*32, dst))  # a[132:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(src[2], src[3], t0))
+    
     p("vmovdqa %ymm{}, {}({})".format(t0,     (dst_off+3*5+coeff)*32, dst))  # s2[0:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(src[0], src[2], t0))
+    
     p("vmovdqa %ymm{}, {}({})".format(t0,     (dst_off+3*6+coeff)*32, dst))  # s0[0:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(src[1], src[3], t1))
+    
     p("vmovdqa %ymm{}, {}({})".format(t1,     (dst_off+3*7+coeff)*32, dst))  # s0[44:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(t0, t1, t0))
+    
     p("vmovdqa %ymm{}, {}({})".format(t0,     (dst_off+3*8+coeff)*32, dst))  # s3[0:]
 
 
@@ -34,10 +39,12 @@ def karatsuba_interpolate(dst, dst_off, src, src_off, coeff):
     p("vmovdqa {}, %ymm{}".format(addr(0, 44), r0_44))
     out0_44 = r0_44
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(1, 0), r0_44, out0_44))
+
     r2_44 = 1
     p("vmovdqa {}, %ymm{}".format(addr(2, 44), r2_44))
     out1_0 = r2_44
     p("vpsubw %ymm{}, %ymm{}, %ymm{}".format(out0_44, r2_44, out1_0))
+
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(1, 44), out1_0, out1_0))
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(0, 0), out0_44, out0_44))
     p("vpaddw {}, %ymm{}, %ymm{}".format(addr(2, 0), out0_44, out0_44))
@@ -46,10 +53,12 @@ def karatsuba_interpolate(dst, dst_off, src, src_off, coeff):
     p("vmovdqa {}, %ymm{}".format(addr(3, 44), r3_44))
     out2_44 = r3_44
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(4, 0), r3_44, out2_44))
+
     r5_44 = 3
     p("vmovdqa {}, %ymm{}".format(addr(5, 44), r5_44))
     out3_0 = r5_44
     p("vpsubw %ymm{}, %ymm{}, %ymm{}".format(out2_44, r5_44, out3_0))
+
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(4, 44), out3_0, out3_0))
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(3, 0), out2_44, out2_44))
     p("vpaddw {}, %ymm{}, %ymm{}".format(addr(5, 0), out2_44, out2_44))
@@ -61,6 +70,7 @@ def karatsuba_interpolate(dst, dst_off, src, src_off, coeff):
     p("vmovdqa {}, %ymm{}".format(addr(8, 44), r8_44))
     r7_0 = r8_44
     p("vpsubw %ymm{}, %ymm{}, %ymm{}".format(r6_44, r8_44, r7_0))
+
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(7, 44), r7_0, r7_0))
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(6, 0), r6_44, r6_44))
     p("vpaddw {}, %ymm{}, %ymm{}".format(addr(8, 0), r6_44, r6_44))
@@ -79,6 +89,7 @@ def karatsuba_interpolate(dst, dst_off, src, src_off, coeff):
     r7_44 = out2_44
     p("vmovdqa {}, %ymm{}".format(addr(7, 44), r7_44))
     p("vpsubw %ymm{}, %ymm{}, %ymm{}".format(out1_44, r7_44, out2_44))
+    
     p("vpsubw {}, %ymm{}, %ymm{}".format(addr(4, 44), out2_44, out2_44))
     p("vpsubw %ymm{}, %ymm{}, %ymm{}".format(out0_44, out1_44, out1_44))
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(r6_44, out1_44, out1_44))
