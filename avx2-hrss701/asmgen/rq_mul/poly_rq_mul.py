@@ -281,10 +281,13 @@ if __name__ == '__main__':
             for i in range(4):
                 f2_i = 0
                 p("vmovdqu {}({}), %ymm{}".format(2*11*32+idx2off(i*3+coeff), real, f2_i))
+                # TODO: run out of register 
                 f0f2_i = 1
                 p("vpaddw {}(%rsp), %ymm{}, %ymm{}".format((0*4+i)*32, f2_i, f0f2_i))
+
                 f1f3_i = 2
                 p("vpaddw {}(%rsp), %ymm{}, %ymm{}".format((1*4+i)*32, f3[i], f1f3_i))
+
                 p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(f1f3_i, f0f2_i, x1[i]))
                 p("vpsubw %ymm{}, %ymm{}, %ymm{}".format(f1f3_i, f0f2_i, x2[i]))
                 # also store the retrieved element of f2 on the stack, makes addition easier later
@@ -303,12 +306,16 @@ if __name__ == '__main__':
                 p("vmovdqa {}(%rsp), %ymm{}".format((2*4+i)*32, f2_i))
                 f2_4_i = 0
                 p("vpsllw $2, %ymm{}, %ymm{}".format(f2_i, f2_4_i))
+
                 f0f2_4_i = 0
                 p("vpaddw {}(%rsp), %ymm{}, %ymm{}".format((0*4+i)*32, f2_4_i, f0f2_4_i))
+
                 f3_4_i = 1
                 p("vpsllw $2, %ymm{}, %ymm{}".format(f3[i], f3_4_i))
+
                 f1f3_4_i = 1
                 p("vpaddw {}(%rsp), %ymm{}, %ymm{}".format((1*4+i)*32, f3_4_i, f1f3_4_i))
+                
                 f1_2f3_8_i = 1
                 p("vpsllw $1, %ymm{}, %ymm{}".format(f1f3_4_i, f1_2f3_8_i))
                 p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(f1_2f3_8_i, f0f2_4_i, x3[i]))
