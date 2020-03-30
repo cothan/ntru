@@ -187,7 +187,7 @@ def karatsuba_interpolate(dst, dst_off, src, src_off, coeff, t0, t1, t2):
 def idx2off(i):
     return int((i * 32 - (8 * (i//3)))/2)
 
-# @snoop()
+@snoop()
 def poly_Rq_mul(c, a, b):
     r_real, a_real, b_real = c, a, b
 
@@ -232,27 +232,30 @@ def poly_Rq_mul(c, a, b):
         # print('// {:2d}'.format(len(registers)))
         return registers.pop()
 
+    def freelist(l):
+        for i in l:
+            free(i)
+
+    def check():
+        return len(registers)
+
     # Evaluate Toom4 / K2 / K2
     const_3 = alloc()
     vconst(const_3, 3)
-    const_2 = alloc()
-    vconst(const_2, 2)
-    const_1 = alloc()
-    vconst(const_1, 1)
 
     for (prep, real) in [(a_prep, a_real), (b_prep, b_real)]:
         for coeff in range(3):
-            f0 = [0, 1, 2, 12]
-            f00 = [16, 17, 18, 28]
-            assert (f0 != f00)
+            print("// register len {}".format(len(registers)))
+            f0 = [alloc(), alloc(), alloc(), alloc()]
+            f00 = [alloc(), alloc(), alloc(), alloc()]
             for i in range(len(f0)):
                 r = f0[i]
                 rr = f00[i]
                 vload(r,  0*11*16+idx2off(i*3+coeff), real)
                 vload(rr, 0*11*16+idx2off(i*3+coeff) + 8, real)
 
-            f3 = [4, 5, 6, 7]
-            f33 = [20, 21, 22, 23]
+            f3 = [alloc(), alloc(), alloc(), alloc()]
+            f33 = [alloc(), alloc(), alloc(), alloc()]
             for i in range(len(f3)):
                 r = f3[i]
                 rr = f33[i]
@@ -261,62 +264,67 @@ def poly_Rq_mul(c, a, b):
 
             if coeff == 2:
                 # and the high
-                mask_low9words = 31
-                vload(31, 0, "low9words")
+                mask_low9words = alloc()
+                vload(mask_low9words, 0, "low9words")
                 vand(f33[3], f33[3], mask_low9words)
+                free(mask_low9words)
 
-            f1 = [8, 9, 10, 11]
-            f11 = [24, 25, 26, 27]
+            f1 = [alloc(), alloc(), alloc(), alloc()]
+            f11 = [alloc(), alloc(), alloc(), alloc()]
             for i in range(len(f1)):
                 r = f1[i]
                 rr = f11[i]
                 vload(r,  1*11*16+idx2off(i*3+coeff), real)
                 vload(rr, 1*11*16+idx2off(i*3+coeff) + 8, real)
 
-            t0 = 14
-            t1 = 15
+            t0 = alloc()
+            t1 = alloc()
             karatsuba_eval(prep, dst_off=0*9*3, src=f0,t0=t0, t1=t1, coeff=coeff)
             karatsuba_eval(prep, dst_off=0*9*3, src=f00,t0=t0, t1=t1, coeff=coeff, slide=8)
 
             karatsuba_eval(prep, dst_off=6*9*3, src=f3,t0=t0, t1=t1, coeff=coeff)
             karatsuba_eval(prep, dst_off=6*9*3, src=f33,t0=t0, t1=t1, coeff=coeff, slide=8)
 
+            free(t0, t1)
+
             for i in range(len(f0)):
                 r = f0[i]
                 rr = f00[i]
                 vstore((0*4+i)*16, "rsp", r)
                 vstore((0*4+i)*16 + 8, "rsp", rr)
-
+            freelist(f0)
+            freelist(f00)
             for i in range(len(f1)):
                 r = f1[i]
                 rr = f11[i]
                 vstore((1*4+i)*16, "rsp", r)
                 vstore((1*4+i)*16 + 8, "rsp", rr)
+            freelist(f1)
+            freelist(f11)
 
-            x1 = [8, 9, 10, 11]
-            x11 = [24, 25, 26, 27]
+            x1 = [alloc(), alloc(), alloc(), alloc()]
+            x11 = [alloc(), alloc(), alloc(), alloc()]
 
-            x2 = [12, 13, 14, 15]
-            x22 = [28, 29, 30, 31]
-            # low9mask is gone
+            x2 = [alloc(), alloc(), alloc(), alloc()]
+            x22 = [alloc(), alloc(), alloc(), alloc()]
 
             for i in range(4):
-                f2_i = 0
-                f2_ii = 16
+                f2_i = alloc()
+                f2_ii = alloc()
                 vload(f2_i,  2*11*16+idx2off(i*3+coeff), real)
                 vload(f2_ii, 2*11*16+idx2off(i*3+coeff) + 8, real)
 
-                f0f2_i = 1
-                f0f2_ii = 17
-                # TODO: find register for t0
-                t0 = 19
+                f0f2_i = alloc()
+                f0f2_ii = alloc()
+                t0 = alloc()
                 vload(t0, (0*4+i)*16, "rsp")
                 vadd(f0f2_i, f2_i, t0)
                 vload(t0, (0*4+i)*16 + 8, "rsp")
                 vadd(f0f2_ii, f2_ii, t0)
+                free(t0)
 
-                f1f3_i = 2
-                f1f3_ii = 18
+                f1f3_i = alloc()
+                f1f3_ii = alloc()
                 vload(t0,  (1*4+i)*16, "rsp")
                 vadd(f1f3_i, f3[i], t0)
                 vload(t0, (1*4+i)*16 + 8, "rsp")
@@ -331,127 +339,177 @@ def poly_Rq_mul(c, a, b):
                 vstore((2*4+i)*16, "rsp", f2_i)
                 vstore((2*4+i)*16 + 8, "rsp", f2_ii)
 
-            t0 = 0
-            t1 = 1
+                free(f2_i, f2_ii)
+                free(f0f2_i, f0f2_ii)
+                free(f1f3_i, f1f3_ii)
+
+            t0 = alloc()
+            t1 = alloc()
             karatsuba_eval(prep, dst_off=1*9*3, src=x1,t0=t0, t1=t1, coeff=coeff)
             karatsuba_eval(prep, dst_off=1*9*3, src=x11,t0=t0, t1=t1, coeff=coeff, slide=8)
 
             karatsuba_eval(prep, dst_off=2*9*3, src=x2,t0=t0, t1=t1, coeff=coeff)
             karatsuba_eval(prep, dst_off=2*9*3, src=x22,t0=t0, t1=t1, coeff=coeff, slide=8)
 
-            x3 = [8, 9, 10, 11]
-            x33 = [24, 25, 26, 27]
+            free(t0, t1)
+            freelist(x1)
+            freelist(x11)
+            freelist(x2)
+            freelist(x22)
 
-            x4 = [12, 13, 14, 15]
-            x44 = [28, 29, 30, 31]
+            x3 = [alloc(), alloc(), alloc(), alloc()]
+            x33 = [alloc(), alloc(), alloc(), alloc()]
 
-            # const_2 = 19
-            # vconst(const_2, 2)
-            # const_1 = 20
-            # vconst(const_1, 1)
+            x4 = [alloc(), alloc(), alloc(), alloc()]
+            x44 = [alloc(), alloc(), alloc(), alloc()]
+
+            const_2 = alloc()
+            vconst(const_2, 2)
+            const_1 = alloc()
+            vconst(const_1, 1)
 
             for i in range(4):
-                f2_i = 0
-                f2_ii = 16
-                vload(f2_i, (2*4+i)*16, "rsp")
-                vload(f2_ii, (2*4+i)*16 + 8, "rsp")
+                for j in range(2):
+                    if j == 0:
+                        f2_i = alloc()
+                        vload(f2_i, (2*4+i)*16, "rsp")
 
-                f2_4_i = 0
-                f2_4_ii = 16
+                        free(f2_i)
+                        f2_4_i = alloc()
+                        vsl(f2_4_i, f2_i, const_2)
 
-                vsl(f2_4_i, f2_i, const_2)
-                vsl(f2_4_ii, f2_ii, const_2)
+                        free(f2_4_i)
+                        f0f2_4_i = alloc()
+                        t0 = alloc()
 
-                f0f2_4_i = 0
-                f0f2_4_ii = 16
-                t0 = 1
-                t00 = 17
-                vload(t0, (0*4+i)*16, "rsp")
-                vload(t00, (0*4+i)*16 + 8, "rsp")
-                vadd(f0f2_4_i, f2_4_i, t0)
-                vadd(f0f2_4_ii, f2_4_ii, t00)
+                        vload(t0, (0*4+i)*16, "rsp")
+                        vadd(f0f2_4_i, f2_4_i, t0)
+                        free(t0)
 
-                f3_4_i = 1
-                f3_4_ii = 17
-                vsl(f3_4_i, f3[i], const_2)
-                vsl(f3_4_ii, f33[i], const_2)
+                        f3_4_i = alloc()
+                        vsl(f3_4_i, f3[i], const_2)
+                        free(f3_4_i)
 
-                f1f3_4_i = 1
-                f1f3_4_ii = 17
-                t0 = 2
-                t00 = 18
-                vload(t0, (1*4+i)*16, "rsp")
-                vload(t00, (1*4+i)*16 + 8, "rsp")
-                vadd(f1f3_4_i, f3_4_i, t0)
-                vadd(f1f3_4_ii, f3_4_ii, t00)
+                        f1f3_4_i = alloc()
+                        t0 = alloc()
 
-                f1_2f3_8_i = 1
-                f1_2f3_8_ii = 17
-                vsl(f1_2f3_8_i, f1f3_4_i, const_1)
-                vsl(f1_2f3_8_ii, f1f3_4_ii, const_1)
+                        vload(t0, (1*4+i)*16, "rsp")
+                        vadd(f1f3_4_i, f3_4_i, t0)
 
-                vadd(x3[i], f0f2_4_i, f1_2f3_8_i)
-                vadd(x33[i], f0f2_4_ii, f1_2f3_8_ii)
+                        free(f1f3_4_i)
+                        free(t0)
+                        f1_2f3_8_i = alloc()
 
-                vsub(x4[i], f0f2_4_i, f1_2f3_8_i)
-                vsub(x44[i], f0f2_4_ii, f1_2f3_8_ii)
+                        vsl(f1_2f3_8_i, f1f3_4_i, const_1)
+                        vadd(x3[i], f0f2_4_i, f1_2f3_8_i)
+                        vsub(x4[i], f0f2_4_i, f1_2f3_8_i)
 
-            t0 = 0
-            t1 = 1
+                        free(f0f2_4_i)
+                        free(f1_2f3_8_i)
+                    else:
+                        f2_ii = alloc()
+                        vload(f2_ii, (2*4+i)*16 + 8, "rsp")
+
+                        free(f2_ii)
+                        f2_4_ii = alloc()
+                        vsl(f2_4_ii, f2_ii, const_2)
+
+                        free(f2_4_ii)
+                        f0f2_4_ii = alloc()
+                        t00 = alloc()
+                        vload(t00, (0*4+i)*16 + 8, "rsp")
+                        vadd(f0f2_4_ii, f2_4_ii, t00)
+                        free(t00)
+                        f3_4_ii = alloc()
+                        vsl(f3_4_ii, f33[i], const_2)
+                        free(f3_4_ii)
+                        f1f3_4_ii = alloc()
+                        t00 = alloc()
+                        vload(t00, (1*4+i)*16 + 8, "rsp")
+                        vadd(f1f3_4_ii, f3_4_ii, t00)
+                        free(f1f3_4_ii)
+                        free(t00)
+                        f1_2f3_8_ii = alloc()
+                        vsl(f1_2f3_8_ii, f1f3_4_ii, const_1)
+                        vadd(x33[i], f0f2_4_ii, f1_2f3_8_ii)
+                        vsub(x44[i], f0f2_4_ii, f1_2f3_8_ii)
+                        free(f0f2_4_ii)
+                        free(f1_2f3_8_ii)
+
+
+            t0 = alloc()
+            t1 = alloc()
             karatsuba_eval(prep, dst_off=3*9*3, src=x3,t0=t0, t1=t1, coeff=coeff)
             karatsuba_eval(prep, dst_off=3*9*3, src=x33,t0=t0, t1=t1, coeff=coeff, slide=8)
 
             karatsuba_eval(prep, dst_off=4*9*3, src=x4,t0=t0, t1=t1, coeff=coeff)
             karatsuba_eval(prep, dst_off=4*9*3, src=x44,t0=t0, t1=t1, coeff=coeff, slide=8)
 
-            x5 = [12, 13, 14, 15]
-            x55 = [28, 29, 30, 31]
+            free(t0, t1)
+            freelist(x3)
+            freelist(x33)
+            freelist(x4)
+            freelist(x44)
+
+            x5 = [alloc(), alloc(), alloc(), alloc()]
+            x55 = [alloc(), alloc(), alloc(), alloc()]
 
             for i in range(4):
-                f3_3_i = 0
-                f3_3_ii = 16
+                f3_3_i = alloc()
+                f3_3_ii = alloc()
                 vmul(f3_3_i, f3[i], const_3)
                 vmul(f3_3_ii, f33[i], const_3)
+                free(f3_3_i, f3_3_ii)
 
-                f2f3_3_i = 0
-                f2f3_3_ii = 16
-                t0 = 19
+                f2f3_3_i = alloc()
+                f2f3_3_ii =  alloc()
+                t0 = alloc()
                 vload(t0, (2*4+i)*16, "rsp")
                 vadd(f2f3_3_i, f3_3_i, t0)
                 vload(t0, (2*4+i)*16 + 8, "rsp")
                 vadd(f2f3_3_ii, f3_3_ii, t0)
+                free(t0)
+                free(f2f3_3_i, f2f3_3_ii)
 
-                f2_3f3_9_i = 0
-                f2_3f3_9_ii = 16
+                f2_3f3_9_i = alloc()
+                f2_3f3_9_ii =  alloc()
                 vmul(f2_3f3_9_i, f2f3_3_i, const_3)
                 vmul(f2_3f3_9_ii, f2f3_3_ii, const_3)
+                free(f2_3f3_9_i, f2_3f3_9_ii)
 
-                f1f2_3f3_9_i = 0
-                f1f2_3f3_9_ii = 16
+                f1f2_3f3_9_i = alloc()
+                f1f2_3f3_9_ii = alloc()
+                t0 = alloc()
                 vload(t0, (1*4+i)*16, "rsp")
                 vadd(f1f2_3f3_9_i, f2_3f3_9_i, t0)
                 vload(t0, (1*4+i)*16 + 8, "rsp")
                 vadd(f1f2_3f3_9_ii, f2_3f3_9_ii, t0)
+                free(f1f2_3f3_9_i, f1f2_3f3_9_ii)
 
-                f1_3f2_9f3_27_i = 0
-                f1_3f2_9f3_27_ii = 16
+                f1_3f2_9f3_27_i = alloc()
+                f1_3f2_9f3_27_ii =  alloc()
                 vmul(f1_3f2_9f3_27_i, f1f2_3f3_9_i, const_3)
                 vmul(f1_3f2_9f3_27_ii, f1f2_3f3_9_ii, const_3)
+                free(f1_3f2_9f3_27_i, f1_3f2_9f3_27_ii)
 
+                
                 vload(t0, (0*4+i)*16, "rsp")
                 vadd(x5[i], f1_3f2_9f3_27_i, t0)
                 vload(t0, (0*4+i)*16 + 8, "rsp")
                 vadd(x55[i], f1_3f2_9f3_27_ii, t0)
+                free(t0)
 
-            t0 = 0
-            t1 = 1
+            t0 = alloc()
+            t1 = alloc()
             karatsuba_eval(prep, dst_off=5*9*3, src=x5,t0=t0, t1=t1, coeff=coeff)
             karatsuba_eval(prep, dst_off=5*9*3, src=x55,t0=t0, t1=t1, coeff=coeff, slide=8)
-
-    # K2_K2_transpose_64x44(r_out, a_prep, b_prep)
+            free(t0, t1)
+            freelist(x5)
+            freelist(x55)
+            freelist(f3)
+            freelist(f33)
+            free(const_1, const_2)
     p("K2_K2_transpose_64x44({}, {}, {});".format(r_out, a_prep, b_prep))
-
-    # TODO: line 360 forward
 
     compose_offset = 56
     far_spill_offset = compose_offset + 4*8
@@ -463,7 +521,7 @@ def poly_Rq_mul(c, a, b):
             vstore((compose_offset+i)*32 + slide, "rsp", 0)
             slide = 8
 
-
+    print('// remain {}'.format(check()))
 
     const729 = alloc()
     vconst(const729, 729)
@@ -477,14 +535,8 @@ def poly_Rq_mul(c, a, b):
     const9 = alloc()
     vconst(const9, 9)
 
-    const_1 = alloc()
-    vconst(const_1, 1)
-
     mask32_to_16 = alloc()
     vload(mask32_to_16, 0, "mask32_to_16")
-
-    const_2 = alloc() 
-    vconst(const_2, 2)
 
     const_7 = alloc() 
     vconst(const_7, 7)
@@ -501,7 +553,17 @@ def poly_Rq_mul(c, a, b):
     mask3_5_3_5 = alloc()
     vload(mask3_5_3_5, 0, "mask3_5_3_5")
 
+    mask5_3_5_3 = alloc()
+    mask5_3_5_3_hi = alloc()
+    vload(mask5_3_5_3, 0, "mask5_3_5_3")
+    vload(mask5_3_5_3_hi, 8, "mask5_3_5_3")
+
+    mask = [mask3_5_3_5, alloc(), alloc()]
+    vload(mask[1], 0, "mask3_5_4_3_1")
+    vload(mask[2], 8, "mask3_5_4_3_1")
+
     for coeff in range(3):
+        print('// 557: {}'.format(check()))
         t0, t1, t2 = alloc(), alloc(), alloc()
         for i in range(7):
             karatsuba_interpolate(dst='rsp', dst_off=i*4*2, src=r_out, src_off=i*9*6, coeff=coeff, t0=t0, t1=t1, t2=t2)
@@ -509,9 +571,9 @@ def poly_Rq_mul(c, a, b):
 
         for j in range(8):
             def limb(i, slide=0):
-                # TODO see above; for case j in {0, 8}, make an exception
                 return '{} + rsp'.format((i*8+j)*16 + slide)
 
+            p("// {} 576: {}".format(j, check()))
             h0lo = alloc()
             h0hi = alloc()
 
@@ -525,8 +587,6 @@ def poly_Rq_mul(c, a, b):
             
             # Use later
             # free(h0lo, h0hi)
-
-            # print("=======")
 
             t1lo = alloc()
             t1hi = alloc()
@@ -832,10 +892,7 @@ def poly_Rq_mul(c, a, b):
             h_lo = [h0lo, h1, h2, h3, h4, h5, h6lo]
             h_hi = [h0hi, h11, h22, h33, h44, h55, h6hi]
 
-            # TODO: line 610
-
             def get_limb(limbreg, i, j, slide=0):
-                # p("vmovdqu {}({}), %ymm{}".format((i*176 + j * 44 + coeff*16) * 2, r_real, limbreg))
                 vload(limbreg, (i*176 + j * 44 + coeff*16) + slide, r_real)
 
             def store_limb(limbreg, i, j):
@@ -863,35 +920,51 @@ def poly_Rq_mul(c, a, b):
 
             if j == 7 and coeff == 2:
                 for i in [2,3,4]:
-                    tmp = h_hi[i]
-                    p("y{} = y{} >> 16;".format(tmp, tmp))
+                    tmp = alloc()
+                    p("y{} = y{} >> 16;".format(tmp, h_hi[i]))
                     vand(tmp, tmp, take6bytes)
                     vstore((far_spill_offset+i-2)*16, "rsp", tmp)
+                    free(tmp)
             
             if j >= 4:
-                h0_old = alloc()
-                h1_old = alloc()
-                h2_old = alloc()
-                h0_oldd = alloc()
-                h1_oldd = alloc()
-                h2_oldd = alloc()
-                get_limb(h0_old, 0, j)
-                get_limb(h1_old,  1, j)
-                get_limb(h2_old,  2, j)
-                get_limb(h0_oldd, 0, j, slide=8)
-                get_limb(h1_oldd, 1, j, slide=8)
-                get_limb(h2_oldd, 2, j, slide=8)
-                vand(h_lo[0], h0_old, h_lo[0])
-                vand(h_lo[1], h1_old, h_lo[1])
-                vand(h_lo[2], h2_old, h_lo[2])
-                vand(h_hi[0], h0_oldd, h_hi[0])
-                vand(h_hi[1], h1_oldd, h_hi[1])
-                vand(h_hi[2], h2_oldd, h_hi[2])
-                free(h0_old, h1_old, h2_old)
-                free(h0_oldd, h1_oldd, h2_oldd)
+                p("// 930: {}".format(check()))    
+                for ml in range(2):
+                    if ml == 0:
+                        h0_old = alloc()
+                        h1_old = alloc()
+                        h2_old = alloc()
+                        get_limb(h0_old, 0, j)
+                        get_limb(h1_old,  1, j)
+                        get_limb(h2_old,  2, j)
+                        vand(h_lo[0], h0_old, h_lo[0])
+                        vand(h_lo[1], h1_old, h_lo[1])
+                        vand(h_lo[2], h2_old, h_lo[2])
+                        free(h0_old, h1_old, h2_old)
+                    else: 
+                        h0_oldd = alloc()
+                        h1_oldd = alloc()
+                        h2_oldd = alloc()
+                        get_limb(h0_oldd, 0, j, slide=8)
+                        get_limb(h1_oldd, 1, j, slide=8)
+                        get_limb(h2_oldd, 2, j, slide=8)
+                        vand(h_hi[0], h0_oldd, h_hi[0])
+                        vand(h_hi[1], h1_oldd, h_hi[1])
+                        vand(h_hi[2], h2_oldd, h_hi[2])
+                        free(h0_oldd, h1_oldd, h2_oldd)
+                p("// 950: {}".format(check()))    
 
+            p("// 941: {}".format(check()))    
             if j < 8:
+                # mask = [mask3_5_3_5, alloc(), alloc()]
+                # vload(mask[1], 0, "mask3_5_4_3_1")
+                # vload(mask[2], 8, "mask3_5_4_3_1")
+                # mask5_3_5_3 = alloc()
+                # mask5_3_5_3_hi = alloc()
+
+                # vload(mask5_3_5_3, 0, "mask5_3_5_3")
+                # vload(mask5_3_5_3_hi, 8, "mask5_3_5_3")
                 for i in range(-1, 3):
+                    p("// 960: {}".format(check()))
                     if j < 4 and i == -1:
                         continue
                     temp = alloc()
@@ -901,31 +974,21 @@ def poly_Rq_mul(c, a, b):
                     p("y{} = vqtbl1q_u8(y{}, y{});".format(h_hi[i+4], h_hi[i+4], shuf48_16))
 
                     if coeff < 2: 
-                        mask = [alloc()]*2
-                        vload(mask[0], 0, "mask3_5_3_5")
+                        # mask = [alloc()]*2
+                        # vload(mask[0], 0, "mask3_5_3_5")
                         permutation = 1
                     elif coeff == 2:
-                        mask = [alloc(), alloc()]
-                        vload(mask[0], 0, "mask3_5_4_3_1")
-                        vload(mask[1], 8, "mask3_5_4_3_1")
+                        # mask = [alloc(), alloc()]
                         permutation = 2
 
-                    vand(temp, h_lo[i+4], mask[0])
-                    vand(tempp, h_hi[i+4], mask[1])
                     
                     if coeff < 2:
-                        free(mask[0])
+                        vand(temp, h_lo[i+4], mask[0])
+                        vand(tempp, h_hi[i+4], mask[0])
                     elif coeff == 2:
-                        free(mask[0], mask[1])
-
-                    mask5_3_5_3 = alloc()
-                    mask5_3_5_3_hi = alloc()
-
-                    vload(mask5_3_5_3, 0, "mask5_3_5_3")
-                    vload(mask5_3_5_3_hi, 8, "mask5_3_5_3")
-
-                    free(mask5_3_5_3, mask5_3_5_3_hi)
-
+                        vand(temp, h_lo[i+4], mask[1])
+                        vand(tempp, h_hi[i+4], mask[2])
+                    
                     vand(h_lo[i+4], h_lo[i+4], mask5_3_5_3)
                     vand(h_hi[i+4], h_hi[i+4], mask5_3_5_3_hi)
 
@@ -947,6 +1010,7 @@ def poly_Rq_mul(c, a, b):
                     # only keep high bits
                     temp2 = tempp 
                     p("y{} = vorrq_u16(y{}, y{});".format(h_hi[i+4], temp2, h_hi[i+4]))
+                    free(temp, tempp)
 
                     if i == -1:
                         dst = alloc()
@@ -969,8 +1033,10 @@ def poly_Rq_mul(c, a, b):
                         free(dst, dstt)
 
                     vstore((compose_offset+(i+1)*8+j)*16, "rsp", temp)
-                    free(temp, tempp)
-        
+            
+                # freelist(mask[1:])
+                # free(mask5_3_5_3, mask5_3_5_3_hi)
+
             for i in range(4):
                 store_limb((h_lo[i],h_hi[i]), i, j)
                 
@@ -978,6 +1044,7 @@ def poly_Rq_mul(c, a, b):
             free(h0lo, h1, h2, h3, h4, h5, h6lo)
             free(h0hi, h11, h22, h33, h44, h55, h6hi)
 
+    p("// remain 1031: {}".format(check()))
     coeff = 0
     for j in range(8):
         for i in range(3):
@@ -1018,7 +1085,7 @@ if __name__ == "__main__":
 
 void poly_Rq_mul(uint16_t *c, uint16_t *a, uint16_t *b)
 {
-    uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, y32, y33, y34, y35;
+    uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31;
     """)
     poly_Rq_mul('c', 'a', 'b')
     p("}\n")
