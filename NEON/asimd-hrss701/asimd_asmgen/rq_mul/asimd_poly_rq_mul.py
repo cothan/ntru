@@ -22,7 +22,7 @@ def vsub(c, a, b):
 
 
 def vconst(dst, value):
-    p("y{} = vdupq_n_u16({})".format(dst, value))
+    p("y{} = vdupq_n_u16({});".format(dst, value))
 
 
 def vand(c, a, b):
@@ -220,11 +220,25 @@ def poly_Rq_mul(c, a, b):
 
     p("uint16_t mask5_3_5_3[16] = {0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};")
 
+    registers = list(range(32))
+
+    def free(*regs):
+        for index, x in enumerate(regs):
+            if x in registers:
+                raise Exception("This register {}:{} is already freed".format(index,x))
+            registers.append(x)
+
+    def alloc():
+        # print('// {:2d}'.format(len(registers)))
+        return registers.pop()
+
     # Evaluate Toom4 / K2 / K2
-    const_3 = 3
+    const_3 = alloc()
     vconst(const_3, 3)
-    mask_low9words = 31
-    vload(31, 0, "low9words")
+    const_2 = alloc()
+    vconst(const_2, 2)
+    const_1 = alloc()
+    vconst(const_1, 1)
 
     for (prep, real) in [(a_prep, a_real), (b_prep, b_real)]:
         for coeff in range(3):
@@ -247,6 +261,8 @@ def poly_Rq_mul(c, a, b):
 
             if coeff == 2:
                 # and the high
+                mask_low9words = 31
+                vload(31, 0, "low9words")
                 vand(f33[3], f33[3], mask_low9words)
 
             f1 = [8, 9, 10, 11]
@@ -292,7 +308,7 @@ def poly_Rq_mul(c, a, b):
 
                 f0f2_i = 1
                 f0f2_ii = 17
-                # TODO: find register for t0, t00
+                # TODO: find register for t0
                 t0 = 19
                 vload(t0, (0*4+i)*16, "rsp")
                 vadd(f0f2_i, f2_i, t0)
@@ -318,10 +334,10 @@ def poly_Rq_mul(c, a, b):
             t0 = 0
             t1 = 1
             karatsuba_eval(prep, dst_off=1*9*3, src=x1,t0=t0, t1=t1, coeff=coeff)
-            karatsuba_eval(prep, dst_off=1*9*3, src=x1,t0=t0, t1=t1, coeff=coeff, slide=8)
+            karatsuba_eval(prep, dst_off=1*9*3, src=x11,t0=t0, t1=t1, coeff=coeff, slide=8)
 
             karatsuba_eval(prep, dst_off=2*9*3, src=x2,t0=t0, t1=t1, coeff=coeff)
-            karatsuba_eval(prep, dst_off=2*9*3, src=x2,t0=t0, t1=t1, coeff=coeff, slide=8)
+            karatsuba_eval(prep, dst_off=2*9*3, src=x22,t0=t0, t1=t1, coeff=coeff, slide=8)
 
             x3 = [8, 9, 10, 11]
             x33 = [24, 25, 26, 27]
@@ -329,10 +345,10 @@ def poly_Rq_mul(c, a, b):
             x4 = [12, 13, 14, 15]
             x44 = [28, 29, 30, 31]
 
-            const_2 = 19
-            vconst(const_2, 2)
-            const_1 = 20
-            vconst(const_1, 1)
+            # const_2 = 19
+            # vconst(const_2, 2)
+            # const_1 = 20
+            # vconst(const_1, 1)
 
             for i in range(4):
                 f2_i = 0
@@ -432,7 +448,8 @@ def poly_Rq_mul(c, a, b):
             karatsuba_eval(prep, dst_off=5*9*3, src=x5,t0=t0, t1=t1, coeff=coeff)
             karatsuba_eval(prep, dst_off=5*9*3, src=x55,t0=t0, t1=t1, coeff=coeff, slide=8)
 
-    K2_K2_transpose_64x44(r_out, a_prep, b_prep)
+    # K2_K2_transpose_64x44(r_out, a_prep, b_prep)
+    p("K2_K2_transpose_64x44({}, {}, {});".format(r_out, a_prep, b_prep))
 
     # TODO: line 360 forward
 
@@ -446,17 +463,7 @@ def poly_Rq_mul(c, a, b):
             vstore((compose_offset+i)*32 + slide, "rsp", 0)
             slide = 8
 
-    registers = list(range(32))
 
-    def free(*regs):
-        for index, x in enumerate(regs):
-            if x in registers:
-                raise Exception("This register {}:{} is already freed".format(index,x))
-            registers.append(x)
-
-    def alloc():
-        # print('// {:2d}'.format(len(registers)))
-        return registers.pop()
 
     const729 = alloc()
     vconst(const729, 729)
