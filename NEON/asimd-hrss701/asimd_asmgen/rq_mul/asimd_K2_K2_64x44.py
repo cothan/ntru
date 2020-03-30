@@ -20,7 +20,7 @@ ecx = 4
 
 
 
-def karatsuba_loop(transpose=True):
+def karatsuba_loop(transpose=True, **kargs):
     global a_transpose, b_transpose, r_transpose
     global a_off, b_off, r_off
     global a_mem, b_mem, r_mem
@@ -233,9 +233,11 @@ def done(t0, t1, t2):
     
 
 @with_goto
-def K2_K2_transpose_64x44(transpose_input=True):
+def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', transpose_input=True):
     global transpose
+    global r_real, a_real, b_real
     transpose = transpose_input
+    r_real, a_real, b_real = r_real_input, a_real_input, b_real_input
 
     p("uint16_t tmp[{}/2];".format((44 + 44 + 96 + 22 + 22 + 22 + 44) * 32))
     p("uint16_t *rsp = tmp;")
