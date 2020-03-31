@@ -187,7 +187,7 @@ def karatsuba_interpolate(dst, dst_off, src, src_off, coeff, t0, t1, t2):
 def idx2off(i):
     return int((i * 32 - (8 * (i//3)))/2)
 
-@snoop()
+# @snoop()
 def poly_Rq_mul(c, a, b):
     r_real, a_real, b_real = c, a, b
 
@@ -509,6 +509,8 @@ def poly_Rq_mul(c, a, b):
             freelist(f3)
             freelist(f33)
             free(const_1, const_2)
+    
+    # Calling external function will clear preset registers 
     p("K2_K2_transpose_64x44({}, {}, {});".format(r_out, a_prep, b_prep))
 
     compose_offset = 56
@@ -522,6 +524,8 @@ def poly_Rq_mul(c, a, b):
             slide = 8
 
     print('// remain {}'.format(check()))
+
+    vconst(const_3, 3)
 
     const729 = alloc()
     vconst(const729, 729)

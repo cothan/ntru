@@ -165,15 +165,15 @@ def done(t0, t1, t2):
     ####
     slide = 0 
     for j in range(2):
-        p("y{} = vld1q_u16({} + rsp".format(t0[j], 16*(10 + a_b_summed) + slide))
-        p("y{} = vld1q_u16({} + rsp".format(t1[j], 16*(10 + t2_in_rsp) + slide))
-        p("y{} = vld1q_u16({} + rsp".format(t2[j], 16*(32 + t2_in_rsp) + slide))
+        p("y{} = vld1q_u16({} + rsp);".format(t0[j], 16*(10 + a_b_summed) + slide))
+        p("y{} = vld1q_u16({} + rsp);".format(t1[j], 16*(10 + t2_in_rsp) + slide))
+        p("y{} = vld1q_u16({} + rsp);".format(t2[j], 16*(32 + t2_in_rsp) + slide))
 
         p("y{} = vsubq_u16(y{}, y{});".format(t0[j], t0[j], t1[j]))
         p("y{} = vsubq_u16(y{}, y{});".format(t0[j], t0[j], t2[j]))
 
-        p("y{} = vld1q_u16({} + {};".format(t1[j], 16*(21 + r_off) + slide, r_mem))
-        p("y{} = vld1q_u16({} + {};".format(t2[j], 16*(65 + r_off) + slide, r_mem))
+        p("y{} = vld1q_u16({} + {});".format(t1[j], 16*(21 + r_off) + slide, r_mem))
+        p("y{} = vld1q_u16({} + {});".format(t2[j], 16*(65 + r_off) + slide, r_mem))
 
         p("y{} = vsubq_u16(y{}, y{});".format(t0[j], t0[j], t1[j]))
         p("y{} = vsubq_u16(y{}, y{});".format(t0[j], t0[j], t2[j]))
@@ -278,6 +278,13 @@ def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', 
 
 
 if __name__ == "__main__":
+    p("""#include <arm_neon.h>
+#include <stdio.h>
 
-    K2_K2_transpose_64x44(transpose_input=True)
+void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b)
+{
+    uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, y32, y33, y34, y35;
+    """)
+    K2_K2_transpose_64x44('c', 'a', 'b', transpose_input=True)
+    p("}\n")
 
