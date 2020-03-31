@@ -276,66 +276,6 @@ def transpose16x96_to_96x16(dst, src, src_off=0, dst_off=0):
         transpose16x16_2(dst, src, dstoff=dst_off + n*16, srcoff=dst_off + n*256 - gap44*16, src_gap=1, dst_gap=6, length=l)
 
 
-if __name__ == '__main__':
 
-    print("""#include <arm_neon.h>
-    #include <stdio.h>
-
-    #define SIZE 96*16
-    #define SIZE2 48*16
-
-    int main()
-    {
-        uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, y32, y33, y34, y35;
-        uint16_t in[SIZE] ={0}; 
-	uint16_t in[SIZE] ={0}; 
-        uint16_t in[SIZE] ={0}; 
-	uint16_t in[SIZE] ={0}; 
-        uint16_t in[SIZE] ={0}; 
-	uint16_t in[SIZE] ={0}; 
-        uint16_t in[SIZE] ={0}; 
-	uint16_t in[SIZE] ={0}; 
-        uint16_t in[SIZE] ={0}; 
-        uint16_t out[SIZE] ={0}; 
-    uint16_t out[SIZE] ={0}; 
-        uint16_t out[SIZE] ={0}; 
-    uint16_t out[SIZE] ={0}; 
-        uint16_t out[SIZE] ={0}; 
-    uint16_t out[SIZE] ={0}; 
-        uint16_t out[SIZE] ={0}; 
-    uint16_t out[SIZE] ={0}; 
-        uint16_t out[SIZE] ={0}; 
-        for (uint16_t i = 0; i < SIZE; i++)
-        {
-            in[i] = i;
-        }
-    for (uint16_t i = 0; i < SIZE2; i++)
-        {
-            if (i % 16 == 0)
-            printf("\\n");
-
-            printf("%4d ", in[i]);
-        }
-    """)
-
-    # transpose16x16("out", "in")
-    # transpose48x16_to_16x44("out", "in")
-    transpose16x96_to_96x16("out", "in")
-
-    print("""
-    printf("\\n=======================\\n");
-
-    for (uint16_t i = 0; i < SIZE; i++)
-        {
-            if (i % 96 == 0)
-            printf("\\n");
-
-            if (i % 16 == 0)
-            printf(" | ");
-
-            printf("%4d ", out[i]);
-        }
-    printf("\\n=======================\\n");
-    }
-    """)
+   
 
