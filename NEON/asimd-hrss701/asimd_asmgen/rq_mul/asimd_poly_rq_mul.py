@@ -32,12 +32,12 @@ def vand(c, a, b):
 
 def vsl(c, a, b):
     # c = each a shift left by b
-    p("y{} = vshlq_s16(y{}, y{});".format(c, a, b))
+    p("y{} = vshlq_u16(y{}, y{});".format(c, a, b))
 
 
 def vsr(c, a, b):
     # c = each a shift right by b
-    p("y{} = vshrq_n_u16(y{}, y{});".format(c, a, b))
+    p("y{} = vshrq_u16(y{}, y{});".format(c, a, b))
 
 
 def vmul(c, a, b):
@@ -909,6 +909,7 @@ def poly_Rq_mul(c, a, b):
                     vstore(i*176 + j * 44 + coeff*16 + 8, r_real, limbreg[1])
 
                     if j == 3: 
+                        # TODO: find a way to work this out
                         p("y{} = y{} >> 16;".format(limbreg[0], limbreg[0]))
                         vand(limbreg[0], limbreg[0], take6bytes)
                         vstore((compose_offset+0*8+j-(3-i))*16, "rsp", limbreg[0])
@@ -925,6 +926,7 @@ def poly_Rq_mul(c, a, b):
             if j == 7 and coeff == 2:
                 for i in [2,3,4]:
                     tmp = alloc()
+                    # TODO: find a way to work this out
                     p("y{} = y{} >> 16;".format(tmp, h_hi[i]))
                     vand(tmp, tmp, take6bytes)
                     vstore((far_spill_offset+i-2)*16, "rsp", tmp)
