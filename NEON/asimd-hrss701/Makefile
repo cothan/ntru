@@ -16,6 +16,7 @@ SRC = fips202.c \
 	  asimd_asmgen/intrin_c/intrin_poly_rq_to_s3_formatted.c \
 	  asimd_asmgen/intrin_c/intrin_sample_iid_formated.c \
 	  asimd_asmgen/rq_mul/intrin_c/intrin_poly_rq_mul_formatted.c \
+	  poly_lift.c \
       verify.c
 
 HDR = kem.h \
