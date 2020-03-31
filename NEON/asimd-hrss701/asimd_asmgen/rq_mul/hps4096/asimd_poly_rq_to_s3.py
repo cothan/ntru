@@ -55,43 +55,43 @@ p(" uint16x8_t y8, y9, y10, y11, y12, y13, y14, y15; ")
 
 
 # zero 
-p("vdupq_n_s16(0x0) = y{}".format(zero))
+p("y{} = vdupq_n_s16(0x0);".format(zero))
 # x3 = 3
-p("vdupq_n_u16(0x3) = y{}".format(x3))
+p("y{} = vdupq_n_u16(0x3);".format(x3))
 # x33 = 3
-p("vdupq_n_s16(0x3) = y{}".format(x33))
+p("y{} = vdupq_n_s16(0x3);".format(x33))
 # MODQ = 4095 = 0xfff
-p("vdupq_n_u16(0x1fff) = y{}".format(MODQ))
+p("y{} = vdupq_n_u16(0x1fff);".format(MODQ))
 # xff 
-p("vdupq_n_u16(0xff) = y{}".format(xff))
+p("y{} = vdupq_n_u16(0xff);".format(xff))
 # xf 
-p("vdupq_n_u16(0xf) = y{}".format(xf))
+p("y{} = vdupq_n_u16(0xf);".format(xf))
 
 p("// Find Last")
 
 # Load
-p("vld1q_u16 ({} + {}) = y{}".format((NTRU_N32//8 - 1)*8, "a->coeffs", last))
+p("y{} = vld1q_u16 ({} + {});".format(last, (NTRU_N32//8 - 1)*8, "a->coeffs"))
 
 # last = MODQ(last)
-p("vandq_u16 (y{}, y{}) = y{}".format(MODQ, last, last))
+p("y{} = vandq_u16 (y{}, y{});".format(last, MODQ, last))
 
 # r = last >> logq1 = last >> 11
-p("vshrq_n_u16 (y{}, {}) = y{}".format(last, LOGQ-1, r[0]))
+p("y{} = vshrq_n_u16 (y{}, {});".format(r[0], last, LOGQ-1))
 
 # r = r ^ 3
-p("veorq_u16 (y{}, y{}) = y{}".format(x3, r[0], r[0]))
+p("y{} = veorq_u16 (y{}, y{});".format(r[0], x3, r[0]))
 
 # r = r << 12
-p("vshlq_n_u16 (y{}, {}) = y{}".format(r[0], LOGQ, r[0]))
+p("y{} = vshlq_n_u16 (y{}, {});".format(r[0], r[0], LOGQ))
 
 # r = r + last
-p("vaddq_u16 (y{}, y{}) = y{}".format(r[0], last, r[0]))
+p("y{} = vaddq_u16 (y{}, y{});".format(r[0], r[0], last))
 
 # Extract 
-p("vdupq_laneq_u16 (y{}, {}) = y{}".format(last, 5, last))
+p("y{} = vdupq_laneq_u16 (y{}, {});".format(last, last, 5))
 
 # last = last << 1
-p("vshlq_n_u16 (y{}, {}) = y{}".format(last, 1, last))
+p("y{} = vshlq_n_u16 (y{}, {});".format(last, last, 1 ))
 
 p("// Done Find Last")
 
@@ -99,26 +99,26 @@ for i in range(0, NTRU_N32 // 16):
     p("// {} -> {}".format(i*16, (i+1)*16))
 
     # Load
-    p("vld1q_u16 ({} + {}) = y{}".format(i*16, "a->coeffs", a[0]))
-    p("vld1q_u16 ({} + {}) = y{}".format(i*16 + 8, "a->coeffs", a[1]))
+    p("y{} = vld1q_u16 ({} + {});".format(a[0], i*16, "a->coeffs"))
+    p("y{} = vld1q_u16 ({} + {});".format(a[1], i*16 + 8, "a->coeffs"))
     # a = MODQ(a)
-    p("vandq_u16 (y{}, y{}) = y{}".format(MODQ, a[0], a[0]))
-    p("vandq_u16 (y{}, y{}) = y{}".format(MODQ, a[1], a[1]))
+    p("y{} = vandq_u16 (y{}, y{});".format(a[0], MODQ, a[0]))
+    p("y{} = vandq_u16 (y{}, y{});".format(a[1], MODQ, a[1]))
     # r = a >> LOGQ-1 
-    p("vshrq_n_u16 (y{}, {}) = y{}".format(a[0], LOGQ-1, r[0]))
-    p("vshrq_n_u16 (y{}, {}) = y{}".format(a[1], LOGQ-1, r[1]))
+    p("y{} = vshrq_n_u16 (y{}, {});".format(r[0], a[0], LOGQ-1))
+    p("y{} = vshrq_n_u16 (y{}, {});".format(r[1], a[1], LOGQ-1))
     # r = r ^ 3 
-    p("veorq_u16 (y{}, y{}) = y{}".format(x3, r[0], r[0]))
-    p("veorq_u16 (y{}, y{}) = y{}".format(x3, r[1], r[1]))
+    p("y{} = veorq_u16 (y{}, y{});".format(r[0], x3, r[0]))
+    p("y{} = veorq_u16 (y{}, y{});".format(r[1], x3, r[1]))
     # r = r << LOGQ 
-    p("vshlq_n_u16 (y{}, {}) = y{}".format(r[0], LOGQ, r[0]))
-    p("vshlq_n_u16 (y{}, {}) = y{}".format(r[1], LOGQ, r[1]))
+    p("y{} = vshlq_n_u16 (y{}, {});".format(r[0], r[0], LOGQ ))
+    p("y{} = vshlq_n_u16 (y{}, {});".format(r[1], r[1], LOGQ ))
     # r = r + a 
-    p("vaddq_u16 (y{}, y{}) = y{}".format(r[0], a[0], r[0]))
-    p("vaddq_u16 (y{}, y{}) = y{}".format(r[1], a[1], r[1]))
+    p("y{} = vaddq_u16 (y{}, y{});".format(r[0], r[0], a[0]))
+    p("y{} = vaddq_u16 (y{}, y{});".format(r[1], r[1], a[1]))
     # r = r + last
-    p("vaddq_u16 (y{}, y{}) = y{}".format(r[0], last, r[0]))
-    p("vaddq_u16 (y{}, y{}) = y{}".format(r[1], last, r[1]))
+    p("y{} = vaddq_u16 (y{}, y{});".format(r[0], r[0], last))
+    p("y{} = vaddq_u16 (y{}, y{});".format(r[1], r[1], last))
     # reval = mod3(r)
     
     p("// MOD3 ")
@@ -132,6 +132,6 @@ for i in range(NTRU_N, NTRU_N32):
     # 701
     # 702
     # 703
-    p("0 = r->coeffs[{}]".format(i))
+    p("r->coeffs[{}] = 0;".format(i))
 
 p("}")

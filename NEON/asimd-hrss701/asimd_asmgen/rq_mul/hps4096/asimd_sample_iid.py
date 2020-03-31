@@ -22,19 +22,19 @@ p(" uint16x8_t y11, y12, y13, y14, y15; ")
 
 
 # three = 3
-p("vdupq_n_s16(0x3) = y{}".format(x3))
+p("y{} = vdupq_n_s16(0x3);".format(x3))
 # xff 
-p("vdupq_n_u16(0xff) = y{}".format(xff))
+p("y{} = vdupq_n_u16(0xff);".format(xff))
 # xf 
-p("vdupq_n_u16(0xf) = y{}".format(xf))
+p("y{} = vdupq_n_u16(0xf);".format(xf))
 # 0 
-p("vdupq_n_u16(0) = y{}".format(zero))
+p("y{} = vdupq_n_u16(0);".format(zero))
 
 
 for i in range(NTRU_N32//16):
     p("// {} -> {}".format(i*16, (i+1)*16))
-    p("vld1q_u16 ({} + {}) = y{}".format(i*16, "uniformbytes", r[0]))
-    p("vld1q_u16 ({} + {}) = y{}".format(i*16 + 8, "uniformbytes", r[1]))
+    p("y{} = vld1q_u16 ({} + {});".format(r[0], i*16, "uniformbytes"))
+    p("y{} = vld1q_u16 ({} + {});".format(r[1], i*16 + 8, "uniformbytes"))
     # r = mod3(r)
     p("// MOD3 ")
     mod3(r, retval, t, c, xff, xf, x3, length=2)
@@ -47,6 +47,6 @@ for i in range(NTRU_N, NTRU_N32):
     # 701
     # 702
     # 703
-    p("0 = r->coeffs[{}]".format(i))
+    p("r->coeffs[{}] = 0;".format(i))
 
 p("}")
