@@ -6652,7 +6652,7 @@ void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b) {
   y1 = vaddq_u16(y1, y5);
   vst1q_u16(2088 + r10, y1);
   vst1q_u16(2440 + r10, y3);
-  y4 = 0;
+  y4 = veorq_u16(y4, y4);
   vst1q_u16(2800 + r10, y4);
   vst1q_u16(2808 + r10, y4);
   // -------------- n = 0
@@ -14532,7 +14532,7 @@ void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b) {
   y1 = vaddq_u16(y1, y5);
   vst1q_u16(2088 + r10, y1);
   vst1q_u16(2440 + r10, y3);
-  y4 = 0;
+  y4 = veorq_u16(y4, y4);
   vst1q_u16(2800 + r10, y4);
   vst1q_u16(2808 + r10, y4);
   // -------------- n = 0
@@ -22412,7 +22412,7 @@ void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b) {
   y1 = vaddq_u16(y1, y5);
   vst1q_u16(2088 + r10, y1);
   vst1q_u16(2440 + r10, y3);
-  y4 = 0;
+  y4 = veorq_u16(y4, y4);
   vst1q_u16(2800 + r10, y4);
   vst1q_u16(2808 + r10, y4);
   // -------------- n = 0
@@ -30292,7 +30292,7 @@ void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b) {
   y1 = vaddq_u16(y1, y5);
   vst1q_u16(2088 + r10, y1);
   vst1q_u16(2440 + r10, y3);
-  y4 = 0;
+  y4 = veorq_u16(y4, y4);
   vst1q_u16(2800 + r10, y4);
   vst1q_u16(2808 + r10, y4);
   // -------------- n = 0
