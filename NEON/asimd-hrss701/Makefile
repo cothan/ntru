@@ -22,7 +22,6 @@ HDR = kem.h \
       owcpa.h \
       params.h \
       poly.h \
-      poly_r2_inv.h \
       sample.h \
       verify.h
 
