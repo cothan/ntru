@@ -107,11 +107,6 @@ def done(t0, t1, t2):
 
     save = []
 
-    p("{} -= {};".format(a_mem, 16*22))
-    if a_mem != b_mem:
-        p("{} -= {};".format(b_mem, 16*22))
-    p("{} -= {};".format(r_mem, 16*44))
-
     for i in range(22):
         slide = 0
         for j in range(2):
@@ -233,7 +228,7 @@ def done(t0, t1, t2):
     
 
 @with_goto
-def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', transpose_input=True):
+def K2_K2_transpose_64x44_goto(r_real_input='c', a_real_input='a', b_real_input='b', transpose_input=True):
     global transpose
     global r_real, a_real, b_real
     transpose = transpose_input
@@ -266,6 +261,10 @@ def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', 
 
     label .done
     p('// done')
+    p("{} -= {};".format(a_mem, 16*22))
+    if a_mem != b_mem:
+        p("{} -= {};".format(b_mem, 16*22))
+    p("{} -= {};".format(r_mem, 16*44))
     done(t0, t1, t2)
     
 
@@ -276,6 +275,40 @@ def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', 
     # p("{} -={};".format(r_real, 2 * (2*16 * coeffs*2)))
     # p("rsp += {}".format( (44 + 44 + 96 + 22 + 22 + 22 + 44) * 16))
 
+def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', transpose_input=True):
+    global transpose
+    global r_real, a_real, b_real
+    transpose = transpose_input
+    r_real, a_real, b_real = r_real_input, a_real_input, b_real_input
+
+    p("uint16_t tmp[{}/2];".format((44 + 44 + 96 + 22 + 22 + 22 + 44) * 32))
+    p("uint16_t *rsp = tmp;")
+    
+    t0 = (0, 1)
+    t1 = (2, 3)
+    t2 = (4, 5)
+    t3 = (6, 7)
+
+    p("for (int i = 0; i < 4; i++){")
+    karatsuba_loop(transpose_input)
+    
+    innerloop(t0, t1, t2)
+    p("{} += {};".format(a_mem, 16*22))
+    if a_mem != b_mem:
+        p("{} += {};".format(b_mem, 16*22))
+    p("{} += {};".format(r_mem, 16*44))
+    
+    innerloop(t0, t1, t2)
+    p("{} -= {};".format(a_mem, 16*22))
+    if a_mem != b_mem:
+        p("{} -= {};".format(b_mem, 16*22))
+    p("{} -= {};".format(r_mem, 16*44))
+
+    done(t0, t1, t2)
+    p("}")
+
+    p("// ecx = {}".format(ecx))
+    assert(ecx == 3)
 
 if __name__ == "__main__":
     p("""#include <arm_neon.h>
