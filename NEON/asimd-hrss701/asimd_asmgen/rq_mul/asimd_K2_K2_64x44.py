@@ -218,7 +218,7 @@ def done(t0, t1, t2):
 
             slide = 8
 
-    p("y{} = 0;".format(t2[0]))
+    p("y{} = veorq_u16(y{}, y{});".format(t2[0], t2[0], t2[0]))
     p("vst1q_u16({} + {}, y{});".format(16*(87 + r_off), r_mem, t2[0]))
     p("vst1q_u16({} + {}, y{});".format(16*(87 + r_off) + 8, r_mem, t2[0]))
 
