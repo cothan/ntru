@@ -188,7 +188,7 @@ def K2_K2_transpose_64x44(r_real='%rdi', a_real='%rsi', b_real='%rdx', coeffs=44
     p("dec %ecx")
     # =====================================================================
     # TODO: handle this 
-    p("jnz karatsuba_loop_{}".format(SALT))additive2 + 22 + 22 + 44) * 32))
+    p("jnz karatsuba_loop_{}".format(SALT))
 
 if __name__ == '__main__':
     p(".data")
