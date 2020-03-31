@@ -37,7 +37,7 @@ def vsl(c, a, b):
 
 def vsr(c, a, b):
     # c = each a shift right by b
-    p("y{} = vshrq_u16(y{}, y{});".format(c, a, b))
+    p("y{} = vshrq_n_u16(y{}, {});".format(c, a, b))
 
 
 def vmul(c, a, b):
@@ -624,8 +624,8 @@ def poly_Rq_mul(c, a, b):
             vsub(t12lo, t1lo, t2lo)
             vsub(t12hi, t1hi, t2hi)
 
-            vsr(t12lo, t12lo, const_1)
-            vsr(t12hi, t12hi, const_1)
+            vsr(t12lo, t12lo, 1)
+            vsr(t12hi, t12hi, 1)
 
             vand(t12lo, t12lo, mask32_to_16)
             vand(t12hi, t12hi, mask32_to_16)
@@ -657,8 +657,8 @@ def poly_Rq_mul(c, a, b):
             vsub(t11c2lo, t11c1lo, h6_2lo)
             vsub(t11c2hi, t11c1hi, h6_2hi)
 
-            vsr(t11c2lo, t11c2lo, const_1)
-            vsr(t11c2hi, t11c2hi, const_1)
+            vsr(t11c2lo, t11c2lo, 1)
+            vsr(t11c2hi, t11c2hi, 1)
 
             free(t11c1lo, t11c1hi)
 
@@ -700,8 +700,8 @@ def poly_Rq_mul(c, a, b):
             r12s = alloc()
             r12ss = alloc() 
             
-            vsr(r12s, t14, const_2)
-            vsr(r12ss, t144, const_2)
+            vsr(r12s, t14,   2)
+            vsr(r12ss, t144, 2)
 
             e12s = alloc()
             e12ss = alloc()
@@ -749,8 +749,8 @@ def poly_Rq_mul(c, a, b):
 
             r12 = alloc() 
             r122 = alloc() 
-            vsr(r12, t13c2, const_3)
-            vsr(r122, t13c22, const_3)
+            vsr(r12, t13c2,   3)
+            vsr(r122, t13c22, 3)
 
             free(r12, r122)
 
@@ -851,8 +851,8 @@ def poly_Rq_mul(c, a, b):
             r23 = alloc()
             r233 = alloc() 
 
-            vsr(r23, e13, const_3)
-            vsr(r233, e13, const_3)
+            vsr(r23, e13,  3)
+            vsr(r233, e13, 3)
 
             free(r23, r233)
 
