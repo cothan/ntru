@@ -55,7 +55,6 @@ def innerloop(t0, t1, t2):
     global coeffs, ecx
 
     mul_64x11(r_mem, a_mem, b_mem, r_off, a_off, b_off)
-    p("K2_schoolbook_64x11({}, {}, {}, ")
     mul_64x11(r_mem, a_mem, b_mem, r_off + 22, a_off + 11, b_off + 11)
     mul_64x11("rsp", a_mem, b_mem, a_b_summed, a_off, b_off, additive=True)
 
