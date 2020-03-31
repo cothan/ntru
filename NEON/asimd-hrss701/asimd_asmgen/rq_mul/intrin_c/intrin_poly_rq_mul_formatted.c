@@ -2,7 +2,7 @@
 #include <arm_neon.h>
 #include <stdio.h>
 
-void poly_Rq_mul(poly *c, poly *a, poly *b) {
+void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14,
       y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29,
       y30, y31;
@@ -13,8 +13,6 @@ void poly_Rq_mul(poly *c, poly *a, poly *b) {
   uint16_t *r12 = rsp + 384;
   uint16_t low9words[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};
   uint16_t mask32_to_16[8] = {0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0};
-  uint16_t mask_mod8192[8] = {0x1fff, 0x1fff, 0x1fff, 0x1fff,
-                              0x1fff, 0x1fff, 0x1fff, 0x1fff};
   uint16_t take6bytes[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};
   unsigned char shuf48_16[8] = {10, 11, 12, 13, 14, 15, 0, 1,
                                 2,  3,  4,  5,  6,  7,  8, 9};
