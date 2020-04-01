@@ -32,9 +32,9 @@ def karatsuba_loop(transpose=True, **kargs):
         b_off = b_transpose
         r_off = r_transpose
 
-        p("uint16_t *r9 = rsp;")
+        p("r9 = rsp;")
+        p("r10 = rsp;")
         a_mem = b_mem = "r9"
-        p("uint16_t *r10 = rsp;")
         r_mem = "r10"
 
         transpose48x16_to_16x44(dst=a_mem, src=a_real, dst_off=a_off)
@@ -253,6 +253,7 @@ def K2_K2_transpose_64x44_goto(r_real_input='c', a_real_input='a', b_real_input=
     if ecx >= 0:
         goto .done
 
+    p("// adjust add")
     p("{} += {};".format(a_mem, 16*22))
     if a_mem != b_mem:
         p("{} += {};".format(b_mem, 16*22))
@@ -261,6 +262,7 @@ def K2_K2_transpose_64x44_goto(r_real_input='c', a_real_input='a', b_real_input=
 
     label .done
     p('// done')
+    p("// adjust sub")
     p("{} -= {};".format(a_mem, 16*22))
     if a_mem != b_mem:
         p("{} -= {};".format(b_mem, 16*22))
@@ -283,6 +285,8 @@ def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', 
 
     p("uint16_t tmp[{}/2];".format((44 + 44 + 96 + 22 + 22 + 22 + 44) * 32))
     p("uint16_t *rsp = tmp;")
+    p("uint16_t *r9  = NULL;")
+    p("uint16_t *r10 = NULL;")
     
     t0 = (0, 1)
     t1 = (2, 3)
@@ -290,20 +294,23 @@ def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', 
     t3 = (6, 7)
 
     p("for (int i = 0; i < 4; i++){")
+    p("// karatsuba_loop")
     karatsuba_loop(transpose_input)
-    
+    p("// innerloop 1")
     innerloop(t0, t1, t2)
+    p("// adjust add")
     p("{} += {};".format(a_mem, 16*22))
     if a_mem != b_mem:
         p("{} += {};".format(b_mem, 16*22))
     p("{} += {};".format(r_mem, 16*44))
-    
+    p("// innerloop 1")
     innerloop(t0, t1, t2)
+    p("// adjust sub")
     p("{} -= {};".format(a_mem, 16*22))
     if a_mem != b_mem:
         p("{} -= {};".format(b_mem, 16*22))
     p("{} -= {};".format(r_mem, 16*44))
-
+    p("// done")
     done(t0, t1, t2)
     p("}")
 
