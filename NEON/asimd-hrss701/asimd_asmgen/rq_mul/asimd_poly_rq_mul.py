@@ -191,17 +191,17 @@ def idx2off(i):
 def poly_Rq_mul(c, a, b):
     r_real, a_real, b_real = c, a, b
 
-    rsp_size = ((64 * 48 // 16)*2 +(64 * 96 // 16) + 16 + (56 - 16 + 4*8 + 3))*16
+    rsp_size = sum([(64 * 48 // 16) * 32, (64 * 48 // 16) * 32, (64 * 96 // 16) * 32, 16 * 32, (44 + 44 + 96 + 22 + 22 + 22 + 44) * 32, (56 - 16 + 4*8 + 3) * 32])
 
-    p("uint16_t rsp[{}];".format(rsp_size))
+    p("uint16_t rsp[{}];".format(int(rsp_size/2)))
 
     p("uint16_t *rax = rsp;")
     a_prep = "rax"
 
-    p("uint16_t *r11 = rsp + {};".format((64 * 48 // 16)))
+    p("uint16_t *r11 = rax + {};".format((64 * 48 // 16)*16))
     b_prep = "r11"
 
-    p("uint16_t *r12 = rsp + {};".format(((64 * 48 // 16)*2)))
+    p("uint16_t *r12 = r11 + {};".format(((64 * 48 // 16)*16)))
     r_out = "r12"
 
     p("uint16_t low9words[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};")
@@ -509,7 +509,7 @@ def poly_Rq_mul(c, a, b):
             free(const_1, const_2)
     
     # Calling external function will clear preset registers 
-    p("K2_K2_transpose_64x44({}, {}, {});".format(r_out, a_prep, b_prep))
+    p("K2_K2_transpose_64x44({}, {}, {}, rsp);".format(r_out, a_prep, b_prep))
 
     compose_offset = 56
     far_spill_offset = compose_offset + 4*8

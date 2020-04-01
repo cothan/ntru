@@ -277,14 +277,14 @@ def K2_K2_transpose_64x44_goto(r_real_input='c', a_real_input='a', b_real_input=
     # p("{} -={};".format(r_real, 2 * (2*16 * coeffs*2)))
     # p("rsp += {}".format( (44 + 44 + 96 + 22 + 22 + 22 + 44) * 16))
 
-def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', transpose_input=True):
+def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', transpose_input=True, offset=11808):
     global transpose
     global r_real, a_real, b_real
     transpose = transpose_input
     r_real, a_real, b_real = r_real_input, a_real_input, b_real_input
 
-    p("uint16_t tmp[{}/2];".format((44 + 44 + 96 + 22 + 22 + 22 + 44) * 32))
-    p("uint16_t *rsp = tmp;")
+    # TODO: share stack
+    p("uint16_t *rsp = sharestack + {};".format(int(offset/2))
     p("uint16_t *r9  = NULL;")
     p("uint16_t *r10 = NULL;")
     
@@ -321,7 +321,7 @@ if __name__ == "__main__":
     p("""#include <arm_neon.h>
 #include <stdio.h>
 
-void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b)
+void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b, uint16_t *sharestack)
 {
     uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, y32, y33, y34, y35;
     """)
