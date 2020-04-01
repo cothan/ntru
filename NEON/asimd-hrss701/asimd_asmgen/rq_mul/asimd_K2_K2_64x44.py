@@ -284,7 +284,7 @@ def K2_K2_transpose_64x44(r_real_input='c', a_real_input='a', b_real_input='b', 
     r_real, a_real, b_real = r_real_input, a_real_input, b_real_input
 
     # TODO: share stack
-    p("uint16_t *rsp = sharestack + {};".format(int(offset/2))
+    p("uint16_t *rsp = sharestack + {};".format(int(offset/2)))
     p("uint16_t *r9  = NULL;")
     p("uint16_t *r10 = NULL;")
     
