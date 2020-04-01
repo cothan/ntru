@@ -7,21 +7,22 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
       y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29,
       y30, y31;
 
-  uint16_t rsp[13744];
+  uint16_t rsp[18448];
   uint16_t *rax = rsp;
-  uint16_t *r11 = rsp + 192;
-  uint16_t *r12 = rsp + 384;
-  uint16_t low9words[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};
-  uint16_t mask32_to_16[8] = {0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0};
-  uint16_t take6bytes[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};
-  unsigned char shuf48_16[16] = {10, 11, 12, 13, 14, 15, 0, 1,
-                                 2,  3,  4,  5,  6,  7,  8, 9};
-  uint16_t mask3_5_3_5[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};
-  uint16_t mask3_5_4_3_1[16] = {0xffff, 0xffff, 0xffff, 0, 0, 0,
-                                0,      0,      0,      0, 0, 0,
-                                0xffff, 0xffff, 0xffff, 0};
-  uint16_t mask5_3_5_3[16] = {0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
-                              0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
+  uint16_t *r11 = rax + 3072;
+  uint16_t *r12 = r11 + 3072;
+  const uint16_t low9words[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};
+  const uint16_t mask32_to_16[8] = {0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0};
+  const uint16_t take6bytes[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};
+  const unsigned char shuf48_16[16] = {10, 11, 12, 13, 14, 15, 0, 1,
+                                       2,  3,  4,  5,  6,  7,  8, 9};
+  const uint16_t mask3_5_3_5[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};
+  const uint16_t mask3_5_4_3_1[16] = {0xffff, 0xffff, 0xffff, 0, 0, 0,
+                                      0,      0,      0,      0, 0, 0,
+                                      0xffff, 0xffff, 0xffff, 0};
+  const uint16_t mask5_3_5_3[16] = {
+      0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
+      0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
   y31 = vdupq_n_u16(3);
   // register len 31
   y30 = vld1q_u16(0 + a->coeffs);
@@ -2757,7 +2758,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(2536 + r11, y15);
   y16 = vaddq_u16(y15, y16);
   vst1q_u16(2584 + r11, y16);
-  K2_K2_transpose_64x44(r12, rax, r11);
+  K2_K2_transpose_64x44(r12, rax, r11, rsp);
   y0 = veorq_u16(y0, y0);
   vst1q_u16(1792 + rsp, y0);
   vst1q_u16(1800 + rsp, y0);

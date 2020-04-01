@@ -1,16 +1,19 @@
 #include <arm_neon.h>
 #include <stdio.h>
 
-void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b) {
+void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b,
+                           uint16_t *sharestack) {
   uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14,
       y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29,
       y30, y31, y32, y33, y34, y35;
 
-  uint16_t tmp[9408 / 2];
-  uint16_t *rsp = tmp;
+  uint16_t *rsp = sharestack + 5904;
+  uint16_t *r9 = NULL;
+  uint16_t *r10 = NULL;
   for (int i = 0; i < 4; i++) {
-    uint16_t *r9 = rsp;
-    uint16_t *r10 = rsp;
+    // karatsuba_loop
+    r9 = rsp;
+    r10 = rsp;
     // -------------- n = 0
     // 16x16: LD A1
     y0 = vld1q_u16(a + 0);
@@ -1225,6 +1228,7 @@ void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b) {
     vst1q_u16(r9 + 700, y17);
     vst1q_u16(r9 + 716, y18);
     vst1q_u16(r9 + 732, y19);
+    // innerloop 1
     y0 = vld1q_s16(0 + r9);
     y6 = vld1q_s16(704 + r9);
     y16 = vld1q_s16(8 + r9);
@@ -2743,8 +2747,10 @@ void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b) {
     y1 = vaddq_u16(y1, y5);
     vst1q_u16(1736 + r10, y1);
     vst1q_u16(1912 + r10, y3);
+    // adjust add
     r9 += 352;
     r10 += 704;
+    // innerloop 1
     y0 = vld1q_s16(0 + r9);
     y6 = vld1q_s16(704 + r9);
     y16 = vld1q_s16(8 + r9);
@@ -4263,8 +4269,10 @@ void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b) {
     y1 = vaddq_u16(y1, y5);
     vst1q_u16(1736 + r10, y1);
     vst1q_u16(1912 + r10, y3);
+    // adjust sub
     r9 -= 352;
     r10 -= 704;
+    // done
     y0 = vld1q_u16(0 + r9);
     y2 = vld1q_u16(352 + r9);
     y0 = vaddq_u16(y0, y2);

@@ -204,19 +204,19 @@ def poly_Rq_mul(c, a, b):
     p("uint16_t *r12 = r11 + {};".format(((64 * 48 // 16)*16)))
     r_out = "r12"
 
-    p("uint16_t low9words[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};")
+    p("const uint16_t low9words[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};")
 
-    p("uint16_t mask32_to_16[8] = {0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0};")
+    p("const uint16_t mask32_to_16[8] = {0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0};")
 
-    p("uint16_t take6bytes[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};")
+    p("const uint16_t take6bytes[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};")
 
-    p("unsigned char shuf48_16[16] = {10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};")
+    p("const unsigned char shuf48_16[16] = {10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};")
 
-    p("uint16_t mask3_5_3_5[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};")
+    p("const uint16_t mask3_5_3_5[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};")
 
-    p("uint16_t mask3_5_4_3_1[16] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0};")
+    p("const uint16_t mask3_5_4_3_1[16] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0};")
 
-    p("uint16_t mask5_3_5_3[16] = {0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};")
+    p("const uint16_t mask5_3_5_3[16] = {0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};")
 
     registers = list(range(32))
 
