@@ -14,6 +14,7 @@ SRC = fips202.c \
 	  asimd_asmgen/intrin_c/intrin_poly_mod_q_Phi_n_formatted.c \
 	  asimd_asmgen/intrin_c/intrin_poly_rq_to_s3_formatted.c \
 	  asimd_asmgen/intrin_c/intrin_sample_iid_formated.c \
+	  asimd_asmgen/rq_mul/intrin_c/intrin_K2_K2_64x44_formatted.c \
 	  asimd_asmgen/rq_mul/intrin_c/intrin_poly_rq_mul_formatted.c \
 	  poly_lift.c \
 	  poly_s3_inv.c \
