@@ -10,7 +10,6 @@ SRC = fips202.c \
       poly.c \
       poly_r2_inv.c \
       sample.c \
-      sample_iid.c \
 	  asimd_asmgen/intrin_c/intrin_poly_mod_3_Phi_n_formatted.c \
 	  asimd_asmgen/intrin_c/intrin_poly_mod_q_Phi_n_formatted.c \
 	  asimd_asmgen/intrin_c/intrin_poly_rq_to_s3_formatted.c \
