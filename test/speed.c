@@ -7,6 +7,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#if __aarch64__
+#include <papi.h>
+#endif 
+
 #define NTESTS 100
 
 static int cmp_llu(const void *a, const void*b)
@@ -61,8 +65,15 @@ int main()
   long long t[NTESTS];
   uint16_t a1 = 0;
   int i;
+  int retval;
 
   printf("-- api --\n\n");
+
+  retval = PAPI_hl_region_begin("keypair");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
 
   for(i=0; i<NTESTS; i++)
   {
@@ -71,20 +82,45 @@ int main()
                        sks+i*NTRU_SECRETKEYBYTES);
   }
   print_results("ntru_keypair: ", t, NTESTS);
+  retval = PAPI_hl_region_end("keypair");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
 
+  retval = PAPI_hl_region_begin("encaps");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
     crypto_kem_enc(cts+i*NTRU_CIPHERTEXTBYTES, key_b, pks+i*NTRU_PUBLICKEYBYTES);
   }
   print_results("ntru_encaps: ", t, NTESTS);
+  retval = PAPI_hl_region_end("encaps");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
 
+  retval = PAPI_hl_region_begin("decaps");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
     crypto_kem_dec(key_a, cts+i*NTRU_CIPHERTEXTBYTES, sks+i*NTRU_SECRETKEYBYTES);
   }
   print_results("ntru_decaps: ", t, NTESTS);
+  retval = PAPI_hl_region_end("decaps");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
 
   printf("-- internals --\n\n");
 
@@ -93,12 +129,23 @@ int main()
   poly_Z3_to_Zq(&a);
   poly_Z3_to_Zq(&b);
 
+  retval = PAPI_hl_region_begin("rq_mul");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
+
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
     poly_Rq_mul(&r, &a, &b);
   }
   print_results("poly_Rq_mul: ", t, NTESTS);
+  retval = PAPI_hl_region_end("rq_mul");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
 
   for(i=0; i<NTESTS; i++)
   {
