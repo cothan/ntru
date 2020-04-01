@@ -1,4 +1,4 @@
-CC = /usr/bin/cc
+CC = clang
 CFLAGS = -O3 -fomit-frame-pointer -mtune=native -g3 -mcpu=cortex-a53 -fPIC -fPIE -pie -flax-vector-conversions -lpapi
 CFLAGS += -Wall -Wextra -Wpedantic
 
