@@ -1,5 +1,5 @@
 CC = /usr/bin/cc
-CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie
+CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie -lpapi
 CFLAGS += -Wall -Wextra -Wpedantic
 
 SRC = fips202.c \
