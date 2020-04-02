@@ -88,7 +88,7 @@ p("y{} = vshlq_n_u16 (y{}, {});".format(r[0], r[0], LOGQ))
 p("y{} = vaddq_u16 (y{}, y{});".format(r[0], r[0], last))
 
 # Extract 
-p("y{} = vdupq_laneq_u16 (y{}, {});".format(last, last, 5))
+p("y{} = vdupq_laneq_u16 (y{}, {});".format(last, r[0], 5))
 
 # last = last << 1
 p("y{} = vshlq_n_u16 (y{}, {});".format(last, last, 1 ))
