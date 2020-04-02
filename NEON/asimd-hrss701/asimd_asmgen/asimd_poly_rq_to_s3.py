@@ -61,7 +61,7 @@ p("y{} = vdupq_n_u16(0x3);".format(x3))
 # x33 = 3
 p("y{} = vdupq_n_s16(0x3);".format(x33))
 # MODQ = 4095 = 0xfff
-p("y{} = vdupq_n_u16(0x1fff);".format(MODQ))
+p("y{} = vdupq_n_u16({});".format(MODQ, NTRU_Q - 1))
 # xff 
 p("y{} = vdupq_n_u16(0xff);".format(xff))
 # xf 
