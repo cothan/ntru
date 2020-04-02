@@ -9,6 +9,7 @@ t = (4, 5)
 c = (6, 7)
 
 x3 = 8
+x0 = 9
 
 xf = 13
 xff = 14
@@ -30,15 +31,17 @@ p("y{} = vdupq_n_s16(0x3);".format(x3))
 p("y{} = vdupq_n_u16(0xff);".format(xff))
 # xf 
 p("y{} = vdupq_n_u16(0xf);".format(xf))
+# x0
+p("y{} = vdupq_n_u16(0x0);".format(x0))
 
 # Get last
-p("y{} = vld1q_u16 ({} + {});".format(last, (NTRU_N32//8 - 1)*8, "r->coeffs"))
+p("y{} = vld1q_u16 ({} + {});".format(last, 84*8, "r->coeffs"))
 # Extract 5th from last and duplicate all register
 p("y{} = vdupq_laneq_u16 (y{}, {});".format(last, last, 5))
 # last = last << 1
 p("y{} = vshlq_n_u16 (y{}, {});".format(last, last, 1))
 
-for i in range(0, NTRU_N32//16):
+for i in range(0, NTRU_N32//16 - 1):
     p("// {} -> {}".format(i*16, (i+1)*16))
     # Load
     p("y{} = vld1q_u16 ({} + {});".format(r[0], i*16, "r->coeffs"))
@@ -53,11 +56,16 @@ for i in range(0, NTRU_N32//16):
     p("vst1q_u16 ({} + {}, y{});".format(i*16 , "r->coeffs"   , retval[0]))
     p("vst1q_u16 ({} + {}, y{});".format(i*16 + 8, "r->coeffs", retval[1]))
 
-# 701 -> 704
+# Let compiler optimize this
+# 680 -> 688
+p("vst1q_u16 ({} + {}, y{});".format(int(680/8), "r->coeffs", x0))
+# 688 -> 696
+p("vst1q_u16 ({} + {}, y{});".format(int(688/8), "r->coeffs", x0))
+# 696 -> 704
+p("vst1q_u16 ({} + {}, y{});".format(int(696/8), "r->coeffs", x0))
+
+# 677 -> 680
 for i in range(NTRU_N, NTRU_N32):
-    # 701
-    # 702
-    # 703
     p("r->coeffs[{}] = 0;".format(i))
 
 p("}")
