@@ -70,7 +70,7 @@ p("y{} = vdupq_n_u16(0xf);".format(xf))
 p("// Find Last")
 
 # Load
-p("y{} = vld1q_u16 ({} + {});".format(last, (NTRU_N32//8 - 1)*8, "a->coeffs"))
+p("y{} = vld1q_u16 ({} + {});".format(last, 84*8, "a->coeffs"))
 
 # last = MODQ(last)
 p("y{} = vandq_u16 (y{}, y{});".format(last, MODQ, last))
@@ -88,14 +88,14 @@ p("y{} = vshlq_n_u16 (y{}, {});".format(r[0], r[0], LOGQ))
 p("y{} = vaddq_u16 (y{}, y{});".format(r[0], r[0], last))
 
 # Extract 
-p("y{} = vdupq_laneq_u16 (y{}, {});".format(last, last, 5))
+p("y{} = vdupq_laneq_u16 (y{}, {});".format(last, r[0], 5))
 
 # last = last << 1
 p("y{} = vshlq_n_u16 (y{}, {});".format(last, last, 1 ))
 
 p("// Done Find Last")
 
-for i in range(0, NTRU_N32 // 16):
+for i in range(0, NTRU_N32 // 16 - 1):
     p("// {} -> {}".format(i*16, (i+1)*16))
 
     # Load
@@ -128,10 +128,16 @@ for i in range(0, NTRU_N32 // 16):
     p("vst1q_u16 ({} + {}, y{});".format(i*16 , "r->coeffs"   , retval[0]))
     p("vst1q_u16 ({} + {}, y{});".format(i*16 + 8, "r->coeffs", retval[1]))
 
+# Let compiler optimize this
+# 680 -> 688
+p("vst1q_u16 ({} + {}, y{});".format(int(680/8), "r->coeffs", zero))
+# 688 -> 696
+p("vst1q_u16 ({} + {}, y{});".format(int(688/8), "r->coeffs", zero))
+# 696 -> 704
+p("vst1q_u16 ({} + {}, y{});".format(int(696/8), "r->coeffs", zero))
+
+# 677 -> 680
 for i in range(NTRU_N, NTRU_N32):
-    # 701
-    # 702
-    # 703
     p("r->coeffs[{}] = 0;".format(i))
 
 p("}")
