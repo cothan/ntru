@@ -326,5 +326,7 @@ void K2_K2_transpose_64x44(uint16_t *c, uint16_t *a, uint16_t *b, uint16_t *shar
     uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, y32, y33, y34, y35;
     """)
     K2_K2_transpose_64x44('c', 'a', 'b', transpose_input=True)
+    #     p("sub ${}, {}".format(4 * (2*16 * coeffs*2), r_real))
+    p("{} -= {};".format(r_real, 2 * (2*16 * coeffs*2)))
     p("}\n")
 
