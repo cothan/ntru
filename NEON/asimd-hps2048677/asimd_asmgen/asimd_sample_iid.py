@@ -31,7 +31,7 @@ p("y{} = vdupq_n_u16(0xf);".format(xf))
 p("y{} = vdupq_n_u16(0);".format(zero))
 
 
-for i in range(NTRU_N32//16):
+for i in range(NTRU_N32//16 - 1):
     p("// {} -> {}".format(i*16, (i+1)*16))
     p("y{} = vld1q_u16 ({} + {});".format(r[0], i*16, "uniformbytes"))
     p("y{} = vld1q_u16 ({} + {});".format(r[1], i*16 + 8, "uniformbytes"))
@@ -42,11 +42,16 @@ for i in range(NTRU_N32//16):
     p("vst1q_u16 ({} + {}, y{});".format(i*16 , "r->coeffs"   , retval[0]))
     p("vst1q_u16 ({} + {}, y{});".format(i*16 + 8, "r->coeffs", retval[1]))
 
-# 701 -> 704
+# Let compiler optimize this
+# 680 -> 688
+p("vst1q_u16 ({} + {}, y{});".format(int(680/8), "r->coeffs", zero))
+# 688 -> 696
+p("vst1q_u16 ({} + {}, y{});".format(int(688/8), "r->coeffs", zero))
+# 696 -> 704
+p("vst1q_u16 ({} + {}, y{});".format(int(696/8), "r->coeffs", zero))
+
+# 677 -> 680
 for i in range(NTRU_N, NTRU_N32):
-    # 701
-    # 702
-    # 703
     p("r->coeffs[{}] = 0;".format(i))
 
 p("}")
