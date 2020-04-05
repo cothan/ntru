@@ -81,7 +81,6 @@ def karatsuba_interpolate(dst, dst_off, src, src_off, coeff, t0, t1, t2):
         else:
             return '{}+{}'.format((src_off+3*(2*i+off//44)+coeff)*16 + 8, src)
 
-
     slide = 0
     for i in range(2):
         r0_44 = 0
