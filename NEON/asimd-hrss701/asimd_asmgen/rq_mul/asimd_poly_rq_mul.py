@@ -51,6 +51,11 @@ def vxor(c, a, b):
 def vld(dst, address):
     p("y{} = vld1q_u16({});".format(dst, address))
 
+def vext(c, a, b, n):
+    # extract/rotate 
+    # c = (a | b)[n:]
+    p("y{} = vextq_u16(y{}, y{}, {});".format(c, a, b, n))
+
 def karatsuba_eval(dst, dst_off, coeff, src, t0, t1, slide=0):
 
     vstore((dst_off+3*0+coeff)*16 + slide, dst, src[0])
@@ -217,6 +222,8 @@ def poly_Rq_mul(c, a, b):
     p("const uint16_t mask3_5_4_3_1[16] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0};")
 
     p("const uint16_t mask5_3_5_3[16] = {0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};")
+
+    p("const uint16_t mask_last[8] = {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0};")
 
     registers = list(range(32))
 
@@ -908,7 +915,8 @@ def poly_Rq_mul(c, a, b):
 
                     if j == 3: 
                         # TODO: find a way to work this out
-                        p("y{} = y{} >> 16;".format(limbreg[0], limbreg[0]))
+                        # p("y{} = y{} >> 16;".format(limbreg[0], limbreg[0]))
+                        vext(limbreg[0], limbreg[0], limbreg[0], 1)
                         vand(limbreg[0], limbreg[0], take6bytes)
                         vstore((compose_offset+0*8+j-(3-i))*16, "rsp", limbreg[0])
 
@@ -925,7 +933,8 @@ def poly_Rq_mul(c, a, b):
                 for i in [2,3,4]:
                     tmp = alloc()
                     # TODO: find a way to work this out
-                    p("y{} = y{} >> 16;".format(tmp, h_hi[i]))
+                    # p("y{} = y{} >> 16;".format(tmp, h_hi[i]))
+                    vext(tmp, h_hi[i], h_hi[i], 1)
                     vand(tmp, tmp, take6bytes)
                     vstore((far_spill_offset+i-2)*16, "rsp", tmp)
                     free(tmp)
