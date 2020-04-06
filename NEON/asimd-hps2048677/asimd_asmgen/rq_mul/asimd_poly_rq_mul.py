@@ -52,6 +52,11 @@ def vxor(c, a, b):
 def vld(dst, address):
     p("y{} = vld1q_u16({});".format(dst, address))
 
+def vext(c, a, b, n):
+    # extract/rotate 
+    # c = (a | b)[n:]
+    p("y{} = vextq_u16(y{}, y{}, {});".format(c, a, b, n))
+
 def karatsuba_eval(dst, dst_off, coeff, src, t0, t1, slide=0):
 
     vstore((dst_off+3*0+coeff)*16 + slide, dst, src[0])
@@ -205,6 +210,8 @@ def poly_Rq_mul(c, a, b):
     r_out = "r12"
 
     p("const uint16_t mask_1_15[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};")
+
+    p("const uint16_t mask_last[8] = {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0};")
 
     p("const uint16_t mask32_to_16[8] = {0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0};")
 
@@ -957,9 +964,21 @@ def poly_Rq_mul(c, a, b):
                     store_limb(tmp2, i, j, slide=8, off=0)
                     
                     free(mask_1_15)
-                    free(tmp2)
 
                     # TODO: 658-678
+                    vext(h_lo[i], h_lo[i], h_lo[i], 1)
+                    vext(h_hi[i], h_hi[i], h_hi[i], 1)
+                    vload(tmp2, 0, "mask_last")
+                    vand(h_hi[i], h_hi[i], tmp2)
+
+                    get_limb(tmp, 0, 0, slide=0, off=(0-16*coeff))
+                    get_limb(tmpp, 0, 0, slide=8, off=(0-16*coeff))
+                    vadd(tmp, h_lo[i], tmp)
+                    vadd(tmpp, h_hi[i], tmpp)
+                    store_limb(tmp, 0, 0, slide=0, off=(0-16*coeff))
+                    store_limb(tmpp, 0, 0, slide=8, off=(0-16*coeff))
+
+                    free(tmp2)
             
             for i in [2, 3]:
                 if j == (7-4*(i-2)) and coeff == 2:
