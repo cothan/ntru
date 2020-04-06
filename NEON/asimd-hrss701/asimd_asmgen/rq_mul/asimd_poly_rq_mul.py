@@ -914,7 +914,7 @@ def poly_Rq_mul(c, a, b):
                     vstore(i*176 + j * 44 + coeff*16 + 8, r_real, limbreg[1])
 
                     if j == 3: 
-                        # TODO: find a way to work this out
+                        
                         # p("y{} = y{} >> 16;".format(limbreg[0], limbreg[0]))
                         vext(limbreg[0], limbreg[0], limbreg[0], 1)
                         vand(limbreg[0], limbreg[0], take6bytes)
@@ -932,7 +932,7 @@ def poly_Rq_mul(c, a, b):
             if j == 7 and coeff == 2:
                 for i in [2,3,4]:
                     tmp = alloc()
-                    # TODO: find a way to work this out
+                    
                     # p("y{} = y{} >> 16;".format(tmp, h_hi[i]))
                     vext(tmp, h_hi[i], h_hi[i], 1)
                     vand(tmp, tmp, take6bytes)
