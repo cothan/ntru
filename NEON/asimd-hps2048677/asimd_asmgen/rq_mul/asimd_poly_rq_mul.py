@@ -1,5 +1,6 @@
 from asimd_K2_K2_64x44 import K2_K2_transpose_64x44
 from pysnooper import snoop
+from "../params" import NTRU_N, NTRU_N32, NTRU_Q
 p = print
 
 
@@ -190,7 +191,7 @@ def idx2off(i):
 def poly_Rq_mul(c, a, b):
     r_real, a_real, b_real = c, a, b
 
-    rsp_size = sum([(64 * 48 // 16) * 32, (64 * 48 // 16) * 32, (64 * 96 // 16) * 32, 16 * 32, (44 + 44 + 96 + 22 + 22 + 22 + 44) * 32, (56 - 16 + 4*8 + 3) * 32])
+    rsp_size = sum([(64 * 48 // 16) * 32, (64 * 48 // 16) * 32, (64 * 96 // 16) * 32, 16 * 32, (44 + 44 + 96 + 22 + 22 + 22 + 44) * 32, (56 - 16) * 32])
 
     p("uint16_t rsp[{}];".format(int(rsp_size/2)))
 
@@ -203,7 +204,7 @@ def poly_Rq_mul(c, a, b):
     p("uint16_t *r12 = r11 + {};".format(((64 * 48 // 16)*16)))
     r_out = "r12"
 
-    p("const uint16_t low9words[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};")
+    p("const uint16_t mask_1_15[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};")
 
     p("const uint16_t mask32_to_16[8] = {0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0};")
 
@@ -236,6 +237,13 @@ def poly_Rq_mul(c, a, b):
     def check():
         return len(registers)
 
+    zero = alloc()
+    vconst(zero, 0)
+    for i in range(0, NTRU_N32, 8):
+        vstore(i, r_real, zero)
+    free(zero)
+    
+
     # Evaluate Toom4 / K2 / K2
     const_3 = alloc()
     vconst(const_3, 3)
@@ -259,12 +267,16 @@ def poly_Rq_mul(c, a, b):
                 vload(r,  3*11*16+idx2off(i*3+coeff), real)
                 vload(rr, 3*11*16+idx2off(i*3+coeff) + 8, real)
 
+            if coeff == 1:
+                mask_1_15 = alloc()
+                vload(mask_1_15, 0, "mask_1_15")
+                vand(f3[3], f3[3], mask_1_15)
+                free(mask_1_15)
+                vconst(f33[3], f33[3], f33[3])
             if coeff == 2:
-                # and the high
-                mask_low9words = alloc()
-                vload(mask_low9words, 0, "low9words")
-                vand(f33[3], f33[3], mask_low9words)
-                free(mask_low9words)
+                # replace 
+                vxor(f3[3], f3[3], f3[3])
+                vconst(f33[3], f33[3], f33[3])
 
             f1 = [alloc(), alloc(), alloc(), alloc()]
             f11 = [alloc(), alloc(), alloc(), alloc()]
@@ -510,16 +522,7 @@ def poly_Rq_mul(c, a, b):
     # Calling external function will clear preset registers 
     p("K2_K2_transpose_64x44({}, {}, {}, rsp);".format(r_out, a_prep, b_prep))
 
-    compose_offset = 56
-    far_spill_offset = compose_offset + 4*8
-    vxor(0, 0, 0)
-
-    for i in range(4*8):
-        slide = 0 
-        for j in range(2):
-            vstore((compose_offset+i)*32 + slide, "rsp", 0)
-            slide = 8
-
+    
     print('// remain {}'.format(check()))
 
     vconst(const_3, 3)
@@ -542,8 +545,8 @@ def poly_Rq_mul(c, a, b):
     const_7 = alloc() 
     vconst(const_7, 7)
 
-    mask_mod8192 = alloc()
-    vconst(mask_mod8192, 8191)
+    mask_mod2048 = alloc()
+    vconst(mask_mod2048, NTRU_Q - 1)
 
     take6bytes = alloc() 
     vload(take6bytes, 0, "take6bytes")
@@ -893,194 +896,112 @@ def poly_Rq_mul(c, a, b):
             h_lo = [h0lo, h1, h2, h3, h4, h5, h6lo]
             h_hi = [h0hi, h11, h22, h33, h44, h55, h6hi]
 
-            def get_limb(limbreg, i, j, slide=0):
-                vload(limbreg, (i*176 + j * 44 + coeff*16) + slide, r_real)
+            def get_limb(limbreg, i, j, slide=0, off=0):
+                vload(limbreg, (off + i*176 + j * 44 + coeff*16) + slide, r_real)
 
-            def store_limb(limbreg, i, j):
+            def store_limb(limbreg, i, j, off=0):
                 if coeff == 2:
                     if i == 3 and j >= 4:  # this part exceeds 704
                         return
-                    vand(limbreg[0], limbreg[0], mask_mod8192)
-                    vand(limbreg[1], limbreg[1], mask_mod8192)
-                    vstore(i*176 + j * 44 + coeff*16, r_real, limbreg[0])
-                    vstore(i*176 + j * 44 + coeff*16 + 8, r_real, limbreg[1])
-
-                    if j == 3: 
-                        # TODO: find a way to work this out
-                        p("y{} = y{} >> 16;".format(limbreg[0], limbreg[0]))
-                        vand(limbreg[0], limbreg[0], take6bytes)
-                        vstore((compose_offset+0*8+j-(3-i))*16, "rsp", limbreg[0])
+                    vand(limbreg[0], limbreg[0], mask_mod2048)
+                    vand(limbreg[1], limbreg[1], mask_mod2048)
+                    vstore(off + i*176 + j * 44 + coeff*16, r_real, limbreg[0])
+                    vstore(off + i*176 + j * 44 + coeff*16 + 8, r_real, limbreg[1])
 
                 else:
                     if i == 3 and j >= 4:  # this part exceeds 704
                         return
 
-                    vand(limbreg[0], limbreg[0], mask_mod8192)
-                    vand(limbreg[1], limbreg[1], mask_mod8192)
-                    vstore(i*176 + j * 44 + coeff*16, r_real, limbreg[0])
-                    vstore(i*176 + j * 44 + coeff*16 + 8, r_real, limbreg[1])
+                    vand(limbreg[0], limbreg[0], mask_mod2048)
+                    vand(limbreg[1], limbreg[1], mask_mod2048)
+                    vstore(off + i*176 + j * 44 + coeff*16, r_real, limbreg[0])
+                    vstore(off + i*176 + j * 44 + coeff*16 + 8, r_real, limbreg[1])
 
-            if j == 7 and coeff == 2:
-                for i in [2,3,4]:
-                    tmp = alloc()
-                    # TODO: find a way to work this out
-                    p("y{} = y{} >> 16;".format(tmp, h_hi[i]))
-                    vand(tmp, tmp, take6bytes)
-                    vstore((far_spill_offset+i-2)*16, "rsp", tmp)
-                    free(tmp)
+            tmp = alloc()
+            tmpp = alloc()
+            get_limb(tmp, 0, j, slide=0, off=0)
+            get_limb(tmpp, 0, j, slide=8, off=0)
+            vadd(tmp, h_lo[0], tmp)
+            vadd(tmpp, h_hi[0], tmpp)
+            store_limb(tmp, 0, j, slide = 0, off= 0)
+            store_limb(tmpp, 0, j, slide= 8, off= 0)
+
+            get_limb(tmp, 1, j, slide=0, off=0)
+            get_limb(tmpp, 1, j, slide=8, off=0)
+            vadd(tmp, h_lo[1], tmp)
+            vadd(tmpp, h_hi[1], tmpp)
+            store_limb(tmp, 1, j, slide=0, off=0)
+            store_limb(tmpp, 1, j, slide=8, off=0)
+
+            for i in [2,3]:
+                for j < (7-4*(i-2)) or (j==(7-4*(i-2)) and coeff == 0):
+                    get_limb(tmp, i, j, slide=0, off=0)
+                    get_limb(tmpp, i, j, slide=8, off=0)
+                    vadd(tmp, h_lo[i], tmp)
+                    vadd(tmpp, h_hi[i], tmpp)
+                    store_limb(tmp, i, j, slide=0, off=0)
+                    store_limb(tmpp, i, j, slide=8, off=0)
+
+            for i in [2, 3]:
+                if j == (7-4*(i-2)) and coeff == 1:
+                    tmp2 = alloc()
+                    mask_1_15 = alloc()
+                    vload(mask_1_15, 0, "mask_1_15")
+                    get_limb(tmp, i, j, slide = 0, off=0)
+                    # get_limb(tmpp, i, j, slide = 8, off=0)
+                    vand(tmp2, h_lo[i], mask_1_15)
+                    vadd(tmp, tmp2, tmp)
+                    store_limb(tmp, i, j, slide=0, off=0)
+
+                    vconst(tmp2, 0)
+                    store_limb(tmp2, i, j, slide=8, off=0)
+                    
+                    free(mask_1_15)
+                    free(tmp2)
+
+                    # TODO: 658-678
+            
+            for i in [2, 3]:
+                if j == (7-4*(i-2)) and coeff == 2:
+                    get_limb(tmp, 0, 0, slide=0, off=(15-16*coeff))
+                    get_limb(tmpp, 0, 0, slide=8, off=(15-16*coeff))
+                    vadd(tmp, h_lo[i], tmp)
+                    vadd(tmpp, h_hi[i], tmpp)
+                    store_limb(tmp, 0, 0, slide=0, off=(15-16*coeff))
+                    store_limb(tmpp, 0, 0, slide=8, off=(15-16*coeff))
             
             if j >= 4:
-                p("// 930: {}".format(check()))    
-                for ml in range(2):
-                    if ml == 0:
-                        h0_old = alloc()
-                        h1_old = alloc()
-                        h2_old = alloc()
-                        get_limb(h0_old, 0, j)
-                        get_limb(h1_old,  1, j)
-                        get_limb(h2_old,  2, j)
-                        vand(h_lo[0], h0_old, h_lo[0])
-                        vand(h_lo[1], h1_old, h_lo[1])
-                        vand(h_lo[2], h2_old, h_lo[2])
-                        free(h0_old, h1_old, h2_old)
-                    else: 
-                        h0_oldd = alloc()
-                        h1_oldd = alloc()
-                        h2_oldd = alloc()
-                        get_limb(h0_oldd, 0, j, slide=8)
-                        get_limb(h1_oldd, 1, j, slide=8)
-                        get_limb(h2_oldd, 2, j, slide=8)
-                        vand(h_hi[0], h0_oldd, h_hi[0])
-                        vand(h_hi[1], h1_oldd, h_hi[1])
-                        vand(h_hi[2], h2_oldd, h_hi[2])
-                        free(h0_oldd, h1_oldd, h2_oldd)
-                p("// 950: {}".format(check()))    
+                get_limb(tmp, 0, j-4, slide=0, off=27)
+                get_limb(tmpp, 0, j-4, slide=8, off=27)
+                vadd(tmp, h_lo[i], tmp)
+                vadd(tmpp, h_hi[i], tmpp)
+                store_limb(tmp, 0, j-4, side=0, off=27)
+                store_limb(tmpp, 0, j-4, slide=8, off=27)
 
-            p("// 941: {}".format(check()))    
-            if j < 8:
-                # mask = [mask3_5_3_5, alloc(), alloc()]
-                # vload(mask[1], 0, "mask3_5_4_3_1")
-                # vload(mask[2], 8, "mask3_5_4_3_1")
-                # mask5_3_5_3 = alloc()
-                # mask5_3_5_3_hi = alloc()
+            get_limb(tmp, 0, j, slide = 0, off=27)
+            get_limb(tmpp, 0, j, slide =8, off=27)
+            vadd(tmp, h_lo[4], tmp)
+            vadd(tmpp, h_hi[4], tmpp)
+            store_limb(tmp, 0, j, silde=0, off=27)
+            store_limb(tmpp, 0, j, slide=8, off=27)
 
-                # vload(mask5_3_5_3, 0, "mask5_3_5_3")
-                # vload(mask5_3_5_3_hi, 8, "mask5_3_5_3")
-                for i in range(-1, 3):
-                    p("// 960: {}".format(check()))
-                    if j < 4 and i == -1:
-                        continue
-                    temp = alloc()
-                    tempp = alloc()
+            get_limb(tmp, 1, j, slide = 0, off=27)
+            get_limb(tmpp, 1, j, slide =8, off=27)
+            vadd(tmp, h_lo[5], tmp)
+            vadd(tmpp, h_hi[5], tmpp)
+            store_limb(tmp, 1, j, silde=0, off=27)
+            store_limb(tmpp, 1, j, slide=8, off=27)
 
-                    p("y{} = vqtbl1q_u8(y{}, y{});".format(h_lo[i+4], h_lo[i+4], shuf48_16))
-                    p("y{} = vqtbl1q_u8(y{}, y{});".format(h_hi[i+4], h_hi[i+4], shuf48_16))
+            if j < 7 or (j == 7 and coeff == 0):
+                get_limb(tmp, 2, j, slide = 0, off=27)
+                get_limb(tmpp, 2, j, slide =8, off=27)
+                vadd(tmp, h_lo[6], tmp)
+                vadd(tmpp, h_hi[6], tmpp)
+                store_limb(tmp, 2, j, silde=0, off=27)
+                store_limb(tmpp, 2, j, slide=8, off=27)
 
-                    if coeff < 2: 
-                        # mask = [alloc()]*2
-                        # vload(mask[0], 0, "mask3_5_3_5")
-                        permutation = 1
-                    elif coeff == 2:
-                        # mask = [alloc(), alloc()]
-                        permutation = 2
-
-                    
-                    if coeff < 2:
-                        vand(temp, h_lo[i+4], mask[0])
-                        vand(tempp, h_hi[i+4], mask[0])
-                    elif coeff == 2:
-                        vand(temp, h_lo[i+4], mask[1])
-                        vand(tempp, h_hi[i+4], mask[2])
-                    
-                    vand(h_lo[i+4], h_lo[i+4], mask5_3_5_3)
-                    vand(h_hi[i+4], h_hi[i+4], mask5_3_5_3_hi)
-
-                    # TODO line 677
-                    if permutation == 1:
-                        # a4 | a1 = (a2 | a1) | (a4 | a3), 1
-                        p("y{} = vextq_u64(y{}, y{}, {});".format(temp, tempp, temp, 1))
-                        temp, tempp = tempp, temp
-                    elif permutation == 2:
-                        # a1 | a2 = (a2 | a1) | (a2 | a1), 1 
-                        p("y{} = vextq_u64(y{}, y{}, {});".format(temp, temp, temp, 1))
-                        # a3 | a1 = (a4 | a3) | (a1 | a2), 1
-                        p("y{} = vextq_u64(y{}, y{}, {});".format(temp, temp, tempp, 1))
-                        # a3 | a4 = (a4 | a3) | (a4 | a3)
-                        p("y{} = vextq_u64(y{}, y{}, {});".format(tempp, tempp, tempp, 1))
-                        # swap 
-                        temp, tempp = tempp, temp
-
-                    # only keep high bits
-                    temp2 = tempp 
-                    p("y{} = vorrq_u16(y{}, y{});".format(h_hi[i+4], temp2, h_hi[i+4]))
-                    free(temp, tempp)
-
-                    if i == -1:
-                        dst = alloc()
-                        dstt = alloc() 
-                        get_limb(dst, 0, j-4)
-                        get_limb(dstt, 0, j-4, slide=8)
-                    else:
-                        dst = h_lo[i] 
-                        dstt = h_hi[i]
-                    
-                    if coeff > 0:
-                        ltmp = alloc()
-                        vload(ltmp, (compose_offset+(i+1)*8+j)*16, "rsp")
-                        vadd(dst, dst, ltmp)
-                        vload(ltmp, (compose_offset+(i+1)*8+j)*16 + 8, "rsp")
-                        vadd(dst, dst, ltmp)
-                        free(ltmp)
-                    if i == -1:
-                        store_limb((dst, dstt), 0, j -4)
-                        free(dst, dstt)
-
-                    vstore((compose_offset+(i+1)*8+j)*16, "rsp", temp)
-            
-                # freelist(mask[1:])
-                # free(mask5_3_5_3, mask5_3_5_3_hi)
-
-            for i in range(4):
-                store_limb((h_lo[i],h_hi[i]), i, j)
-                
-            
-            free(h0lo, h1, h2, h3, h4, h5, h6lo)
-            free(h0hi, h11, h22, h33, h44, h55, h6hi)
-
-    p("// remain 1031: {}".format(check()))
-    coeff = 0
-    for j in range(8):
-        for i in range(3):
-            htemp = alloc()
-            htempp = alloc()
-            get_limb(htemp, i, j)
-            get_limb(htempp, i, j, slide=8)
-            if not (i == 0 and j == 0):
-                ltmp = alloc()
-                vload(ltmp, (compose_offset+(i+1)*8+((j-1) % 8))*16, "rsp")
-                vadd(htemp, htemp, ltmp)
-                vload(ltmp, (compose_offset+(i+1)*8+((j-1) % 8))*16 + 8, "rsp")
-                vadd(htempp, htempp, ltmp)
-                free(ltmp)
-            if i == 0 and 4<=j + 4 < 8:
-                ltmp = alloc()
-                vload(ltmp, (compose_offset+0*8+((j+4-1) % 8))*16, "rsp")
-                vadd(htemp, htemp, ltmp)
-                vload(ltmp, (compose_offset+0*8+((j+4-1) % 8))*16 + 8, "rsp")
-                vadd(htempp, htempp, ltmp)
-                free(ltmp)
-            if j == 0 and i in [0, 1, 2]:
-                ltmp = alloc()
-                vload(ltmp, (far_spill_offset+i)*16, "rsp")
-                vadd(htemp, htemp, ltmp)
-                vload(ltmp, (far_spill_offset+i)*16 + 8, "rsp")
-                vadd(htempp, htempp, ltmp)
-                free(ltmp)
-            vand(htemp, mask_mod8192, htemp)
-            vand(htempp, mask_mod8192, htempp)
-            vstore((i*176 + j * 44 + coeff*16) * 2, r_real, htemp)
-            vstore((i*176 + j * 44 + coeff*16) * 2 + 8, r_real, htempp)
-            free(htemp, htempp)
+            free(tmp, tmpp)
+            freelist(h_lo, h_hi)
 
 if __name__ == "__main__":
     p("""#include <arm_neon.h>
