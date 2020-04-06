@@ -2,3 +2,5 @@ NEON/asimd-h.code-workspace
 NEON/asimd-hrss701/asimd_asmgen/rq_mul/__pycache__/asimd_K2_K2_64x44.cpython-37.pyc
 NEON/asimd-hrss701/asimd_asmgen/rq_mul/__pycache__/asimd_K2_schoolbook_64x11.cpython-37.pyc
 NEON/asimd-hrss701/asimd_asmgen/rq_mul/__pycache__/asimd_tranpose.cpython-37.pyc
+NEON/asimd-hps2048677/asimd_asmgen/rq_mul/.vscode/settings.json
+NEON/.vscode/settings.json
