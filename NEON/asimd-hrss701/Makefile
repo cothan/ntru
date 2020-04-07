@@ -1,6 +1,6 @@
 CC = clang
-CFLAGS = -O3 -fomit-frame-pointer -mtune=native -g3 -mcpu=cortex-a53 -fPIC -fPIE -pie -flax-vector-conversions -lpapi
-CFLAGS += -Wall -Wextra -Wpedantic
+CFLAGS = -O3 -fomit-frame-pointer -mtune=native -g3 -mcpu=cortex-a53 -fPIC -fPIE -pie -flax-vector-conversions
+LDFLAGS = -lkeccak -lpapi
 
 SRC = fips202.c \
       kem.c \
@@ -57,7 +57,7 @@ test/ram: $(SRC_URAND) $(OBJS) $(HDR_URAND) test/ram.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) test/ram.c
 
 test/speed: $(SRC_URAND) $(OBJS) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) cpucycles.c test/speed.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) cpucycles.c test/speed.c $(LDFLAGS)
 
 test/speed_r2_inv: $(SRC_URAND) $(OBJS) $(HDR_URAND) cpucycles.h cpucycles.c test/speed_r2_inv.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) cpucycles.c test/speed_r2_inv.c
