@@ -6,7 +6,7 @@
 #include "owcpa.h"
 
 #if __aarch64__
-#include <libkeccak.a>
+#include <libkeccak.a.headers/SimpleFIPS202.h>
 #endif
 
 // API FUNCTIONS 
