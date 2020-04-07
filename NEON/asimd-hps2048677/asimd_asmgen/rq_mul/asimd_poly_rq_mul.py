@@ -222,8 +222,6 @@ def poly_Rq_mul(c, a, b):
 
     p("const uint16_t take6bytes[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};")
 
-    p("const unsigned char shuf48_16[16] = {10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};")
-
     p("const uint16_t mask3_5_3_5[8] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0};")
 
     p("const uint16_t mask3_5_4_3_1[16] = {0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xffff, 0xffff, 0xffff, 0};")
