@@ -1,6 +1,7 @@
 CC = /usr/bin/cc
-CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie -lpapi
-CFLAGS += -Wall -Wextra -Wpedantic
+CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie
+CFLAGS += -Wall -Wextra -Wpedantic 
+LDFLAGS = -lpapi -lkeccak
 
 SRC = fips202.c \
       kem.c \
@@ -50,7 +51,7 @@ test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_pack.c
 
 test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c $(LDFLAGS)
 
 test/ram: $(SRC_URAND) $(OBJS) $(HDR_URAND) test/ram.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) test/ram.c
@@ -68,7 +69,7 @@ test/keypair: $(SRC_URAND) $(HDR_URAND) test/keypair.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/keypair.c
 
 PQCgenKAT_kem: $(SRC_KAT) $(HDR_KAT)
-	$(CC) $(CFLAGS) -o $@ $(SRC_KAT) -lcrypto $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(SRC_KAT) -lcrypto $(LDFLAGS) 
 
 .PHONY: clean test
 
