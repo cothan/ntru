@@ -1,1 +1,1 @@
-../../avx2-hps2048677/crypto_sort_int32.c
+../../ref-common/crypto_sort_int32.c
