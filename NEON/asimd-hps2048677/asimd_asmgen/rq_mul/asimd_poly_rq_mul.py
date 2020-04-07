@@ -1,6 +1,11 @@
 from asimd_K2_K2_64x44 import K2_K2_transpose_64x44
 from pysnooper import snoop
-from "../params" import NTRU_N, NTRU_N32, NTRU_Q
+
+NTRU_N   = 677
+NTRU_N32 = 704
+NTRU_Q   = 2048
+
+
 p = print
 
 
@@ -279,11 +284,11 @@ def poly_Rq_mul(c, a, b):
                 vload(mask_1_15, 0, "mask_1_15")
                 vand(f3[3], f3[3], mask_1_15)
                 free(mask_1_15)
-                vconst(f33[3], f33[3], f33[3])
+                vxor(f33[3], f33[3], f33[3])
             if coeff == 2:
                 # replace 
                 vxor(f3[3], f3[3], f3[3])
-                vconst(f33[3], f33[3], f33[3])
+                vxor(f33[3], f33[3], f33[3])
 
             f1 = [alloc(), alloc(), alloc(), alloc()]
             f11 = [alloc(), alloc(), alloc(), alloc()]
@@ -557,9 +562,6 @@ def poly_Rq_mul(c, a, b):
 
     take6bytes = alloc() 
     vload(take6bytes, 0, "take6bytes")
-
-    shuf48_16 = alloc()
-    vload(shuf48_16, 0, "shuf48_16")
 
     mask3_5_3_5 = alloc()
     vload(mask3_5_3_5, 0, "mask3_5_3_5")
@@ -930,24 +932,21 @@ def poly_Rq_mul(c, a, b):
             get_limb(tmpp, 0, j, slide=8, off=0)
             vadd(tmp, h_lo[0], tmp)
             vadd(tmpp, h_hi[0], tmpp)
-            store_limb(tmp, 0, j, slide = 0, off= 0)
-            store_limb(tmpp, 0, j, slide= 8, off= 0)
+            store_limb((tmp, tmpp), 0, j, off= 0)
 
             get_limb(tmp, 1, j, slide=0, off=0)
             get_limb(tmpp, 1, j, slide=8, off=0)
             vadd(tmp, h_lo[1], tmp)
             vadd(tmpp, h_hi[1], tmpp)
-            store_limb(tmp, 1, j, slide=0, off=0)
-            store_limb(tmpp, 1, j, slide=8, off=0)
+            store_limb((tmp, tmpp), 1, j, off=0)
 
             for i in [2,3]:
-                for j < (7-4*(i-2)) or (j==(7-4*(i-2)) and coeff == 0):
+                if j < (7-4*(i-2)) or (j==(7-4*(i-2)) and coeff == 0):
                     get_limb(tmp, i, j, slide=0, off=0)
                     get_limb(tmpp, i, j, slide=8, off=0)
                     vadd(tmp, h_lo[i], tmp)
                     vadd(tmpp, h_hi[i], tmpp)
-                    store_limb(tmp, i, j, slide=0, off=0)
-                    store_limb(tmpp, i, j, slide=8, off=0)
+                    store_limb((tmp, tmpp), i, j, off=0)
 
             for i in [2, 3]:
                 if j == (7-4*(i-2)) and coeff == 1:
@@ -958,10 +957,9 @@ def poly_Rq_mul(c, a, b):
                     # get_limb(tmpp, i, j, slide = 8, off=0)
                     vand(tmp2, h_lo[i], mask_1_15)
                     vadd(tmp, tmp2, tmp)
-                    store_limb(tmp, i, j, slide=0, off=0)
-
                     vconst(tmp2, 0)
-                    store_limb(tmp2, i, j, slide=8, off=0)
+                    store_limb((tmp, tmp2), i, j, off=0)
+
                     
                     free(mask_1_15)
 
@@ -975,8 +973,7 @@ def poly_Rq_mul(c, a, b):
                     get_limb(tmpp, 0, 0, slide=8, off=(0-16*coeff))
                     vadd(tmp, h_lo[i], tmp)
                     vadd(tmpp, h_hi[i], tmpp)
-                    store_limb(tmp, 0, 0, slide=0, off=(0-16*coeff))
-                    store_limb(tmpp, 0, 0, slide=8, off=(0-16*coeff))
+                    store_limb((tmp, tmpp), 0, 0, off=(0-16*coeff))
 
                     free(tmp2)
             
@@ -986,41 +983,37 @@ def poly_Rq_mul(c, a, b):
                     get_limb(tmpp, 0, 0, slide=8, off=(15-16*coeff))
                     vadd(tmp, h_lo[i], tmp)
                     vadd(tmpp, h_hi[i], tmpp)
-                    store_limb(tmp, 0, 0, slide=0, off=(15-16*coeff))
-                    store_limb(tmpp, 0, 0, slide=8, off=(15-16*coeff))
+                    store_limb((tmp, tmpp), 0, 0, off=(15-16*coeff))
             
             if j >= 4:
                 get_limb(tmp, 0, j-4, slide=0, off=27)
                 get_limb(tmpp, 0, j-4, slide=8, off=27)
                 vadd(tmp, h_lo[i], tmp)
                 vadd(tmpp, h_hi[i], tmpp)
-                store_limb(tmp, 0, j-4, side=0, off=27)
-                store_limb(tmpp, 0, j-4, slide=8, off=27)
+                store_limb((tmp,tmpp) , 0, j-4, off=27)
 
             get_limb(tmp, 0, j, slide = 0, off=27)
             get_limb(tmpp, 0, j, slide =8, off=27)
             vadd(tmp, h_lo[4], tmp)
             vadd(tmpp, h_hi[4], tmpp)
-            store_limb(tmp, 0, j, silde=0, off=27)
-            store_limb(tmpp, 0, j, slide=8, off=27)
+            store_limb((tmp, tmpp), 0, j, off=27)
 
             get_limb(tmp, 1, j, slide = 0, off=27)
             get_limb(tmpp, 1, j, slide =8, off=27)
             vadd(tmp, h_lo[5], tmp)
             vadd(tmpp, h_hi[5], tmpp)
-            store_limb(tmp, 1, j, silde=0, off=27)
-            store_limb(tmpp, 1, j, slide=8, off=27)
+            store_limb((tmp, tmpp), 1, j, off=27)
 
             if j < 7 or (j == 7 and coeff == 0):
                 get_limb(tmp, 2, j, slide = 0, off=27)
                 get_limb(tmpp, 2, j, slide =8, off=27)
                 vadd(tmp, h_lo[6], tmp)
                 vadd(tmpp, h_hi[6], tmpp)
-                store_limb(tmp, 2, j, silde=0, off=27)
-                store_limb(tmpp, 2, j, slide=8, off=27)
+                store_limb((tmp, tmpp), 2, j, off=27)
 
             free(tmp, tmpp)
-            freelist(h_lo, h_hi)
+            freelist(h_lo)
+            freelist(h_hi)
 
 if __name__ == "__main__":
     p("""#include <arm_neon.h>
