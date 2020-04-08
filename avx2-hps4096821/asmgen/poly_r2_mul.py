@@ -23,57 +23,57 @@ def mult_128x128(xy, x, y, t1, t2):
 def karatsuba_256x256(ab, a, b, t0, t1, t2, t3, t4):
     """assumes a and b are two ymm registers"""
     z0, z2 = ab
-    p("vextracti128 $1, %ymm{}, %xmm{}".format(a, t0))
-    p("vextracti128 $1, %ymm{}, %xmm{}".format(b, t1))
-    # t0 = aa, t1 = bb
-    mult_128x128(z2, t0, t1, t3, t4)
+    a0, a1 = a, t0
+    b0, b1 = b, t1
+    z1 = t2
+    p("vextracti128 $1, %ymm{}, %xmm{}".format(a, a1))
+    p("vextracti128 $1, %ymm{}, %xmm{}".format(b, b1))
+    mult_128x128(z2, a1, b1, t3, t4)
 
-    p("vpxor %xmm{}, %xmm{}, %xmm{}".format(a, t0, t0))  # t0 contains [0][a xor t0]
-    p("vpxor %xmm{}, %xmm{}, %xmm{}".format(b, t1, t1))
-    mult_128x128(t2, t0, t1, t3, t4)
-    mult_128x128(z0, a, b, t3, t4)
+    p("vpxor %xmm{}, %xmm{}, %xmm{}".format(a0, a1, a1))  # a1 contains [0][a0 xor a1]
+    p("vpxor %xmm{}, %xmm{}, %xmm{}".format(b0, b1, b1))
+    mult_128x128(z1, a1, b1, t3, t4)
+    mult_128x128(z0, a0, b0, t3, t4)
 
-    # t22|t2 ^ z22|z2 = t22^z22 | t2 ^ z2 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t2, z2, t2))
-    # t22|t2 ^ z00|z0 = t22^z00 | t2 ^ z0 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t2, z0, t2))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(z1, z2, z1))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(z1, z0, z1))
 
-    ###
-
-    # put top half of t2 into t (contains [0][z1top])
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0)) # t0 = 0 | 0
-    p("vextracti128 $1, %ymm{}, %xmm{}".format(t2, t0)) # t0 = t22 | 0
-    # 
-    # z22|z2 ^ t22|0 = z22^t22|z2  
+    # put top half of z1 into t (contains [0][z1top])
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0))
+    p("vextracti128 $1, %ymm{}, %xmm{}".format(z1, t0))
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(z2, t0, z2))  # compose into z2
 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0)) # t0 = 0|0
-    p("vinserti128 $1, %xmm{}, %ymm{}, %ymm{}".format(t2, t0, t0)) #t0 = t2 | 0
-    # z00 | z0 ^ t00| t0 = z00 ^ t2 | z0 ^ 0 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, z0, z0)) 
-
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, t0, t0))
+    p("vinserti128 $1, %xmm{}, %ymm{}, %ymm{}".format(z1, t0, t0))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t0, z0, z0))
     # ~512bit result is now in z2 and z0
+
 
 def karatsuba_512x512(w, ab, xy, t0, t1, t2, t3, t4, t5, t6):
     """ w: 4 ymm reg. ab: 2 ymm reg. xy: 2 ymm reg. t*: 1 ymm reg """
-    a, b = ab
-    x, y = xy
+    a, b = ab[0], ab[1]
+    x, y = xy[0], xy[1]
 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(a, b, t5))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(x, y, t6))
+    aPb = t5
+    xPy = t6
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(a, b, aPb))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(x, y, xPy))
 
-    karatsuba_256x256((w[0], w[1]), a, x, t0, t1, t2, t3, t4)
+    aTx = w[0], w[1]
+    karatsuba_256x256(aTx, a, x, t0, t1, t2, t3, t4)
 
-    karatsuba_256x256((w[2], w[3]), b, y, t0, t1, t2, t3, t4)
+    bTy = w[2], w[3]
+    karatsuba_256x256(bTy, b, y, t0, t1, t2, t3, t4)
 
-    karatsuba_256x256((a,b), t5, t6, t0, t1, t2, t3, t4)
+    aPbTxPy = ab
+    karatsuba_256x256(aPbTxPy, aPb, xPy, t0, t1, t2, t3, t4)
 
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(w[0], a, a))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(w[1], b, b))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(w[2], a, a))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(w[3], b, b))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(a, w[1], w[1]))
-    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(b, w[2], w[2]))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(aTx[0], aPbTxPy[0], aPbTxPy[0]))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(aTx[1], aPbTxPy[1], aPbTxPy[1]))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(bTy[0], aPbTxPy[0], aPbTxPy[0]))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(bTy[1], aPbTxPy[1], aPbTxPy[1]))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(aPbTxPy[0], w[1], w[1]))
+    p("vpxor %ymm{}, %ymm{}, %ymm{}".format(aPbTxPy[1], w[2], w[2]))
 
 def store_1024(w, ptr="%rdi"):
     p("vmovdqa %ymm{}, {}({})".format(w[0], 32*0, ptr))
@@ -88,12 +88,8 @@ def load_1024(w, ptr="%rdi"):
     p("vmovdqa {}({}), %ymm{}".format(32*3, ptr, w[3]))
 
 def vec256_sr53(r, a, t):
-    # aa|0a & ff|f0 = aa | a&0xf0 
-    # rr = aa, r = a & 0xf0
     p("vpand mask1110(%rip), %ymm{}, %ymm{}".format(a, r))
-
     p("vpsllq ${}, %ymm{}, %ymm{}".format(11, r, r))
-    
     p("vpermq ${}, %ymm{}, %ymm{}".format(int('00''11''10''01', 2), r, r))
     p("vpsrlq ${}, %ymm{}, %ymm{}".format(53, a, t))
     p("vpxor %ymm{}, %ymm{}, %ymm{}".format(t, r, r))
