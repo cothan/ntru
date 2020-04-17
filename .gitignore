@@ -5,3 +5,5 @@ NEON/asimd-hrss701/asimd_asmgen/rq_mul/__pycache__/asimd_tranpose.cpython-37.pyc
 NEON/asimd-hps2048677/asimd_asmgen/rq_mul/.vscode/settings.json
 NEON/.vscode/settings.json
 NEON/asimd-hps2048677/asimd_asmgen/rq_mul/.vscode/settings.json
+NEON/asimd-hps4096821/asimd_asmgen/rq_mul/__pycache__/asimd_schoolbook_64x13.cpython-37.pyc
+NEON/asimd-hps4096821/asimd_asmgen/rq_mul/__pycache__/asimd_transpose.cpython-37.pyc

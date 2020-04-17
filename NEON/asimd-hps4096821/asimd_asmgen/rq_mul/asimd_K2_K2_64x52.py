@@ -9,6 +9,7 @@ def vload(dst, address, src):
 
 def vstore(address, dst, src):
     p("vst1q_u16({} + {}, y{});".format(address, dst, src))
+    
 
 def vadd(c, a, b):
     # c =  a + b
@@ -155,10 +156,10 @@ def done(t0, t1, t2):
 
             vload(t2[j], 16*(t2_in_rsp+39+i) + slide, "rsp")
             if j == 0:
-                vsub(4 + i, t1, t2[j])
+                vsub(4 + i, t1[j], t2[j])
                 save.append(4 + i)
             else:
-                vsub(12 + 4 + i, t1, t2[j])
+                vsub(12 + 4 + i, t1[j], t2[j])
                 save.append(16 + 4 + i)
             
             # t2 is free
@@ -203,7 +204,7 @@ def done(t0, t1, t2):
                     tt1 = 12 + 4 + i
             else:
                 tt1 = 28
-                vload(t1, 16*(t2_in_rsp+26+i) + slide, "rsp")
+                vload(t1[j], 16*(t2_in_rsp+26+i) + slide, "rsp")
 
             vsub(tt1, tt1, t0[j])
 
@@ -212,7 +213,7 @@ def done(t0, t1, t2):
 
             vload(t2[j], 16*(t2_in_rsp+i) + slide, "rsp")
             vadd(t0[j], t0[j], t2[j])
-            vstore(16*(26+i+r_off) + slide, r_mem, t0)
+            vstore(16*(26+i+r_off) + slide, r_mem, t0[j])
             vstore(16*(52+i+r_off) + slide, r_mem, tt1)
 
             slide = 8
@@ -283,6 +284,7 @@ if __name__ == '__main__':
 void K2_K2_schoolbook_64x52coef(uint16_t *c, uint16_t *a, uint16_t *b, uint16_t *sharestack)
 {
     uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31;
+    uint16x8_t y32, y33, y34, y35;
     """)
     K2_K2_transpose_64x52('c', 'a', 'b', transpose_input=True)
     p("{} -= {};".format(r_real, 2 * (2*16 * coeffs*2)))
