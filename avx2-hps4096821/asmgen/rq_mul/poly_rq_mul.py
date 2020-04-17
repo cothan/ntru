@@ -9,16 +9,21 @@ def karatsuba_eval(dst, dst_off, coeff, src, t0, t1):
     p("vmovdqa %ymm{}, {}({})".format(src[0], (dst_off+4*0+coeff)*32, dst))  # a[0:]
     p("vmovdqa %ymm{}, {}({})".format(src[1], (dst_off+4*1+coeff)*32, dst))  # a[44:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(src[0], src[1], t0))
+
     p("vmovdqa %ymm{}, {}({})".format(t0, (dst_off+4*2+coeff)*32, dst))  # s1[0:]
     p("vmovdqa %ymm{}, {}({})".format(src[2], (dst_off+4*3+coeff)*32, dst))  # a[88:]
     p("vmovdqa %ymm{}, {}({})".format(src[3], (dst_off+4*4+coeff)*32, dst))  # a[132:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(src[2], src[3], t0))
+
     p("vmovdqa %ymm{}, {}({})".format(t0, (dst_off+4*5+coeff)*32, dst))  # s2[0:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(src[0], src[2], t0))
+
     p("vmovdqa %ymm{}, {}({})".format(t0, (dst_off+4*6+coeff)*32, dst))  # s0[0:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(src[1], src[3], t1))
+
     p("vmovdqa %ymm{}, {}({})".format(t1, (dst_off+4*7+coeff)*32, dst))  # s0[44:]
     p("vpaddw %ymm{}, %ymm{}, %ymm{}".format(t0, t1, t0))
+
     p("vmovdqa %ymm{}, {}({})".format(t0, (dst_off+4*8+coeff)*32, dst))  # s3[0:]
 
 
@@ -90,13 +95,13 @@ def karatsuba_interpolate(dst, dst_off, src, src_off, coeff):
     p("vmovdqa {}, %ymm{}".format(addr(4, 52), out3_52))
 
     # TODO should move these up in between computations for better pipelining?
-    p("vmovdqa %ymm{}, {}({})".format(out0_0, (dst_off+2*0+0)*32, dst))
+    p("vmovdqa %ymm{}, {}({})".format(out0_0,  (dst_off+2*0+0)*32, dst))
     p("vmovdqa %ymm{}, {}({})".format(out0_52, (dst_off+2*0+1)*32, dst))
-    p("vmovdqa %ymm{}, {}({})".format(out1_0, (dst_off+2*1+0)*32, dst))
+    p("vmovdqa %ymm{}, {}({})".format(out1_0,  (dst_off+2*1+0)*32, dst))
     p("vmovdqa %ymm{}, {}({})".format(out1_52, (dst_off+2*1+1)*32, dst))
-    p("vmovdqa %ymm{}, {}({})".format(out2_0, (dst_off+2*2+0)*32, dst))
+    p("vmovdqa %ymm{}, {}({})".format(out2_0,  (dst_off+2*2+0)*32, dst))
     p("vmovdqa %ymm{}, {}({})".format(out2_52, (dst_off+2*2+1)*32, dst))
-    p("vmovdqa %ymm{}, {}({})".format(out3_0, (dst_off+2*3+0)*32, dst))
+    p("vmovdqa %ymm{}, {}({})".format(out3_0,  (dst_off+2*3+0)*32, dst))
     p("vmovdqa %ymm{}, {}({})".format(out3_52, (dst_off+2*3+1)*32, dst))
 
 
