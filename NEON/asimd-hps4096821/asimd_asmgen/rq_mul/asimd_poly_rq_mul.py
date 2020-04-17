@@ -531,7 +531,7 @@ def poly_Rq_mul(r, a, b):
             freelist(f33)
 
     # Calling external function will clear preset registers 
-    p("K2_K2_transpose_64x44({}, {}, {}, rsp);".format(r_out, a_prep, b_prep))
+    p("K2_K2_transpose_64x52({}, {}, {}, rsp);".format(r_out, a_prep, b_prep))
 
     print('// remain {}'.format(check()))
 

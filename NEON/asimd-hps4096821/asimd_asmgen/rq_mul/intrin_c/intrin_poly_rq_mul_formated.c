@@ -3753,7 +3753,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3384 + r11, y9);
   y8 = vaddq_u16(y9, y8);
   vst1q_u16(3448 + r11, y8);
-  K2_K2_transpose_64x44(r12, rax, r11, rsp);
+  K2_K2_transpose_64x52(r12, rax, r11, rsp);
   // remain 32
   y23 = vdupq_n_u16(4095);
   y22 = vld1q_u16(0 + mask32_to_16);
