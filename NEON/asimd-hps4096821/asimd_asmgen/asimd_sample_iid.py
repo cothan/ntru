@@ -17,8 +17,7 @@ p("#include <arm_neon.h>\n")
 p("void sample_iid(poly *r, const unsigned char uniformbytes[NTRU_SAMPLE_IID_BYTES]){")
 
 p(" uint16x8_t y0, y1, y2, y3, y4, y5, y6; ")
-p(" int16x8_t y7, y8, y9, y10; ")
-p(" uint16x8_t y11, y12, y13, y14, y15; ")
+p(" int16x8_t y7, y8, y9, y10, y11; ")
 
 
 # three = 3
