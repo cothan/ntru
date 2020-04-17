@@ -58,7 +58,7 @@ def schoolbook_64x13(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive=Fa
             a_reg, b_reg = alloc(), alloc()
 
             vload(a_reg, 16*(i + a_off) + slide, a_mem)
-            vload(b_reg, 16*(i + a_off) + slide, b_mem)
+            vload(b_reg, 16*(i + b_off) + slide, b_mem)
 
             if additive:
                 vload(t0, 16*(i + a_off + 13) + slide, a_mem)
@@ -72,8 +72,8 @@ def schoolbook_64x13(r_mem, a_mem, b_mem, r_off=0, a_off=0, b_off=0, additive=Fa
             slide = 8
 
     p("// remain: {}".format(check()))
-    print(a_regs)
-    print(b_regs)
+    # print(a_regs)
+    # print(b_regs)
 
     for i in range(13):
         first = True
