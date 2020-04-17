@@ -39,9 +39,9 @@ b_in_rsp = a_in_rsp + 26
 t2_in_rsp = b_in_rsp + 26
 coeffs = 52
 
-a_off, b_off, r_off = "", "", ""
-a_mem, b_mem, r_mem = "", "", ""
-a_real, b_real, r_real = "a", "b", "c"
+a_off, b_off, r_off = "--", "--", "--"
+a_mem, b_mem, r_mem = "--", "--", "--"
+a_real, b_real, r_real = "--", "--", "--"
 ecx = 4
 
 
@@ -49,6 +49,7 @@ def karatsuba_loop(transpose=True):
     global a_off, b_off, r_off
     global a_mem, b_mem, r_mem
     global coeffs
+    global a_transpose, b_transpose, r_transpose
 
     if transpose:
         a_off = a_transpose
@@ -73,6 +74,8 @@ def karatsuba_loop(transpose=True):
 def innerloop(t0, t1, t2):
     global a_off, b_off, r_off
     global a_mem, b_mem, r_mem
+
+    p("// {} {}".format(a_off, b_off))
 
     mul_64x13(r_mem, a_mem, b_mem, r_off, a_off, b_off)
     mul_64x13(r_mem, a_mem, b_mem, r_off+26, a_off+13, b_off+13)
@@ -228,7 +231,7 @@ def done(t0, t1, t2):
     ecx -= 1
 
 
-def K2_K2_transpose_64x52(r_real_in='c', a_real_in='a', b_real_in='b', coeffs_input=52, transpose_input=True, offset=1234):
+def K2_K2_transpose_64x52(r_real_in='c', a_real_in='a', b_real_in='b', coeffs_input=52, transpose_input=True, offset=33280):
     global coeffs
     global transpose 
     global r_real, a_real, b_real
