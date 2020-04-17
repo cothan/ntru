@@ -65,7 +65,7 @@ def vext(c, a, b, n):
     p("y{} = vextq_u16(y{}, y{}, {});".format(c, a, b, n))
 
 
-registers = [i for i in range(31, -1, -1)]
+registers = [i for i in range(29, -1, -1)]
 
 def free(*regs):
     for index, x in enumerate(regs):
@@ -531,7 +531,7 @@ def poly_Rq_mul(r, a, b):
             freelist(f33)
 
     # Calling external function will clear preset registers 
-    p("K2_K2_transpose_64x52({}, {}, {}, rsp);".format(r_out, a_prep, b_prep))
+    p("K2_K2_schoolbook_64x52coef({}, {}, {}, rsp);".format(r_out, a_prep, b_prep))
 
     print('// remain {}'.format(check()))
 
@@ -1029,7 +1029,7 @@ if __name__ == "__main__":
 
 void poly_Rq_mul(poly *c, const poly *a, const poly *b)
 {
-    uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31;
+    uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29;
     """)
     poly_Rq_mul('c->coeffs', 'a->coeffs', 'b->coeffs')
     p("}\n")

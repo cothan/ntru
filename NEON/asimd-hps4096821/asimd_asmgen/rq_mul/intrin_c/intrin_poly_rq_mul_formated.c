@@ -4,10 +4,9 @@
 
 void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   uint16x8_t y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14,
-      y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29,
-      y30, y31;
+      y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29;
 
-  // poly_Rq_mul: 32
+  // poly_Rq_mul: 30
   const uint16_t mask_9_7[8] = {0xffff, 0, 0, 0, 0, 0, 0, 0};
   const uint16_t mask32_to_16[8] = {0xffff, 0, 0xffff, 0, 0xffff, 0, 0xffff, 0};
   const uint16_t mask_7_9[8] = {0xffff, 0xffff, 0xffff, 0xffff,
@@ -121,7 +120,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(808 + c->coeffs, y0);
   vst1q_u16(816 + c->coeffs, y0);
   vst1q_u16(824 + c->coeffs, y0);
-  // register len 32
+  // register len 30
   y0 = vld1q_u16(0 + a->coeffs);
   y4 = vld1q_u16(8 + a->coeffs);
   y1 = vld1q_u16(52 + a->coeffs);
@@ -574,7 +573,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3336 + rax, y6);
   y7 = vaddq_u16(y6, y7);
   vst1q_u16(3400 + rax, y7);
-  // register len 32
+  // register len 30
   y15 = vld1q_u16(16 + a->coeffs);
   y11 = vld1q_u16(24 + a->coeffs);
   y14 = vld1q_u16(68 + a->coeffs);
@@ -1027,7 +1026,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3352 + rax, y9);
   y8 = vaddq_u16(y9, y8);
   vst1q_u16(3416 + rax, y8);
-  // register len 32
+  // register len 30
   y23 = vld1q_u16(32 + a->coeffs);
   y19 = vld1q_u16(40 + a->coeffs);
   y22 = vld1q_u16(84 + a->coeffs);
@@ -1482,7 +1481,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3368 + rax, y17);
   y16 = vaddq_u16(y17, y16);
   vst1q_u16(3432 + rax, y16);
-  // register len 32
+  // register len 30
   y0 = vld1q_u16(48 + a->coeffs);
   y4 = vld1q_u16(56 + a->coeffs);
   y1 = vld1q_u16(100 + a->coeffs);
@@ -1937,7 +1936,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3384 + rax, y7);
   y6 = vaddq_u16(y7, y6);
   vst1q_u16(3448 + rax, y6);
-  // register len 32
+  // register len 30
   y15 = vld1q_u16(0 + b->coeffs);
   y11 = vld1q_u16(8 + b->coeffs);
   y14 = vld1q_u16(52 + b->coeffs);
@@ -2390,7 +2389,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3336 + r11, y8);
   y9 = vaddq_u16(y8, y9);
   vst1q_u16(3400 + r11, y9);
-  // register len 32
+  // register len 30
   y23 = vld1q_u16(16 + b->coeffs);
   y19 = vld1q_u16(24 + b->coeffs);
   y22 = vld1q_u16(68 + b->coeffs);
@@ -2843,7 +2842,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3352 + r11, y16);
   y17 = vaddq_u16(y16, y17);
   vst1q_u16(3416 + r11, y17);
-  // register len 32
+  // register len 30
   y0 = vld1q_u16(32 + b->coeffs);
   y4 = vld1q_u16(40 + b->coeffs);
   y1 = vld1q_u16(84 + b->coeffs);
@@ -3298,7 +3297,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3368 + r11, y6);
   y7 = vaddq_u16(y6, y7);
   vst1q_u16(3432 + r11, y7);
-  // register len 32
+  // register len 30
   y15 = vld1q_u16(48 + b->coeffs);
   y11 = vld1q_u16(56 + b->coeffs);
   y14 = vld1q_u16(100 + b->coeffs);
@@ -3753,11 +3752,11 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(3384 + r11, y9);
   y8 = vaddq_u16(y9, y8);
   vst1q_u16(3448 + r11, y8);
-  K2_K2_transpose_64x52(r12, rax, r11, rsp);
-  // remain 32
+  K2_K2_schoolbook_64x52coef(r12, rax, r11, rsp);
+  // remain 30
   y23 = vdupq_n_u16(4095);
   y22 = vld1q_u16(0 + mask32_to_16);
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
   y18 = vld1q_u16(48 + r12);
   y21 = vld1q_u16(96 + r12);
   y18 = vsubq_u16(y18, y21);
@@ -3876,8 +3875,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(88 + rsp, y1);
   vst1q_u16(104 + rsp, y6);
   vst1q_u16(120 + rsp, y2);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y3 = vld1q_u16(1200 + r12);
   y21 = vld1q_u16(1248 + r12);
   y3 = vsubq_u16(y3, y21);
@@ -3996,8 +3995,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(216 + rsp, y18);
   vst1q_u16(232 + rsp, y6);
   vst1q_u16(248 + rsp, y4);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y7 = vld1q_u16(2352 + r12);
   y21 = vld1q_u16(2400 + r12);
   y7 = vsubq_u16(y7, y21);
@@ -4116,8 +4115,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(344 + rsp, y3);
   vst1q_u16(360 + rsp, y6);
   vst1q_u16(376 + rsp, y17);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y1 = vld1q_u16(3504 + r12);
   y21 = vld1q_u16(3552 + r12);
   y1 = vsubq_u16(y1, y21);
@@ -4236,8 +4235,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(472 + rsp, y7);
   vst1q_u16(488 + rsp, y6);
   vst1q_u16(504 + rsp, y16);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y18 = vld1q_u16(4656 + r12);
   y21 = vld1q_u16(4704 + r12);
   y18 = vsubq_u16(y18, y21);
@@ -4356,8 +4355,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(600 + rsp, y1);
   vst1q_u16(616 + rsp, y6);
   vst1q_u16(632 + rsp, y2);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y3 = vld1q_u16(5808 + r12);
   y21 = vld1q_u16(5856 + r12);
   y3 = vsubq_u16(y3, y21);
@@ -4476,8 +4475,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(728 + rsp, y18);
   vst1q_u16(744 + rsp, y6);
   vst1q_u16(760 + rsp, y4);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y7 = vld1q_u16(6960 + r12);
   y21 = vld1q_u16(7008 + r12);
   y7 = vsubq_u16(y7, y21);
@@ -4596,8 +4595,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(856 + rsp, y3);
   vst1q_u16(872 + rsp, y6);
   vst1q_u16(888 + rsp, y17);
-  // karatsuba_interpolate: 27
-  // 0 576: 30
+  // karatsuba_interpolate: 25
+  // 0 576: 28
   y19 = vld1q_u16(0 + rsp);
   y20 = vld1q_u16(8 + rsp);
   y21 = vshlq_n_u32(y19, 1);
@@ -4744,7 +4743,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y2 = vandq_u16(y2, y23);
   vst1q_u16(427 + c->coeffs, y5);
   vst1q_u16(435 + c->coeffs, y2);
-  // 1 576: 30
+  // 1 576: 28
   y4 = vld1q_u16(16 + rsp);
   y8 = vld1q_u16(24 + rsp);
   y18 = vshlq_n_u32(y4, 1);
@@ -4891,7 +4890,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y16 = vandq_u16(y16, y23);
   vst1q_u16(479 + c->coeffs, y9);
   vst1q_u16(487 + c->coeffs, y16);
-  // 2 576: 30
+  // 2 576: 28
   y21 = vld1q_u16(32 + rsp);
   y5 = vld1q_u16(40 + rsp);
   y0 = vshlq_n_u32(y21, 1);
@@ -5038,7 +5037,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y1 = vandq_u16(y1, y23);
   vst1q_u16(531 + c->coeffs, y2);
   vst1q_u16(539 + c->coeffs, y1);
-  // 3 576: 30
+  // 3 576: 28
   y18 = vld1q_u16(48 + rsp);
   y9 = vld1q_u16(56 + rsp);
   y19 = vshlq_n_u32(y18, 1);
@@ -5185,7 +5184,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y7 = vandq_u16(y7, y23);
   vst1q_u16(583 + c->coeffs, y16);
   vst1q_u16(591 + c->coeffs, y7);
-  // 4 576: 30
+  // 4 576: 28
   y0 = vld1q_u16(64 + rsp);
   y2 = vld1q_u16(72 + rsp);
   y4 = vshlq_n_u32(y0, 1);
@@ -5332,7 +5331,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y6 = vandq_u16(y6, y23);
   vst1q_u16(635 + c->coeffs, y1);
   vst1q_u16(643 + c->coeffs, y6);
-  // 5 576: 30
+  // 5 576: 28
   y19 = vld1q_u16(80 + rsp);
   y16 = vld1q_u16(88 + rsp);
   y21 = vshlq_n_u32(y19, 1);
@@ -5479,7 +5478,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y20 = vandq_u16(y20, y23);
   vst1q_u16(687 + c->coeffs, y7);
   vst1q_u16(695 + c->coeffs, y20);
-  // 6 576: 30
+  // 6 576: 28
   y4 = vld1q_u16(96 + rsp);
   y1 = vld1q_u16(104 + rsp);
   y18 = vshlq_n_u32(y4, 1);
@@ -5626,7 +5625,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y8 = vandq_u16(y8, y23);
   vst1q_u16(739 + c->coeffs, y6);
   vst1q_u16(747 + c->coeffs, y8);
-  // 7 576: 30
+  // 7 576: 28
   y21 = vld1q_u16(112 + rsp);
   y7 = vld1q_u16(120 + rsp);
   y0 = vshlq_n_u32(y21, 1);
@@ -5773,7 +5772,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y5 = vandq_u16(y5, y23);
   vst1q_u16(791 + c->coeffs, y20);
   vst1q_u16(799 + c->coeffs, y5);
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
   y16 = vld1q_u16(64 + r12);
   y18 = vld1q_u16(112 + r12);
   y16 = vsubq_u16(y16, y18);
@@ -5892,8 +5891,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(88 + rsp, y1);
   vst1q_u16(104 + rsp, y7);
   vst1q_u16(120 + rsp, y2);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y4 = vld1q_u16(1216 + r12);
   y18 = vld1q_u16(1264 + r12);
   y4 = vsubq_u16(y4, y18);
@@ -6012,8 +6011,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(216 + rsp, y16);
   vst1q_u16(232 + rsp, y7);
   vst1q_u16(248 + rsp, y9);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y3 = vld1q_u16(2368 + r12);
   y18 = vld1q_u16(2416 + r12);
   y3 = vsubq_u16(y3, y18);
@@ -6132,8 +6131,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(344 + rsp, y4);
   vst1q_u16(360 + rsp, y7);
   vst1q_u16(376 + rsp, y0);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y1 = vld1q_u16(3520 + r12);
   y18 = vld1q_u16(3568 + r12);
   y1 = vsubq_u16(y1, y18);
@@ -6252,8 +6251,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(472 + rsp, y3);
   vst1q_u16(488 + rsp, y7);
   vst1q_u16(504 + rsp, y17);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y16 = vld1q_u16(4672 + r12);
   y18 = vld1q_u16(4720 + r12);
   y16 = vsubq_u16(y16, y18);
@@ -6372,8 +6371,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(600 + rsp, y1);
   vst1q_u16(616 + rsp, y7);
   vst1q_u16(632 + rsp, y2);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y4 = vld1q_u16(5824 + r12);
   y18 = vld1q_u16(5872 + r12);
   y4 = vsubq_u16(y4, y18);
@@ -6492,8 +6491,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(728 + rsp, y16);
   vst1q_u16(744 + rsp, y7);
   vst1q_u16(760 + rsp, y9);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y3 = vld1q_u16(6976 + r12);
   y18 = vld1q_u16(7024 + r12);
   y3 = vsubq_u16(y3, y18);
@@ -6612,8 +6611,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(856 + rsp, y4);
   vst1q_u16(872 + rsp, y7);
   vst1q_u16(888 + rsp, y0);
-  // karatsuba_interpolate: 27
-  // 0 576: 30
+  // karatsuba_interpolate: 25
+  // 0 576: 28
   y19 = vld1q_u16(0 + rsp);
   y6 = vld1q_u16(8 + rsp);
   y18 = vshlq_n_u32(y19, 1);
@@ -6760,7 +6759,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y2 = vandq_u16(y2, y23);
   vst1q_u16(443 + c->coeffs, y8);
   vst1q_u16(451 + c->coeffs, y2);
-  // 1 576: 30
+  // 1 576: 28
   y9 = vld1q_u16(16 + rsp);
   y20 = vld1q_u16(24 + rsp);
   y16 = vshlq_n_u32(y9, 1);
@@ -6907,7 +6906,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y17 = vandq_u16(y17, y23);
   vst1q_u16(495 + c->coeffs, y5);
   vst1q_u16(503 + c->coeffs, y17);
-  // 2 576: 30
+  // 2 576: 28
   y18 = vld1q_u16(32 + rsp);
   y8 = vld1q_u16(40 + rsp);
   y21 = vshlq_n_u32(y18, 1);
@@ -7054,7 +7053,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y1 = vandq_u16(y1, y23);
   vst1q_u16(547 + c->coeffs, y2);
   vst1q_u16(555 + c->coeffs, y1);
-  // 3 576: 30
+  // 3 576: 28
   y16 = vld1q_u16(48 + rsp);
   y5 = vld1q_u16(56 + rsp);
   y19 = vshlq_n_u32(y16, 1);
@@ -7201,7 +7200,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y3 = vandq_u16(y3, y23);
   vst1q_u16(599 + c->coeffs, y17);
   vst1q_u16(607 + c->coeffs, y3);
-  // 4 576: 30
+  // 4 576: 28
   y21 = vld1q_u16(64 + rsp);
   y2 = vld1q_u16(72 + rsp);
   y9 = vshlq_n_u32(y21, 1);
@@ -7348,7 +7347,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y7 = vandq_u16(y7, y23);
   vst1q_u16(651 + c->coeffs, y1);
   vst1q_u16(659 + c->coeffs, y7);
-  // 5 576: 30
+  // 5 576: 28
   y19 = vld1q_u16(80 + rsp);
   y17 = vld1q_u16(88 + rsp);
   y18 = vshlq_n_u32(y19, 1);
@@ -7495,7 +7494,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y6 = vandq_u16(y6, y23);
   vst1q_u16(703 + c->coeffs, y3);
   vst1q_u16(711 + c->coeffs, y6);
-  // 6 576: 30
+  // 6 576: 28
   y9 = vld1q_u16(96 + rsp);
   y1 = vld1q_u16(104 + rsp);
   y16 = vshlq_n_u32(y9, 1);
@@ -7642,7 +7641,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y20 = vandq_u16(y20, y23);
   vst1q_u16(755 + c->coeffs, y7);
   vst1q_u16(763 + c->coeffs, y20);
-  // 7 576: 30
+  // 7 576: 28
   y18 = vld1q_u16(112 + rsp);
   y3 = vld1q_u16(120 + rsp);
   y21 = vshlq_n_u32(y18, 1);
@@ -7789,7 +7788,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y8 = vandq_u16(y8, y23);
   vst1q_u16(807 + c->coeffs, y6);
   vst1q_u16(815 + c->coeffs, y8);
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
   y17 = vld1q_u16(80 + r12);
   y16 = vld1q_u16(128 + r12);
   y17 = vsubq_u16(y17, y16);
@@ -7908,8 +7907,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(88 + rsp, y1);
   vst1q_u16(104 + rsp, y3);
   vst1q_u16(120 + rsp, y2);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y9 = vld1q_u16(1232 + r12);
   y16 = vld1q_u16(1280 + r12);
   y9 = vsubq_u16(y9, y16);
@@ -8028,8 +8027,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(216 + rsp, y17);
   vst1q_u16(232 + rsp, y3);
   vst1q_u16(248 + rsp, y5);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y4 = vld1q_u16(2384 + r12);
   y16 = vld1q_u16(2432 + r12);
   y4 = vsubq_u16(y4, y16);
@@ -8148,8 +8147,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(344 + rsp, y9);
   vst1q_u16(360 + rsp, y3);
   vst1q_u16(376 + rsp, y21);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y1 = vld1q_u16(3536 + r12);
   y16 = vld1q_u16(3584 + r12);
   y1 = vsubq_u16(y1, y16);
@@ -8268,8 +8267,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(472 + rsp, y4);
   vst1q_u16(488 + rsp, y3);
   vst1q_u16(504 + rsp, y0);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y17 = vld1q_u16(4688 + r12);
   y16 = vld1q_u16(4736 + r12);
   y17 = vsubq_u16(y17, y16);
@@ -8388,8 +8387,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(600 + rsp, y1);
   vst1q_u16(616 + rsp, y3);
   vst1q_u16(632 + rsp, y2);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y9 = vld1q_u16(5840 + r12);
   y16 = vld1q_u16(5888 + r12);
   y9 = vsubq_u16(y9, y16);
@@ -8508,8 +8507,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(728 + rsp, y17);
   vst1q_u16(744 + rsp, y3);
   vst1q_u16(760 + rsp, y5);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y4 = vld1q_u16(6992 + r12);
   y16 = vld1q_u16(7040 + r12);
   y4 = vsubq_u16(y4, y16);
@@ -8628,8 +8627,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(856 + rsp, y9);
   vst1q_u16(872 + rsp, y3);
   vst1q_u16(888 + rsp, y21);
-  // karatsuba_interpolate: 27
-  // 0 576: 30
+  // karatsuba_interpolate: 25
+  // 0 576: 28
   y19 = vld1q_u16(0 + rsp);
   y7 = vld1q_u16(8 + rsp);
   y16 = vshlq_n_u32(y19, 1);
@@ -8776,7 +8775,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y2 = vandq_u16(y2, y23);
   vst1q_u16(459 + c->coeffs, y20);
   vst1q_u16(467 + c->coeffs, y2);
-  // 1 576: 30
+  // 1 576: 28
   y5 = vld1q_u16(16 + rsp);
   y6 = vld1q_u16(24 + rsp);
   y17 = vshlq_n_u32(y5, 1);
@@ -8923,7 +8922,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y0 = vandq_u16(y0, y23);
   vst1q_u16(511 + c->coeffs, y8);
   vst1q_u16(519 + c->coeffs, y0);
-  // 2 576: 30
+  // 2 576: 28
   y16 = vld1q_u16(32 + rsp);
   y20 = vld1q_u16(40 + rsp);
   y18 = vshlq_n_u32(y16, 1);
@@ -9070,7 +9069,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y1 = vandq_u16(y1, y23);
   vst1q_u16(563 + c->coeffs, y2);
   vst1q_u16(571 + c->coeffs, y1);
-  // 3 576: 30
+  // 3 576: 28
   y17 = vld1q_u16(48 + rsp);
   y8 = vld1q_u16(56 + rsp);
   y19 = vshlq_n_u32(y17, 1);
@@ -9225,7 +9224,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y4 = vandq_u16(y4, y23);
   vst1q_u16(615 + c->coeffs, y0);
   vst1q_u16(623 + c->coeffs, y4);
-  // 4 576: 30
+  // 4 576: 28
   y18 = vld1q_u16(64 + rsp);
   y2 = vld1q_u16(72 + rsp);
   y5 = vshlq_n_u32(y18, 1);
@@ -9372,7 +9371,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y3 = vandq_u16(y3, y23);
   vst1q_u16(667 + c->coeffs, y1);
   vst1q_u16(675 + c->coeffs, y3);
-  // 5 576: 30
+  // 5 576: 28
   y19 = vld1q_u16(80 + rsp);
   y0 = vld1q_u16(88 + rsp);
   y16 = vshlq_n_u32(y19, 1);
@@ -9519,7 +9518,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y7 = vandq_u16(y7, y23);
   vst1q_u16(719 + c->coeffs, y4);
   vst1q_u16(727 + c->coeffs, y7);
-  // 6 576: 30
+  // 6 576: 28
   y5 = vld1q_u16(96 + rsp);
   y1 = vld1q_u16(104 + rsp);
   y17 = vshlq_n_u32(y5, 1);
@@ -9666,7 +9665,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y6 = vandq_u16(y6, y23);
   vst1q_u16(771 + c->coeffs, y3);
   vst1q_u16(779 + c->coeffs, y6);
-  // 7 576: 30
+  // 7 576: 28
   y16 = vld1q_u16(112 + rsp);
   y4 = vld1q_u16(120 + rsp);
   y18 = vshlq_n_u32(y16, 1);
@@ -9821,7 +9820,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y20 = vandq_u16(y20, y23);
   vst1q_u16(615 + c->coeffs, y7);
   vst1q_u16(623 + c->coeffs, y20);
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
   y0 = vld1q_u16(96 + r12);
   y17 = vld1q_u16(144 + r12);
   y0 = vsubq_u16(y0, y17);
@@ -9940,8 +9939,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(88 + rsp, y1);
   vst1q_u16(104 + rsp, y4);
   vst1q_u16(120 + rsp, y2);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y5 = vld1q_u16(1248 + r12);
   y17 = vld1q_u16(1296 + r12);
   y5 = vsubq_u16(y5, y17);
@@ -10060,8 +10059,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(216 + rsp, y0);
   vst1q_u16(232 + rsp, y4);
   vst1q_u16(248 + rsp, y8);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y9 = vld1q_u16(2400 + r12);
   y17 = vld1q_u16(2448 + r12);
   y9 = vsubq_u16(y9, y17);
@@ -10180,8 +10179,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(344 + rsp, y5);
   vst1q_u16(360 + rsp, y4);
   vst1q_u16(376 + rsp, y18);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y1 = vld1q_u16(3552 + r12);
   y17 = vld1q_u16(3600 + r12);
   y1 = vsubq_u16(y1, y17);
@@ -10300,8 +10299,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(472 + rsp, y9);
   vst1q_u16(488 + rsp, y4);
   vst1q_u16(504 + rsp, y21);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y0 = vld1q_u16(4704 + r12);
   y17 = vld1q_u16(4752 + r12);
   y0 = vsubq_u16(y0, y17);
@@ -10420,8 +10419,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(600 + rsp, y1);
   vst1q_u16(616 + rsp, y4);
   vst1q_u16(632 + rsp, y2);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y5 = vld1q_u16(5856 + r12);
   y17 = vld1q_u16(5904 + r12);
   y5 = vsubq_u16(y5, y17);
@@ -10540,8 +10539,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(728 + rsp, y0);
   vst1q_u16(744 + rsp, y4);
   vst1q_u16(760 + rsp, y8);
-  // karatsuba_interpolate: 27
-  // karatsuba_interpolate: 27
+  // karatsuba_interpolate: 25
+  // karatsuba_interpolate: 25
   y9 = vld1q_u16(7008 + r12);
   y17 = vld1q_u16(7056 + r12);
   y9 = vsubq_u16(y9, y17);
@@ -10660,8 +10659,8 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   vst1q_u16(856 + rsp, y5);
   vst1q_u16(872 + rsp, y4);
   vst1q_u16(888 + rsp, y18);
-  // karatsuba_interpolate: 27
-  // 0 576: 30
+  // karatsuba_interpolate: 25
+  // 0 576: 28
   y19 = vld1q_u16(0 + rsp);
   y3 = vld1q_u16(8 + rsp);
   y17 = vshlq_n_u32(y19, 1);
@@ -10808,7 +10807,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y2 = vandq_u16(y2, y23);
   vst1q_u16(475 + c->coeffs, y6);
   vst1q_u16(483 + c->coeffs, y2);
-  // 1 576: 30
+  // 1 576: 28
   y8 = vld1q_u16(16 + rsp);
   y7 = vld1q_u16(24 + rsp);
   y0 = vshlq_n_u32(y8, 1);
@@ -10955,7 +10954,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y21 = vandq_u16(y21, y23);
   vst1q_u16(527 + c->coeffs, y20);
   vst1q_u16(535 + c->coeffs, y21);
-  // 2 576: 30
+  // 2 576: 28
   y17 = vld1q_u16(32 + rsp);
   y6 = vld1q_u16(40 + rsp);
   y16 = vshlq_n_u32(y17, 1);
@@ -11102,7 +11101,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y1 = vandq_u16(y1, y23);
   vst1q_u16(579 + c->coeffs, y2);
   vst1q_u16(587 + c->coeffs, y1);
-  // 3 576: 30
+  // 3 576: 28
   y0 = vld1q_u16(48 + rsp);
   y20 = vld1q_u16(56 + rsp);
   y19 = vshlq_n_u32(y0, 1);
@@ -11249,7 +11248,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y9 = vandq_u16(y9, y23);
   vst1q_u16(631 + c->coeffs, y21);
   vst1q_u16(639 + c->coeffs, y9);
-  // 4 576: 30
+  // 4 576: 28
   y16 = vld1q_u16(64 + rsp);
   y2 = vld1q_u16(72 + rsp);
   y8 = vshlq_n_u32(y16, 1);
@@ -11396,7 +11395,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y4 = vandq_u16(y4, y23);
   vst1q_u16(683 + c->coeffs, y1);
   vst1q_u16(691 + c->coeffs, y4);
-  // 5 576: 30
+  // 5 576: 28
   y19 = vld1q_u16(80 + rsp);
   y21 = vld1q_u16(88 + rsp);
   y17 = vshlq_n_u32(y19, 1);
@@ -11543,7 +11542,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y3 = vandq_u16(y3, y23);
   vst1q_u16(735 + c->coeffs, y9);
   vst1q_u16(743 + c->coeffs, y3);
-  // 6 576: 30
+  // 6 576: 28
   y8 = vld1q_u16(96 + rsp);
   y1 = vld1q_u16(104 + rsp);
   y0 = vshlq_n_u32(y8, 1);
@@ -11690,7 +11689,7 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y7 = vandq_u16(y7, y23);
   vst1q_u16(787 + c->coeffs, y4);
   vst1q_u16(795 + c->coeffs, y7);
-  // 7 576: 30
+  // 7 576: 28
   y17 = vld1q_u16(112 + rsp);
   y9 = vld1q_u16(120 + rsp);
   y16 = vshlq_n_u32(y17, 1);
@@ -11837,5 +11836,5 @@ void poly_Rq_mul(poly *c, const poly *a, const poly *b) {
   y6 = vandq_u16(y6, y23);
   vst1q_u16(631 + c->coeffs, y3);
   vst1q_u16(639 + c->coeffs, y6);
-  // poly_Rq_mul: 32
+  // poly_Rq_mul: 30
 }
