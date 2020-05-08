@@ -1,0 +1,46 @@
+{
+  "cpu in mhz":"1200",
+  "threads":[
+    {
+      "id":"548339642384",
+      "regions":[
+        {
+          "keypair":{
+            "region_count":"1",
+            "cycles":"60902788",
+            "perf::TASK-CLOCK":"3169954491",
+            "PAPI_TOT_INS":"2573348209",
+            "PAPI_TOT_CYC":"3664526786"
+          }
+        },
+        {
+          "encaps":{
+            "region_count":"1",
+            "cycles":"1095639",
+            "perf::TASK-CLOCK":"57021771",
+            "PAPI_TOT_INS":"46726601",
+            "PAPI_TOT_CYC":"51229867"
+          }
+        },
+        {
+          "decaps":{
+            "region_count":"1",
+            "cycles":"907491",
+            "perf::TASK-CLOCK":"47257500",
+            "PAPI_TOT_INS":"34263828",
+            "PAPI_TOT_CYC":"54346866"
+          }
+        },
+        {
+          "rq_mul":{
+            "region_count":"1",
+            "cycles":"260686",
+            "perf::TASK-CLOCK":"13574167",
+            "PAPI_TOT_INS":"8404313",
+            "PAPI_TOT_CYC":"15097332"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -5,9 +5,9 @@
 #include "sample.h"
 #include "owcpa.h"
 
-#if __aarch64__
-#include <libkeccak.a.headers/SimpleFIPS202.h>
-#endif
+//#if __aarch64__
+//#include <libkeccak.a.headers/SimpleFIPS202.h>
+//#endif
 
 // API FUNCTIONS 
 int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
@@ -35,11 +35,11 @@ int crypto_kem_enc(unsigned char *c, unsigned char *k, const unsigned char *pk)
   poly_S3_tobytes(rm, &r);
   poly_S3_tobytes(rm+NTRU_PACK_TRINARY_BYTES, &m);
 
-#if __aarch64__
-  SHA3_256(k, rm, NTRU_OWCPA_MSGBYTES);
-#else 
+//#if __aarch64__
+// SHA3_256(k, rm, NTRU_OWCPA_MSGBYTES);
+//#else 
   crypto_hash_sha3256(k, rm, NTRU_OWCPA_MSGBYTES);
-#endif 
+//#endif 
 
   poly_Z3_to_Zq(&r);
   owcpa_enc(c, &r, &m, pk);
@@ -61,11 +61,11 @@ int crypto_kem_dec(unsigned char *k, const unsigned char *c, const unsigned char
   fail |= owcpa_dec(rm, c, sk);
   /* If fail = 0 then c = Enc(h, rm). There is no need to re-encapsulate. */
   /* See comment in owcpa_dec for details.                                */
-#if __aarch64__
-  SHA3_256(k, rm, NTRU_OWCPA_MSGBYTES);
-#else 
+//#if __aarch64__
+//  SHA3_256(k, rm, NTRU_OWCPA_MSGBYTES);
+//#else 
   crypto_hash_sha3256(k, rm, NTRU_OWCPA_MSGBYTES);
-#endif 
+//#endif 
 
   /* shake(secret PRF key || input ciphertext) */
   for(i=0;i<NTRU_PRFKEYBYTES;i++)
@@ -73,11 +73,11 @@ int crypto_kem_dec(unsigned char *k, const unsigned char *c, const unsigned char
   for(i=0;i<NTRU_CIPHERTEXTBYTES;i++)
     buf[NTRU_PRFKEYBYTES + i] = c[i];
   
-#if __aarch64__
-  SHA3_256(rm, buf, NTRU_PRFKEYBYTES+NTRU_CIPHERTEXTBYTES);
-#else
+//#if __aarch64__
+//  SHA3_256(rm, buf, NTRU_PRFKEYBYTES+NTRU_CIPHERTEXTBYTES);
+//#else
   crypto_hash_sha3256(rm, buf, NTRU_PRFKEYBYTES+NTRU_CIPHERTEXTBYTES);
-#endif 
+//#endif 
   cmov(k, rm, NTRU_SHAREDKEYBYTES, fail);
 
   return 0;
