@@ -213,12 +213,30 @@ int main()
 #endif
 
 #ifdef NTRU_HPS
+  /*
+  #if __aarch64__
+  retval = PAPI_hl_region_begin("sample_fixed_type");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
+  #endif 
+  */
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
     sample_fixed_type(&a, fgbytes);
   }
   print_results("sample_fixed_type: ", t, NTESTS);
+  /*
+  #if __aarch64__
+  retval = PAPI_hl_region_end("sample_fixed_type");
+  if (retval != PAPI_OK)
+  {
+    return 1;
+  }
+  #endif 
+  */
 #endif
 
   for(i=0; i<NTESTS; i++)
