@@ -34,7 +34,7 @@ limitations under the License.
 // c = aa ^ bb
 #define sb_vxor(c, aa, bb) c = veorq_u16(aa, bb);
 
-#define SB_HALF 8 // Round up of 7*3*3/8
+#define SB_ITER 8 // Round up of 7*3*3/8
 
 /*
 =========================================
@@ -80,13 +80,13 @@ Output After Transpose
   0   1   2   3   4   5   6   7  |   8   9  10  11  12  13  14  15  |  16   17   18   19   20   21   22   23  |  24   25   26   27   28   29   30    x
 ------
 */
-void schoolbook_half_8x_neon(uint16_t *restrict c_in_mem,
-                             uint16_t *restrict a_in_mem,
-                             uint16_t *restrict b_in_mem)
+void schoolbook_neon(uint16_t *restrict c_in_mem,
+                     uint16_t *restrict a_in_mem,
+                     uint16_t *restrict b_in_mem)
 {
     uint16x8_t tmp, aa[16], bb[16];
     uint16_t *a_mem = a_in_mem, *b_mem = b_in_mem, *c_mem = c_in_mem;
-    for (uint16_t i = 0; i < SB_HALF; i++)
+    for (uint16_t i = 0; i < SB_ITER; i++)
     {
         sb_vload(aa[0], &a_mem[0 * 16]);
         sb_vload(bb[0], &b_mem[0 * 16]);
