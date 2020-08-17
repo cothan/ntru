@@ -1,12 +1,6 @@
 #include <arm_neon.h>
 #include "poly.h"
 
-// load c <= a
-#define poly_vload_x1(c, a) c = vld1q_u16(a);
-
-// store c <= a
-#define poly_vstore_x1(c, a) vst1q_u16(c, a);
-
 // c = a >> value
 #define poly_vsr_x1(c, a, value) c = vshrq_n_u16(a, value);
 
@@ -28,8 +22,6 @@
 // c = a ^ b
 #define poly_vxor_x1(c, a, b) c = veorq_u16(a, b);
 
-// c = ~a
-#define poly_vnot_x1(c, a, b) c = vmvnq_s16(a);
 
 // load c <= a
 #define poly_vload(c, a) c = vld1q_u16_x4(a);
@@ -43,6 +35,13 @@
     c.val[1] = vshrq_n_u16(a.val[1], value); \
     c.val[2] = vshrq_n_u16(a.val[2], value); \
     c.val[3] = vshrq_n_u16(a.val[3], value);
+
+// c = a >> value
+#define poly_vsr_sign(c, a, value)           \
+    c.val[0] = vshrq_n_s16(a.val[0], value); \
+    c.val[1] = vshrq_n_s16(a.val[1], value); \
+    c.val[2] = vshrq_n_s16(a.val[2], value); \
+    c.val[3] = vshrq_n_s16(a.val[3], value);
 
 // c = a << value
 #define poly_vsl(c, a, value)                \
@@ -59,11 +58,11 @@
     c.val[3] = vandq_u16(a.val[3], b);
 
 // c = a & b
-#define poly_vand(c, a, b)                    \
-    c.val[0] = vandq_u16(a.val[0], b.val[0]); \
-    c.val[1] = vandq_u16(a.val[1], b.val[1]); \
-    c.val[2] = vandq_u16(a.val[2], b.val[2]); \
-    c.val[3] = vandq_u16(a.val[3], b.val[3]);
+#define poly_vand_sign(c, a, b)               \
+    c.val[0] = vandq_s16(a.val[0], b.val[0]); \
+    c.val[1] = vandq_s16(a.val[1], b.val[1]); \
+    c.val[2] = vandq_s16(a.val[2], b.val[2]); \
+    c.val[3] = vandq_s16(a.val[3], b.val[3]);
 
 // c = a + b
 #define poly_vadd(c, a, b)                    \
@@ -86,6 +85,13 @@
     c.val[2] = vsubq_u16(a.val[2], b.val[2]); \
     c.val[3] = vsubq_u16(a.val[3], b.val[3]);
 
+// c = a - b
+#define poly_vsub_const_sign(c, a, b)  \
+    c.val[0] = vsubq_s16(a.val[0], b); \
+    c.val[1] = vsubq_s16(a.val[1], b); \
+    c.val[2] = vsubq_s16(a.val[2], b); \
+    c.val[3] = vsubq_s16(a.val[3], b);
+
 // c = a - const
 #define poly_vsub_const(c, a, b)       \
     c.val[0] = vsubq_u16(a.val[0], b); \
@@ -101,6 +107,13 @@
     c.val[3] = veorq_u16(a.val[3], b.val[3]);
 
 // c = a ^ b
+#define poly_vxor_sign(c, a, b)               \
+    c.val[0] = veorq_s16(a.val[0], b.val[0]); \
+    c.val[1] = veorq_s16(a.val[1], b.val[1]); \
+    c.val[2] = veorq_s16(a.val[2], b.val[2]); \
+    c.val[3] = veorq_s16(a.val[3], b.val[3]);
+
+// c = a ^ b
 #define poly_vxor_const(c, a, b)       \
     c.val[0] = veorq_u16(a.val[0], b); \
     c.val[1] = veorq_u16(a.val[1], b); \
@@ -108,7 +121,7 @@
     c.val[3] = veorq_u16(a.val[3], b);
 
 // c = ~a
-#define poly_vnot(c, a)             \
+#define poly_vnot_sign(c, a)        \
     c.val[0] = vmvnq_s16(a.val[0]); \
     c.val[1] = vmvnq_s16(a.val[1]); \
     c.val[2] = vmvnq_s16(a.val[2]); \
@@ -127,8 +140,9 @@ void poly_mod_3_Phi_n(poly *r)
     poly_vdup_x1(hex_0x0f, 0x0f);
     poly_vdup_x1(hex_0x03, 0x03);
 
-    // 6x4 = 24 SIMD registers
-    uint16x8x4_t r0, r1, r2, r3, t, c;
+    // 8x4 = 32 SIMD registers
+    uint16x8x4_t r0, r1, r2, r3;
+    int16x8x4_t t, c, a, b;
 
     for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
     {
@@ -158,19 +172,19 @@ void poly_mod_3_Phi_n(poly *r)
         poly_vadd(r3, r1, r2);
 
         // t = r3 - 3
-        poly_vsub_const(t, r3, hex_0x03);
+        poly_vsub_const_sign(t, (int16x8x4_t)r3, (int16x8_t)hex_0x03);
         // c = t >> 15
-        poly_vsr(c, t, 15);
+        poly_vsr_sign(c, t, 15);
 
-        // r1 = c & t
-        poly_vand(r1, c, t);
-        // r2 = ~c & t
-        poly_vnot(r2, c);
-        poly_vand(r2, r2, t);
-        // r3 = r1 ^ r2
-        poly_vxor(r3, r1, r2);
+        // a = c & t
+        poly_vand_sign(a, c, t);
+        // b = ~c & t
+        poly_vnot_sign(b, c);
+        poly_vand_sign(b, b, t);
+        // c = a ^ b
+        poly_vxor_sign(c, a, b);
 
-        poly_vstore(&r->coeffs[addr], r3);
+        poly_vstore(&r->coeffs[addr], (uint16x8x4_t)c);
     }
 }
 
@@ -216,8 +230,9 @@ void poly_Rq_to_S3(poly *r, const poly *a)
     // last = last << 1
     poly_vsl_x1(last, last, 1);
 
-    // 6x4 = 24 SIMD registers
-    uint16x8x4_t r0, r1, r2, r3, t, c;
+    // 8x4 = 32 SIMD registers
+    uint16x8x4_t r0, r1, r2, r3;
+    int16x8x4_t t, c, a, b;
 
     for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
     {
@@ -253,18 +268,18 @@ void poly_Rq_to_S3(poly *r, const poly *a)
         poly_vadd(r3, r1, r2);
 
         // t = r3 - 3
-        poly_vsub_const(t, r3, hex_0x03);
+        poly_vsub_const_sign(t, (int16x8x4_t)r3, (int16x8_t)hex_0x03);
         // c = t >> 15
-        poly_vsr(c, t, 15);
+        poly_vsr_sign(c, t, 15);
 
-        // r1 = c & t
-        poly_vand(r1, c, t);
-        // r2 = ~c & t
-        poly_vnot(r2, c);
-        poly_vand(r2, r2, t);
-        // r3 = r1 ^ r2
-        poly_vxor(r3, r1, r2);
+        // a = c & t
+        poly_vand_sign(a, c, t);
+        // b = ~c & t
+        poly_vnot_sign(b, c);
+        poly_vand_sign(b, b, t);
+        // c = a ^ b
+        poly_vxor_sign(c, a, b);
 
-        poly_vstore(&r->coeffs[addr], r3);
+        poly_vstore(&r->coeffs[addr], (uint16x8x4_t)c);
     }
 }
