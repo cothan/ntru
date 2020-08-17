@@ -79,13 +79,6 @@
     c.val[3] = vaddq_u16(a.val[3], b);
 
 // c = a - b
-#define poly_vsub(c, a, b)                    \
-    c.val[0] = vsubq_u16(a.val[0], b.val[0]); \
-    c.val[1] = vsubq_u16(a.val[1], b.val[1]); \
-    c.val[2] = vsubq_u16(a.val[2], b.val[2]); \
-    c.val[3] = vsubq_u16(a.val[3], b.val[3]);
-
-// c = a - b
 #define poly_vsub_const_sign(c, a, b)  \
     c.val[0] = vsubq_s16(a.val[0], b); \
     c.val[1] = vsubq_s16(a.val[1], b); \
@@ -98,13 +91,6 @@
     c.val[1] = vsubq_u16(a.val[1], b); \
     c.val[2] = vsubq_u16(a.val[2], b); \
     c.val[3] = vsubq_u16(a.val[3], b);
-
-// c = a ^ b
-#define poly_vxor(c, a, b)                    \
-    c.val[0] = veorq_u16(a.val[0], b.val[0]); \
-    c.val[1] = veorq_u16(a.val[1], b.val[1]); \
-    c.val[2] = veorq_u16(a.val[2], b.val[2]); \
-    c.val[3] = veorq_u16(a.val[3], b.val[3]);
 
 // c = a ^ b
 #define poly_vxor_sign(c, a, b)               \
