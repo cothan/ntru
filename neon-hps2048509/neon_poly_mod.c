@@ -67,10 +67,10 @@
 
 // c = a & b
 #define poly_vand_sign(c, a, b)               \
-    c.val[0] = vandq_s16(a.val[0], b.val[0]); \
-    c.val[1] = vandq_s16(a.val[1], b.val[1]); \
-    c.val[2] = vandq_s16(a.val[2], b.val[2]); \
-    c.val[3] = vandq_s16(a.val[3], b.val[3]);
+    c.val[0] = vandq_s16(a.val[0],(int16x8_t) b.val[0]); \
+    c.val[1] = vandq_s16(a.val[1],(int16x8_t) b.val[1]); \
+    c.val[2] = vandq_s16(a.val[2],(int16x8_t) b.val[2]); \
+    c.val[3] = vandq_s16(a.val[3],(int16x8_t) b.val[3]);
 
 // c = a + b
 #define poly_vadd(c, a, b)                    \
@@ -121,7 +121,7 @@
     c.val[2] = vmvnq_s16(a.val[2]); \
     c.val[3] = vmvnq_s16(a.val[3]);
 
-void poly_mod_3_Phi_n(poly *r)
+void neon_poly_mod_3_Phi_n(poly *r)
 {
     // 4 SIMD registers
     uint16x8_t last, hex_0xff, hex_0x0f, hex_0x03;
@@ -145,7 +145,7 @@ void poly_mod_3_Phi_n(poly *r)
         // r->coeffs[i] + 2*r->coeffs[NTRU_N-1]
         poly_vadd_const(r3, r0, last);
 
-        // r3 = (res >> 8) + (res & 0xff)
+        // r3 = (r3 >> 8) + (r3 & 0xff)
         poly_vsr(r1, r3, 8);
         poly_vand_const(r2, r3, hex_0xff);
         poly_vadd(r3, r1, r2);
@@ -170,8 +170,8 @@ void poly_mod_3_Phi_n(poly *r)
         // c = t >> 15
         poly_vsr_sign(c, t, 15);
 
-        // a = c & t
-        poly_vand_sign(a, c, t);
+        // a = c & r3
+        poly_vand_sign(a, c, r3);
         // b = ~c & t
         poly_vnot_sign(b, c);
         poly_vand_sign(b, b, t);
@@ -182,7 +182,7 @@ void poly_mod_3_Phi_n(poly *r)
     }
 }
 
-void poly_mod_q_Phi_n(poly *r)
+void neon_poly_mod_q_Phi_n(poly *r)
 {
     // 1 SIMD registers
     uint16x8_t last;
@@ -201,13 +201,13 @@ void poly_mod_q_Phi_n(poly *r)
     }
 }
 
-void poly_Rq_to_S3(poly *r, const poly *a)
+void neon_poly_Rq_to_S3(poly *r, const poly *a)
 {
     // 7 SIMD registers
     uint16x8_t last, modQ, tt, tmp, hex_0xff, hex_0x0f, hex_0x03;
     poly_vdup_x1(last, a->coeffs[NTRU_N - 1]);
 
-    poly_vdup_x1(modQ, NTRU_Q);
+    poly_vdup_x1(modQ, NTRU_Q - 1);
 
     poly_vdup_x1(hex_0x03, 0x03);
     poly_vdup_x1(hex_0xff, 0xff);
@@ -266,8 +266,8 @@ void poly_Rq_to_S3(poly *r, const poly *a)
         // c = t >> 15
         poly_vsr_sign(c, t, 15);
 
-        // a = c & t
-        poly_vand_sign(aa, c, t);
+        // a = c & r3
+        poly_vand_sign(aa, c, r3);
         // b = ~c & t
         poly_vnot_sign(bb, c);
         poly_vand_sign(bb, bb, t);
