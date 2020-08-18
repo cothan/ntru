@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
-void poly_mul_neon(uint16_t polyC[512], uint16_t polyA[512], uint16_t polyB[512]);
+void poly_mul_neon(uint16_t *restrict polyC, 
+                   uint16_t const polyA[512], 
+                   uint16_t const polyB[512]);
 
 #endif

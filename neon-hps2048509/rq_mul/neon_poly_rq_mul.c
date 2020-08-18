@@ -101,7 +101,7 @@ limitations under the License.
     c.val[1] = vsubq_u16(a.val[1], b.val[1]);
 
 // Evaluate and copy
-void karat_neon_evaluate_SB0(uint16_t *restrict w[3], uint16_t *restrict poly)
+void karat_neon_evaluate_SB0(uint16_t *restrict w[3], uint16_t const poly[NTRU_N_PAD])
 {
     uint16_t *c0 = poly,
              *c1 = &poly[SB0],
@@ -535,7 +535,7 @@ void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
     }
 }
 
-void poly_mul_neon(uint16_t polyC[512], uint16_t polyA[512], uint16_t polyB[512])
+void poly_mul_neon(uint16_t *restrict polyC, uint16_t const polyA[512], uint16_t const polyB[512])
 {
     uint16_t *kaw[3], *kbw[3], *kcw[3];
     uint16_t tmp_ab[SB0 * 6];
