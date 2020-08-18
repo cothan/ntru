@@ -121,7 +121,8 @@
     c.val[2] = vmvnq_s16(a.val[2]); \
     c.val[3] = vmvnq_s16(a.val[3]);
 
-void neon_poly_mod_3_Phi_n(poly *r)
+// void neon_poly_mod_3_Phi_n(poly *r) name for testing 
+void poly_mod_3_Phi_n(poly *r)
 {
     // 4 SIMD registers
     uint16x8_t last, hex_0xff, hex_0x0f, hex_0x03;
@@ -182,7 +183,8 @@ void neon_poly_mod_3_Phi_n(poly *r)
     }
 }
 
-void neon_poly_mod_q_Phi_n(poly *r)
+// void neon_poly_mod_q_Phi_n(poly *r) name for testing only
+void poly_mod_q_Phi_n(poly *r)
 {
     // 1 SIMD registers
     uint16x8_t last;
@@ -201,7 +203,8 @@ void neon_poly_mod_q_Phi_n(poly *r)
     }
 }
 
-void neon_poly_Rq_to_S3(poly *r, const poly *a)
+// void neon_poly_Rq_to_S3(poly *r, const poly *a) name for testing only
+void poly_Rq_to_S3(poly *r, const poly *a)
 {
     // 7 SIMD registers
     uint16x8_t last, modQ, tt, tmp, hex_0xff, hex_0x0f, hex_0x03;
