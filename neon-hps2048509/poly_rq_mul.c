@@ -1,8 +1,22 @@
-#include "rq_mul/neon_poly_rq_mul.h"
 #include "poly.h"
 
 void poly_Rq_mul(poly *r, const poly *a, const poly *b)
 {
-    poly_mul_neon(r->coeffs, a->coeffs, b->coeffs);
-}
+  int k,i;
+  /*
+  for (k = 0; k< 10; k++)
+  {
+  	printf("poly_b[%d] = %d\n", k, b->coeffs[k]);
+  	printf("poly_a[%d] = %d\n", k, a->coeffs[k]);
+  }
+  */
 
+  for(k=0; k<NTRU_N; k++)
+  {
+    r->coeffs[k] = 0;
+    for(i=1; i<NTRU_N-k; i++)
+      r->coeffs[k] += a->coeffs[k+i] * b->coeffs[NTRU_N-i];
+    for(i=0; i<k+1; i++)
+      r->coeffs[k] += a->coeffs[k-i] * b->coeffs[i];
+  }
+}
