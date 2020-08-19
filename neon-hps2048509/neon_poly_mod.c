@@ -181,6 +181,9 @@ void poly_mod_3_Phi_n(poly *r)
 
         poly_vstore(&r->coeffs[addr], c);
     }
+    r->coeffs[NTRU_N] = 0;
+    r->coeffs[NTRU_N+1] = 0;
+    r->coeffs[NTRU_N+2] = 0;
 }
 
 // void neon_poly_mod_q_Phi_n(poly *r) name for testing only
@@ -201,6 +204,9 @@ void poly_mod_q_Phi_n(poly *r)
 
         poly_vstore(&r->coeffs[addr], r3);
     }
+    r->coeffs[NTRU_N] = 0;
+    r->coeffs[NTRU_N+1] = 0;
+    r->coeffs[NTRU_N+2] = 0;
 }
 
 // void neon_poly_Rq_to_S3(poly *r, const poly *a) name for testing only
@@ -279,4 +285,7 @@ void poly_Rq_to_S3(poly *r, const poly *a)
 
         poly_vstore(&r->coeffs[addr], c);
     }
+    r->coeffs[NTRU_N] = 0;
+    r->coeffs[NTRU_N+1] = 0;
+    r->coeffs[NTRU_N+2] = 0;
 }
