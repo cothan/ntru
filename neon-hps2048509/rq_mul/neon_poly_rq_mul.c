@@ -544,13 +544,9 @@ void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
         vand(res, res, mask);
         vstore(&poly[addr], res);
     }
-    // 509, 510, 511
-    poly[NTRU_N] = 0;
-    poly[NTRU_N+1] = 0;
-    poly[NTRU_N+2] = 0;
 }
 
-void poly_mul_neon(uint16_t *restrict polyC, uint16_t const polyA[512], uint16_t const polyB[512])
+void poly_mul_neon(uint16_t *restrict polyC, uint16_t *restrict polyA, uint16_t *restrict polyB)
 {
     uint16_t *kaw[3], *kbw[3], *kcw[3];
     uint16_t tmp_ab[SB0 * 6];
