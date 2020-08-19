@@ -4,11 +4,17 @@ void poly_Rq_mul(poly *r, const poly *a, const poly *b)
 {
   int k,i;
   /*
-  for (k = 0; k< 10; k++)
+  printf("poly_a:\n");
+  for (k = 0; k< NTRU_N_PAD; k++)
   {
-  	printf("poly_b[%d] = %d\n", k, b->coeffs[k]);
-  	printf("poly_a[%d] = %d\n", k, a->coeffs[k]);
+  	printf("%d, ", a->coeffs[k]);
   }
+  printf("\npoly_b:\n");
+  for (k = 0; k< NTRU_N_PAD; k++)
+  {
+  	printf("%d, ", b->coeffs[k]);
+  }
+  printf("\n");
   */
 
   for(k=0; k<NTRU_N; k++)

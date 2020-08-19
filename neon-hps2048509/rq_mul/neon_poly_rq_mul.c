@@ -296,9 +296,9 @@ void tc4_evaluate_neon_SB1(uint16_t *restrict w[7], uint16_t *restrict poly)
              *c1 = &poly[1 * SB1],
              *c2 = &poly[2 * SB1],
              *c3 = &poly[3 * SB1],
-             //  *w0_mem = w[0],
-                 //  *w6_mem = w[6],
-                 *w1_mem = w[1],
+            //  *w0_mem = w[0],
+            //  *w6_mem = w[6],
+             *w1_mem = w[1],
              *w2_mem = w[2],
              *w3_mem = w[3],
              *w4_mem = w[4],
@@ -529,7 +529,7 @@ void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
     for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
     {
         vload(tmp2, &tmp[addr]);
-        vload(tmp1, &tmp[addr + NTRU_N_PAD]);
+        vload(tmp1, &tmp[addr + NTRU_N]);
         vadd(res, tmp1, tmp2);
         vstore(&poly[addr], res);
     }
