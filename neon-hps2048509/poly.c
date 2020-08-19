@@ -19,13 +19,13 @@ void poly_trinary_Zq_to_Z3(poly *r)
   }
 }
 
-void poly_Sq_mul(poly *r, const poly *a, const poly *b)
+void poly_Sq_mul(poly *r, poly *a, poly *b)
 {
   poly_Rq_mul(r, a, b);
   poly_mod_q_Phi_n(r);
 }
 
-void poly_S3_mul(poly *r, const poly *a, const poly *b)
+void poly_S3_mul(poly *r, poly *a, poly *b)
 {
   poly_Rq_mul(r, a, b);
   poly_mod_3_Phi_n(r);

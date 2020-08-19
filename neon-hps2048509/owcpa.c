@@ -92,7 +92,7 @@ void owcpa_keypair(unsigned char *pk,
 
 
 void owcpa_enc(unsigned char *c,
-               const poly *r,
+               poly *r,
                const poly *m,
                const unsigned char *pk)
 {

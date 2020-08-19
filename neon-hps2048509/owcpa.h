@@ -12,7 +12,7 @@ void owcpa_keypair(unsigned char *pk,
                    const unsigned char seed[NTRU_SEEDBYTES]);
 
 void owcpa_enc(unsigned char *c,
-               const poly *r,
+               poly *r,
                const poly *m,
                const unsigned char *pk);
 
