@@ -36,10 +36,10 @@ uint16_t compare_array(uint16_t *a, uint16_t *b, uint16_t size,
 
 uint16_t compare_array_8(uint16_t *a, uint16_t *b, uint16_t size,
                        const char *string) {
-  printf("%s: \n", string);
+  // printf("%s: \n", string);
   uint16_t error = 0;
   uint16_t tmp1, tmp2;
-  for (uint16_t i = 0; i < size; i += 8) {
+  for (uint16_t i = 0; i < size - 8; i += 8) {
     for (uint16_t j = 0; j < 8; j++) {
         tmp1 = a[i + j] & MASK;
         tmp2 = b[i + j] & MASK;
@@ -65,7 +65,7 @@ int test_poly_Rq_mul(poly *a, poly *b)
     neon_poly_Rq_mul(&f, a,  b);
 
     int res = 0;
-    res |= compare_array(e.coeffs, f.coeffs, NTRU_N, "poly_Rq_mul vs neon_poly_Rq_mul");
+    res |= compare_array_8(e.coeffs, f.coeffs, NTRU_N_PAD, "poly_Rq_mul vs neon_poly_Rq_mul");
 
     return res;
 }
