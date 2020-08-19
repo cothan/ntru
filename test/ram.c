@@ -1,6 +1,5 @@
 #include "../kem.h"
 #include "../params.h"
-#include "../cpucycles.h"
 #include "../randombytes.h"
 #include "../poly.h"
 #include <stdlib.h>

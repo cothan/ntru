@@ -4,7 +4,7 @@
 #include "../kem.h"
 #include "../verify.h"
 
-#define TRIALS 100
+#define TRIALS 10000
 int main(void)
 {
   int i,c;
