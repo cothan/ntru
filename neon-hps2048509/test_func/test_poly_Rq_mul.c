@@ -10,35 +10,42 @@
 // Compile flags
 // clang -o test_poly_Rq_mul ../rq_mul/neon_batch_multiplication.c ../rq_mul/neon_matrix_transpose.c ../rq_mul/neon_poly_rq_mul.c  test_poly_Rq_mul.c -g3 -O0 -Wall -Wextra
 
-// // Return 0 when PASS, otherwise 1
-// uint16_t compare_array(uint16_t *a, uint16_t *b, uint16_t size,
-//                        const char *string) {
-// //   printf("%s: \n", string);
-//   uint16_t error = 0;
-//   for (uint16_t i = 0; i < size; i ++) {
-//     if (a[i] != b[i]) {
-//         error = 1;
-//         printf("%d: %d != %d\n", i, a[i], b[i]);
-//     }
-    
-//     if (error) {
-//       printf("FAILED\n");
-//       return 1;
-//     }
-//   }
-// //   printf("CORRECT\n");
-//   return 0;
-// }
-
+// Return 0 when PASS, otherwise 1
 uint16_t compare_array(uint16_t *a, uint16_t *b, uint16_t size,
+                       const char *string) {
+//   printf("%s: \n", string);
+  uint16_t error = 0;
+  uint16_t tmp1, tmp2;
+
+  for (uint16_t i = 0; i < size; i ++) {
+    tmp1 = a[i] & MASK;
+    tmp2 = b[i] & MASK;
+    if (tmp1 != tmp2) {
+        error = 1;
+        printf("%d: %d != %d\n", i, a[i], b[i]);
+    }
+    
+    if (error) {
+      printf("FAILED\n");
+      return 1;
+    }
+  }
+//   printf("CORRECT\n");
+  return 0;
+}
+
+uint16_t compare_array_8(uint16_t *a, uint16_t *b, uint16_t size,
                        const char *string) {
   printf("%s: \n", string);
   uint16_t error = 0;
+  uint16_t tmp1, tmp2;
   for (uint16_t i = 0; i < size; i += 8) {
     for (uint16_t j = 0; j < 8; j++) {
-      if (a[i + j] != b[i + j]) {
+        tmp1 = a[i + j] & MASK;
+        tmp2 = b[i + j] & MASK;
+      if (tmp1 != tmp2) {
         error = 1;
-        printf("%d: %d != %d\n", i + j, a[i + j], b[i + j]);
+        printf("%d: %d != %d\n", i + j, tmp1, tmp2);
       }
     }
     if (error) {
@@ -68,15 +75,13 @@ int main()
 {
     poly a, b;
     int res = 0;
-    uint16_t t; 
     for (int i = 0; i < TESTS; i++)
     {
         // 1st
         for (uint16_t j = 0; j < NTRU_N; j++)
         {
-            t = rand();
-            a.coeffs[j] = t & MASK;
-            b.coeffs[j] = t & MASK;
+            a.coeffs[j] = rand() & MASK;
+            b.coeffs[j] = rand() & MASK;
         }
         for (uint16_t k = NTRU_N; k < NTRU_N_PAD; k++)
         {
