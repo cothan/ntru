@@ -97,14 +97,15 @@ void sample_iid(poly *r, const unsigned char uniformbytes[NTRU_SAMPLE_IID_BYTES]
     // 35 SIMD registers
     uint16x8x4_t r0, r1, r2, r3;
     int16x8x4_t t, c, a, b;
-    uint16x8_t hex_0x03, hex_0x0f, hex_0xff;
+    uint16x8_t hex_0x03, hex_0x0f, hex_0xff, zero;
     sp_vdup_x1(hex_0x03, 0x03);
     sp_vdup_x1(hex_0xff, 0xff);
     sp_vdup_x1(hex_0x0f, 0x0f);
+    sp_vdup_x1(zero, 0);
 
     for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
     {
-        sp_vload(r0, &uniformbytes[addr]);
+        sp_vload(r3, &uniformbytes[addr]);
 
         // r3 = (res >> 8) + (res & 0xff)
         sp_vsr(r1, r3, 8);
@@ -131,8 +132,8 @@ void sample_iid(poly *r, const unsigned char uniformbytes[NTRU_SAMPLE_IID_BYTES]
         // c = t >> 15
         sp_vsr_sign(c, t, 15);
 
-        // a = c & t
-        sp_vand_sign(a, c, t);
+        // a = c & r3
+        sp_vand_sign(a, c, r3);
         // b = ~c & t
         sp_vnot_sign(b, c);
         sp_vand_sign(b, b, t);
