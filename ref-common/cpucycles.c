@@ -2,26 +2,21 @@
 
 #if __aarch64__
 
-/*
-cpucycles/armv8.c version 20190803
-D. J. Bernstein
-Public domain.
-*/
-
-#include <time.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
+#include <papi.h>
 
 long long cpucycles(void)
 {
-  long long result = clock();
-  //asm volatile("mrs %0, PMCCNTR_EL0" : "=r" (result));
+  long long result = PAPI_get_real_usec();
   return result;
 }
 
 
 #else
+/*
+cpucycles/armv8.c version 20190803
+D. J. Bernstein
+Public domain.
+*/
 
 long long cpucycles(void)
 {
