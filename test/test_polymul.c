@@ -5,9 +5,10 @@
 #include "../randombytes.h"
 
 /* Leaving this in here for debugging purposes. */
-// static void poly_print(poly *a)
+// static void poly_print(poly *a, char *string)
 // {
 //   int i;
+//   printf("%s\n", string);
 //   printf("[");
 //   for(i=0; i<NTRU_N-1; i++)
 //     printf("%d, ", a->coeffs[i]);
