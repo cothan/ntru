@@ -5,15 +5,6 @@
 #include "sample.h"
 #include "owcpa.h"
 
-<<<<<<< HEAD
-#if __aarch64__
-#include <libkeccak.a.headers/SimpleFIPS202.h>
-#endif
-=======
-//#if __aarch64__
-//#include <libkeccak.a.headers/SimpleFIPS202.h>
-//#endif
->>>>>>> 722f2dc40b08f1281a46c409c4b242009db21f2c
 
 // API FUNCTIONS 
 int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
@@ -41,19 +32,7 @@ int crypto_kem_enc(unsigned char *c, unsigned char *k, const unsigned char *pk)
   poly_S3_tobytes(rm, &r);
   poly_S3_tobytes(rm+NTRU_PACK_TRINARY_BYTES, &m);
 
-<<<<<<< HEAD
-#if __aarch64__
-  SHA3_256(k, rm, NTRU_OWCPA_MSGBYTES);
-#else 
   crypto_hash_sha3256(k, rm, NTRU_OWCPA_MSGBYTES);
-#endif 
-=======
-//#if __aarch64__
-// SHA3_256(k, rm, NTRU_OWCPA_MSGBYTES);
-//#else 
-  crypto_hash_sha3256(k, rm, NTRU_OWCPA_MSGBYTES);
-//#endif 
->>>>>>> 722f2dc40b08f1281a46c409c4b242009db21f2c
 
   poly_Z3_to_Zq(&r);
   owcpa_enc(c, &r, &m, pk);
@@ -75,19 +54,7 @@ int crypto_kem_dec(unsigned char *k, const unsigned char *c, const unsigned char
   fail |= owcpa_dec(rm, c, sk);
   /* If fail = 0 then c = Enc(h, rm). There is no need to re-encapsulate. */
   /* See comment in owcpa_dec for details.                                */
-<<<<<<< HEAD
-#if __aarch64__
-  SHA3_256(k, rm, NTRU_OWCPA_MSGBYTES);
-#else 
   crypto_hash_sha3256(k, rm, NTRU_OWCPA_MSGBYTES);
-#endif 
-=======
-//#if __aarch64__
-//  SHA3_256(k, rm, NTRU_OWCPA_MSGBYTES);
-//#else 
-  crypto_hash_sha3256(k, rm, NTRU_OWCPA_MSGBYTES);
-//#endif 
->>>>>>> 722f2dc40b08f1281a46c409c4b242009db21f2c
 
   /* shake(secret PRF key || input ciphertext) */
   for(i=0;i<NTRU_PRFKEYBYTES;i++)
@@ -95,19 +62,7 @@ int crypto_kem_dec(unsigned char *k, const unsigned char *c, const unsigned char
   for(i=0;i<NTRU_CIPHERTEXTBYTES;i++)
     buf[NTRU_PRFKEYBYTES + i] = c[i];
   
-<<<<<<< HEAD
-#if __aarch64__
-  SHA3_256(rm, buf, NTRU_PRFKEYBYTES+NTRU_CIPHERTEXTBYTES);
-#else
   crypto_hash_sha3256(rm, buf, NTRU_PRFKEYBYTES+NTRU_CIPHERTEXTBYTES);
-#endif 
-=======
-//#if __aarch64__
-//  SHA3_256(rm, buf, NTRU_PRFKEYBYTES+NTRU_CIPHERTEXTBYTES);
-//#else
-  crypto_hash_sha3256(rm, buf, NTRU_PRFKEYBYTES+NTRU_CIPHERTEXTBYTES);
-//#endif 
->>>>>>> 722f2dc40b08f1281a46c409c4b242009db21f2c
   cmov(k, rm, NTRU_SHAREDKEYBYTES, fail);
 
   return 0;
