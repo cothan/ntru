@@ -11,7 +11,7 @@
 #include <papi.h>
 #endif 
 
-#define NTESTS 100
+#define NTESTS 1000
 
 static int cmp_llu(const void *a, const void*b)
 {
@@ -44,7 +44,6 @@ static void print_results(const char *s, unsigned long long *t, size_t tlen)
   for(i=0;i<tlen-1;i++)
   {
     t[i] = t[i+1] - t[i];
-  //  printf("%llu ", t[i]);
   }
   printf("\n");
   printf("median: %llu\n", median(t, tlen));
@@ -72,7 +71,7 @@ int main()
   retval = PAPI_hl_region_begin("keypair");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
   #endif 
   for(i=0; i<NTESTS; i++)
@@ -87,13 +86,13 @@ int main()
   retval = PAPI_hl_region_end("keypair");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
 
   retval = PAPI_hl_region_begin("encaps");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
   #endif 
   for(i=0; i<NTESTS; i++)
@@ -107,13 +106,13 @@ int main()
   retval = PAPI_hl_region_end("encaps");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
 
   retval = PAPI_hl_region_begin("decaps");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
   #endif 
   for(i=0; i<NTESTS; i++)
@@ -126,7 +125,7 @@ int main()
   retval = PAPI_hl_region_end("decaps");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
   #endif 
   printf("-- internals --\n\n");
@@ -139,7 +138,7 @@ int main()
   retval = PAPI_hl_region_begin("rq_mul");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
   #endif 
   for(i=0; i<NTESTS; i++)
@@ -152,7 +151,7 @@ int main()
   retval = PAPI_hl_region_end("rq_mul");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
   #endif 
   for(i=0; i<NTESTS; i++)
@@ -213,30 +212,28 @@ int main()
 #endif
 
 #ifdef NTRU_HPS
-  /*
+  
   #if __aarch64__
   retval = PAPI_hl_region_begin("sample_fixed_type");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
   #endif 
-  */
+  
   for(i=0; i<NTESTS; i++)
   {
     t[i] = cpucycles();
     sample_fixed_type(&a, fgbytes);
   }
   print_results("sample_fixed_type: ", t, NTESTS);
-  /*
   #if __aarch64__
   retval = PAPI_hl_region_end("sample_fixed_type");
   if (retval != PAPI_OK)
   {
-    return 1;
+    printf("PAPI_hl_region: Error\n");
   }
   #endif 
-  */
 #endif
 
   for(i=0; i<NTESTS; i++)
