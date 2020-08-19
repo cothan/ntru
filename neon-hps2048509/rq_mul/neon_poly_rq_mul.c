@@ -33,6 +33,8 @@ limitations under the License.
 #define SB2_RES (2 * SB2) // 64
 #define SB3_RES (2 * SB3) // 32
 
+#define MASK (NTRU_Q - 1)
+
 #define inv3 43691
 #define inv15 61167
 
@@ -83,6 +85,12 @@ limitations under the License.
     c.val[1] = veorq_u16(a.val[1], b.val[1]); \
     c.val[2] = veorq_u16(a.val[2], b.val[2]); \
     c.val[3] = veorq_u16(a.val[3], b.val[3]);
+
+#define vand(c, a, b)                  \
+    c.val[0] = vandq_u16(a.val[0], b); \
+    c.val[1] = vandq_u16(a.val[1], b); \
+    c.val[2] = vandq_u16(a.val[2], b); \
+    c.val[3] = vandq_u16(a.val[3], b);
 
 // load c <= a
 #define vload_x2(c, a) c = vld1q_u16_x2(a);
@@ -525,14 +533,21 @@ void neon_toom_cook_422_combine(uint16_t *restrict polyC, uint16_t *restrict pol
 static inline
 void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
 {
+    uint16x8_t mask;
     uint16x8x4_t res, tmp1, tmp2;
+    mask = vdupq_n_u16(MASK);
     for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
     {
         vload(tmp2, &tmp[addr]);
         vload(tmp1, &tmp[addr + NTRU_N]);
         vadd(res, tmp1, tmp2);
+        vand(res, res, mask);
         vstore(&poly[addr], res);
     }
+    // 509, 510, 511
+    poly[NTRU_N] = 0;
+    poly[NTRU_N+1] = 0;
+    poly[NTRU_N+2] = 0;
 }
 
 void poly_mul_neon(uint16_t *restrict polyC, uint16_t const polyA[512], uint16_t const polyB[512])
