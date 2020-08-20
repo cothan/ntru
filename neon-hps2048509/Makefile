@@ -1,5 +1,5 @@
 CC = /usr/bin/clang
-CFLAGS = -O3 -fomit-frame-pointer -mtune=native -fPIC -fPIE -pie
+CFLAGS = -O3 -fomit-frame-pointer -mtune=native -fPIC -fPIE -pie -g3
 CFLAGS += -Wall -Wextra -Wpedantic
 
 SRC = crypto_sort_int32.c \
@@ -14,8 +14,8 @@ SRC = crypto_sort_int32.c \
       poly_r2_inv.c \
       rq_mul/neon_batch_multiplication.c \
       rq_mul/neon_matrix_transpose.c \
-      rq_mul/neon_poly_rq_mul.c \
-      poly_rq_mul.c \
+      rq_mul/neon_poly_rq_mul.c\
+      neon_poly_rq_mul.c \
       poly_s3_inv.c \
       sample.c \
       sample_iid.c \
@@ -55,7 +55,7 @@ test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_pack.c
 
 test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c -lpapi
 
 test/ram: $(SRC_URAND) $(OBJS) $(HDR_URAND) test/ram.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) test/ram.c
