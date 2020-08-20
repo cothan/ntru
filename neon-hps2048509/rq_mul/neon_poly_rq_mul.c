@@ -86,6 +86,7 @@ limitations under the License.
     c.val[2] = veorq_u16(a.val[2], b.val[2]); \
     c.val[3] = veorq_u16(a.val[3], b.val[3]);
 
+// c = a & b
 #define vand(c, a, b)                  \
     c.val[0] = vandq_u16(a.val[0], b); \
     c.val[1] = vandq_u16(a.val[1], b); \
