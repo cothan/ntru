@@ -6,7 +6,7 @@
 REF="../ref-hps2048509"
 AVX="../avx2-hps2048509"
 
-cp \
+ln -s \
 $AVX/api_bytes.h \
 $REF/api.h \
 $REF/crypto_hash_sha3256.h \
@@ -29,7 +29,8 @@ $REF/PQCgenKAT_kem.c \
 $REF/randombytes.c \
 $REF/randombytes.h \
 # $REF/poly_mod.c \
-# $REF/sample_iid.c \
+# $REF/poly_rq_mul.c \
+$REF/sample_iid.c \
 $REF/rng.c \
 $REF/rng.h \
 $REF/sample.c \

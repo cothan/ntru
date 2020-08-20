@@ -1,6 +1,1 @@
-#ifndef RANDOMBYTES_H
-#define RANDOMBYTES_H
-
-void randombytes(unsigned char *x,unsigned long long xlen);
-
-#endif
+../ref-hps2048509/randombytes.h
