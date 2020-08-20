@@ -1,1 +1,0 @@
-../../ref-common/sample.c
