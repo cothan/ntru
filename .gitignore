@@ -1,2 +1,15 @@
 *.pyc
 *.json
+neon-hps2048509/test_func/test_poly_mod
+neon-hps2048509/test_func/test_poly_Rq_mul
+neon-hps2048509/test/test_polymul
+neon-hps2048509/test/ram
+neon-hps2048509/test/test_ntru
+neon-hps2048509/test/test_pack
+*.rsp
+*.req
+*/*/*/PQCgenKAT_kem
+*callgrind.*
+neon-hps2048509/test/speed
+neon-hps2048509/PQCgenKAT_kem
+neon-hps2048509/Untitled-1.log
