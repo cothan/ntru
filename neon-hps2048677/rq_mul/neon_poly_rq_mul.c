@@ -673,7 +673,7 @@ void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
     for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 24)
     {
         vload_x3(tmp2, &tmp[addr]);
-        vload_x3(tmp1, &tmp[addr + NTRU_N_PAD]);
+        vload_x3(tmp1, &tmp[addr + NTRU_N]);
         vadd_x3(res, tmp1, tmp2);
         vand_x3(res, res, mask);
         vstore_x3(&poly[addr], res);

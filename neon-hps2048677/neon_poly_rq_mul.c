@@ -42,16 +42,4 @@ void poly_Rq_mul(poly *r, poly *a, poly *b)
     // Multiplication
     poly_mul_neon(r->coeffs, a->coeffs, b->coeffs);
     
-
-    // Maybe not needed
-    // // 677, 678, 679
-    // r->coeffs[NTRU_N] = 0;
-    // r->coeffs[NTRU_N+1] = 0;
-    // r->coeffs[NTRU_N+2] = 0;
-
-    // poly_vxor_x1(last, last, last);
-    // // 680 + 32 = 712
-    // poly_vstore_const(&r->coeffs[NTRU_N + 3], last);
-    // // 712 -> 720
-    // poly_vstore_x1(&r->coeffs[NTRU + 35], last);
 }

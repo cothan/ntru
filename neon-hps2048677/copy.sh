@@ -5,6 +5,7 @@
 
 REF="../ref-hps2048677"
 AVX="../avx2-hps2048677"
+COM="../ref-common"
 
 ln -s \
 $AVX/api_bytes.h \
@@ -16,12 +17,8 @@ $REF/fips202.c \
 $REF/fips202.h \
 $REF/kem.c \
 $REF/kem.h \
-$REF/owcpa.c \
-$REF/owcpa.h \
 $REF/pack3.c \
 $REF/packq.c \
-$REF/poly.c \
-$REF/poly.h \
 $REF/poly_lift.c \
 $REF/poly_r2_inv.c \
 $REF/poly_s3_inv.c \
@@ -36,6 +33,15 @@ $REF/sample.h \
 $REF/verify.c \
 $REF/verify.h \
 $REF/Makefile \
-$REF/Makefile-NIST . 
+$REF/Makefile-NIST
+$COM/cpucycles.c \
+$COM/cpucycles.h . 
 
 cp -r $REF/test . 
+
+cp $REF/owcpa.c \
+$REF/owcpa.h \
+$REF/poly.c \
+$REF/poly.h \
+$AVX/params.h \ 
+. 
