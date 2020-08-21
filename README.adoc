@@ -30,6 +30,7 @@ Compiler version:  `clang version 10.0.1, Target: aarch64-unknown-linux-gnu`
 
 
 Timing benchmark in microsecond (us)
+
 .Cortex-A72 Timing
 |====
 | Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
@@ -59,6 +60,17 @@ For cherry picking purpose (pun intended), I can compile `REF` code with `-fno-t
 * Branch prediction: Unknown
 
 Benchmark on Raspberry Pi 3B 64-bit OS ARMv8
+
+----
+CC = /usr/bin/clang
+CFLAGS = -O3 -fomit-frame-pointer -mtune=native -fPIC -fPIE -pie -g3
+CFLAGS += -Wall -Wextra -Wpedantic 
+LDFLAGS = -lpapi
+----
+
+Compiler version:  `clang version 10.0.1, Target: aarch64-unknown-linux-gnu`
+
+Timing benchmark in microsecond (us)
 
 .Cortex-A53 Timing
 |====
