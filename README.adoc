@@ -12,7 +12,7 @@ ARM NEON instruction acceleration
 
 Benchmark on Raspberry Pi 4:
 
-* CPU freq: 1500 Mhz (no overclock)
+* CPU max freq: 1500 Mhz (no overclock)
 * ARMv8 ASIMD instruction 
 * RAM: 8 GB
 * Speculator: Yes
@@ -50,4 +50,30 @@ Timing benchmark in microsecond (us)
 For cherry picking purpose (pun intended), I can compile `REF` code with `-fno-tree-vectorize` to have better speed up, but I decide this speed up is enough. 
 
 == Cortex-A53
+
+* CPU max freq: 1200 Mhz (no overclock)
+* ARMv8 ASIMD instruction 
+* RAM: 1 GB
+* Speculative: Yes
+* Out-of-order: No
+* Branch prediction: Unknown
+
+Benchmark on Raspberry Pi 3B 64-bit OS ARMv8
+
+.Cortex-A53 Timing
+|====
+| Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
+| REF-NTRU-HPS2048-509 | 1839 | 4710 | 1547 | 1556 
+| NEON-NTRU-HPS2048-509 | 344 | 175 | 47 | 48 
+| *REF/NEON-HPS2048-509* | 5.34 | 26.91 | 32.91 | 32.41
+| REF-NTRU-HRSS-701 | 3060 | 8896 | 2923 | 2936
+| NEON-NTRU-HRSS-701 | 207 | 311 | 83 | 84
+| *REF/NEON-HRSS-701* | 14.78 | 28.60 | 35.21 | 34.95
+| REF-NTRU-HPS2048-677 | 3134 | 8281 | 2728 | 2740
+| NEON-NTRU-HPS2048-677 | 483 | 256 | 70 | 71
+| *REF/NEON-HPS2048-677* | 6.49 | 32.34 | 38.97 | 38.59
+| REF-NTRU-HPS4096-821 | 4504 | 12125 | 4005 | 4020 
+| NEON-NTRU-HPS4096-821 | 598 | 327 | 92 | 94 
+| *REF/NEON-HPS4096-821* | 7.53 | 37.08 | 43.53 | 42.76
+|====
 
