@@ -1,0 +1,53 @@
+= NTRU
+
+NTRU is a submission to the second round of [NIST's Post-Quantum Cryptography
+project](https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Round-2-Submissions).
+It is a merger of the first round NTRUEncrypt and NTRU-HRSS-KEM submissions. See [ntru.org](https://ntru.org) for more information.
+
+== CERG-GMU 
+
+ARM NEON instruction acceleration
+
+== Cortex-A72 
+
+Benchmark on Raspberry Pi 4:
+
+* CPU freq: 1500 Mhz (no overclock)
+* ARMv8 ASIMD instruction 
+* RAM: 8 GB
+* Speculator: Yes
+* Out-of-order: Yes
+* Branch prediction: Yes
+
+----
+CC = /usr/bin/clang
+CFLAGS = -O3 -fomit-frame-pointer -mtune=native -fPIC -fPIE -pie -g3
+CFLAGS += -Wall -Wextra -Wpedantic 
+LDFLAGS = -lpapi
+----
+
+Compiler version:  `clang version 10.0.1, Target: aarch64-unknown-linux-gnu`
+
+
+Timing benchmark in microsecond (us)
+.Cortex-A72 Timing
+|====
+| Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
+| REF-NTRU-HPS2048-509 | 809 | 2122 | 696 | 699 
+| NEON-NTRU-HPS2048-509 | 139 | 95 | 25 | 26 
+| *REF/NEON-HPS2048-509* | 5.82 | 22.33 | 27.84 | 26.88
+| REF-NTRU-HRSS-701 | 1372 | 4017 | 1320 | 1377
+| NEON-NTRU-HRSS-701 | 95 | 176 | 48 | 48
+| *REF/NEON-HRSS-701* | 14.44 | 22.82 | 27.50 | 28.68
+| REF-NTRU-HPS2048-677 | 1389 | 3754 | 1229 | 1238
+| NEON-NTRU-HPS2048-677 | 196 | 141 | 37 | 38
+| *REF/NEON-HPS2048-677* | 7.08 | 26.62 | 33.21 | 32.57
+| REF-NTRU-HPS4096-821 | 2007 | 5502 | 1808 | 1815 
+| NEON-NTRU-HPS4096-821 | 245 | 188 | 51 | 53 
+| *REF/NEON-HPS4096-821* | 8.19 | 29.26 | 35.45 | 34.24
+|====
+
+For cherry picking purpose (pun intended), I can compile `REF` code with `-fno-tree-vectorize` to have better speed up, but I decide this speed up is enough. 
+
+== Cortex-A53
+
