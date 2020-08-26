@@ -105,12 +105,12 @@ limitations under the License.
     c.val[2] = vmulq_n_u16(a.val[2], value); \
     c.val[3] = vmulq_n_u16(a.val[3], value);
 
-// c = a ^ b
-#define vxor(c, a, b)                         \
-    c.val[0] = veorq_u16(a.val[0], b.val[0]); \
-    c.val[1] = veorq_u16(a.val[1], b.val[1]); \
-    c.val[2] = veorq_u16(a.val[2], b.val[2]); \
-    c.val[3] = veorq_u16(a.val[3], b.val[3]);
+// c = value
+#define vzero(c, value)            \
+    c.val[0] = vmovq_n_u16(value); \
+    c.val[1] = vmovq_n_u16(value); \
+    c.val[2] = vmovq_n_u16(value); \
+    c.val[3] = vmovq_n_u16(value);
 
 // c = ~a
 #define vnot(c, a)                  \
@@ -160,11 +160,6 @@ limitations under the License.
     c.val[0] = vmulq_n_u16(a.val[0], value); \
     c.val[1] = vmulq_n_u16(a.val[1], value);
 
-// c = a ^ b
-#define vxor_x2(c, a, b)                      \
-    c.val[0] = veorq_u16(a.val[0], b.val[0]); \
-    c.val[1] = veorq_u16(a.val[1], b.val[1]);
-
 // load c <= a
 #define vload_x1(c, a) c = vld1q_u16(a);
 
@@ -185,9 +180,6 @@ limitations under the License.
 
 // c = a * value
 #define vmuln_x1(c, a, value) c = vmulq_n_u16(a, value);
-
-// c = a ^ b
-#define vxor_x1(c, a, b) c = veorq_u16(a, b);
 
 // load c <= a
 #define vload_x3(c, a) c = vld1q_u16_x3(a);
@@ -666,7 +658,7 @@ void neon_toom_cook_422_combine(uint16_t *restrict polyC, uint16_t *restrict pol
     // Transpose 8x8x32
     half_transpose_8x32(tmp_cc);
 
-    vxor(zero, zero, zero);
+    vzero(zero, 0);
     for (uint16_t addr = 0; addr < SB1_RES*7; addr+=32)
     {
         vstore(&tmp_aabb[addr], zero);
@@ -702,6 +694,7 @@ void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
 
 void poly_mul_neon(uint16_t *restrict polyC, uint16_t *restrict polyA, uint16_t *restrict polyB)
 {
+    uint16x8x4_t zero;
     uint16_t *kaw[5], *kbw[5], *kcw[5];
     uint16_t tmp_ab[SB0 * 5 * 2];
     uint16_t tmp_c[SB0_RES * 5];
@@ -728,8 +721,7 @@ void poly_mul_neon(uint16_t *restrict polyC, uint16_t *restrict polyA, uint16_t 
     kcw[3] = &tmp_c[3 * SB0_RES];
     kcw[4] = &tmp_c[4 * SB0_RES];
 
-    uint16x8x4_t zero;
-    vxor(zero, zero, zero);
+    vzero(zero, 0);
     for (uint16_t addr = 0; addr < SB0_RES * 5; addr += 32)
     {
         vstore(&tmp_c[addr], zero);
@@ -757,7 +749,7 @@ void poly_mul_neon(uint16_t *restrict polyC, uint16_t *restrict polyA, uint16_t 
 
     // Karatsuba Interpolate
     // * Re-use tmp_ab
-    vxor(zero, zero, zero);
+    vzero(zero, 0);
     for (uint16_t addr = 0; addr < SB0_RES * 3; addr += 32)
     {
         vstore(&tmp_ab[addr], zero);

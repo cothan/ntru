@@ -1,4 +1,4 @@
-CC = /usr/bin/clang
+CC = cc
 CFLAGS = -O3 -fomit-frame-pointer -mtune=native -fPIC -fPIE -pie -g3
 CFLAGS += -Wall -Wextra -Wpedantic
 

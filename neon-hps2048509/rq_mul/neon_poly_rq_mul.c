@@ -99,12 +99,12 @@ limitations under the License.
     c.val[2] = vmulq_n_u16(a.val[2], value); \
     c.val[3] = vmulq_n_u16(a.val[3], value);
 
-// c = a ^ b
-#define vxor(c, a, b)                         \
-    c.val[0] = veorq_u16(a.val[0], b.val[0]); \
-    c.val[1] = veorq_u16(a.val[1], b.val[1]); \
-    c.val[2] = veorq_u16(a.val[2], b.val[2]); \
-    c.val[3] = veorq_u16(a.val[3], b.val[3]);
+// c = value
+#define vzero(c, value)            \
+    c.val[0] = vmovq_n_u16(value); \
+    c.val[1] = vmovq_n_u16(value); \
+    c.val[2] = vmovq_n_u16(value); \
+    c.val[3] = vmovq_n_u16(value);
 
 // c = a & b
 #define vand(c, a, b)                  \
@@ -532,7 +532,7 @@ void neon_toom_cook_422_combine(uint16_t *restrict polyC, uint16_t *restrict pol
     // Transpose 8x8x32
     transpose_8x32(tmp_cc);
 
-    vxor(zero, zero, zero);
+    vzero(zero, 0);
     for (uint16_t addr = 0; addr < SB1_RES * 7; addr += 32)
     {
         vstore(&tmp_aabb[addr], zero);
@@ -569,6 +569,7 @@ void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
 
 void poly_mul_neon(uint16_t *restrict polyC, uint16_t *restrict polyA, uint16_t *restrict polyB)
 {
+    uint16x8x4_t zero;
     uint16_t *kaw[3], *kbw[3], *kcw[3];
     uint16_t tmp_ab[SB0 * 6];
     uint16_t tmp_c[SB0_RES * 3];
@@ -587,8 +588,7 @@ void poly_mul_neon(uint16_t *restrict polyC, uint16_t *restrict polyA, uint16_t 
     kcw[1] = &tmp_c[1 * SB0_RES];
     kcw[2] = &tmp_c[2 * SB0_RES];
 
-    uint16x8x4_t zero;
-    vxor(zero, zero, zero);
+    vzero(zero, 0);
     for (uint16_t addr = 0; addr < SB0_RES * 3; addr += 32)
     {
         vstore(&tmp_c[addr], zero);
@@ -609,7 +609,7 @@ void poly_mul_neon(uint16_t *restrict polyC, uint16_t *restrict polyA, uint16_t 
     neon_toom_cook_422_combine(kcw[2], kaw[2], kbw[2]);
 
     // Karatsuba Interpolate
-    vxor(zero, zero, zero);
+    vzero(zero, 0);
     for (uint16_t addr = 0; addr < SB0_RES * 2; addr += 32)
     {
         vstore(&tmp_ab[addr], zero);
