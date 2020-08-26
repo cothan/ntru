@@ -41,11 +41,31 @@ limitations under the License.
 
 #define MASK (NTRU_Q - 1)
 
+#if defined(__clang__)
+
 // load c <= a
 #define vload(c, a) c = vld1q_u16_x4(a);
 
 // store c <= a
 #define vstore(c, a) vst1q_u16_x4(c, a);
+
+#elif defined(__GNUC__)
+
+#define vload(c, a)               \
+    c.val[0] = vld1q_u16(a);      \
+    c.val[1] = vld1q_u16(a + 8);  \
+    c.val[2] = vld1q_u16(a + 16); \
+    c.val[3] = vld1q_u16(a + 24);
+
+#define vstore(c, a)             \
+    vst1q_u16(c, a.val[0]);      \
+    vst1q_u16(c + 8, a.val[1]);  \
+    vst1q_u16(c + 16, a.val[2]); \
+    vst1q_u16(c + 24, a.val[3]);
+
+#else
+#error "Unsupported compiler"
+#endif
 
 #define inv3 43691
 #define inv15 61167
