@@ -41,6 +41,7 @@ all: test/test_polymul \
      test/test_pack \
      test/ram \
      test/speed \
+     test/speed2 \
      test/encap \
      test/decap \
      test/keypair
@@ -56,6 +57,9 @@ test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 
 test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c -lpapi
+
+test/speed2: $(SRC_URAND) $(HDR_URAND) test/speed2.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/speed2.c -lpapi
 
 test/ram: $(SRC_URAND) $(OBJS) $(HDR_URAND) test/ram.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) test/ram.c
@@ -82,6 +86,7 @@ test:
 	./test/test_ntru
 	./test/test_pack
 	./test/speed
+      ./test/speed2
 	./test/ram
 
 clean:

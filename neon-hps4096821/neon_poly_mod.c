@@ -44,27 +44,40 @@ limitations under the License.
 // c = a ^ b
 #define poly_vxor_x1(c, a, b) c = veorq_u16(a, b);
 
+#if defined(__clang__)
 
 // load c <= a
 #define poly_vload(c, a) c = vld1q_u16_x4(a);
 
-// // store c <= a
-// #define poly_vstore(c, a) vst1q_u16_x4(c, a);
+// store c <= a
+#define poly_vstore(c, a) vst1q_u16_x4(c, a);
+
+#elif defined(__GNUC__)
+
+// load c <= a
+#define poly_vload(c, a)          \
+    c.val[0] = vld1q_u16(a);      \
+    c.val[1] = vld1q_u16(a + 8);  \
+    c.val[2] = vld1q_u16(a + 16); \
+    c.val[3] = vld1q_u16(a + 24);
 
 // store c <= a
-#define poly_vstore(c, a)                     \
-    vst1q_u16(c +  0, (uint16x8_t) a.val[0]); \
-    vst1q_u16(c +  8, (uint16x8_t) a.val[1]); \
-    vst1q_u16(c + 16, (uint16x8_t) a.val[2]); \
-    vst1q_u16(c + 24, (uint16x8_t) a.val[3]);
+#define poly_vstore(c, a)                    \
+    vst1q_u16(c + 0, (uint16x8_t)a.val[0]);  \
+    vst1q_u16(c + 8, (uint16x8_t)a.val[1]);  \
+    vst1q_u16(c + 16, (uint16x8_t)a.val[2]); \
+    vst1q_u16(c + 24, (uint16x8_t)a.val[3]);
+
+#else
+#error "Unsupported compiler"
+#endif
 
 // store c <= a
 #define poly_vstore_const(c, a) \
-    vst1q_u16(c +  0, a);       \
-    vst1q_u16(c +  8, a);       \
+    vst1q_u16(c + 0, a);        \
+    vst1q_u16(c + 8, a);        \
     vst1q_u16(c + 16, a);       \
     vst1q_u16(c + 24, a);
-
 
 // c = a >> value
 #define poly_vsr(c, a, value)                \
@@ -95,11 +108,11 @@ limitations under the License.
     c.val[3] = vandq_u16(a.val[3], b);
 
 // c = a & b
-#define poly_vand_sign(c, a, b)               \
-    c.val[0] = vandq_s16(a.val[0],(int16x8_t) b.val[0]); \
-    c.val[1] = vandq_s16(a.val[1],(int16x8_t) b.val[1]); \
-    c.val[2] = vandq_s16(a.val[2],(int16x8_t) b.val[2]); \
-    c.val[3] = vandq_s16(a.val[3],(int16x8_t) b.val[3]);
+#define poly_vand_sign(c, a, b)                          \
+    c.val[0] = vandq_s16(a.val[0], (int16x8_t)b.val[0]); \
+    c.val[1] = vandq_s16(a.val[1], (int16x8_t)b.val[1]); \
+    c.val[2] = vandq_s16(a.val[2], (int16x8_t)b.val[2]); \
+    c.val[3] = vandq_s16(a.val[3], (int16x8_t)b.val[3]);
 
 // c = a + b
 #define poly_vadd(c, a, b)                    \
@@ -116,11 +129,11 @@ limitations under the License.
     c.val[3] = vaddq_u16(a.val[3], b);
 
 // c = a - b
-#define poly_vsub_const_sign(c, a, b)  \
-    c.val[0] = vsubq_s16( (int16x8_t) a.val[0], (int16x8_t) b); \
-    c.val[1] = vsubq_s16( (int16x8_t) a.val[1], (int16x8_t) b); \
-    c.val[2] = vsubq_s16( (int16x8_t) a.val[2], (int16x8_t) b); \
-    c.val[3] = vsubq_s16( (int16x8_t) a.val[3], (int16x8_t) b);
+#define poly_vsub_const_sign(c, a, b)                        \
+    c.val[0] = vsubq_s16((int16x8_t)a.val[0], (int16x8_t)b); \
+    c.val[1] = vsubq_s16((int16x8_t)a.val[1], (int16x8_t)b); \
+    c.val[2] = vsubq_s16((int16x8_t)a.val[2], (int16x8_t)b); \
+    c.val[3] = vsubq_s16((int16x8_t)a.val[3], (int16x8_t)b);
 
 // c = a - const
 #define poly_vsub_const(c, a, b)       \
@@ -150,7 +163,7 @@ limitations under the License.
     c.val[2] = vmvnq_s16(a.val[2]); \
     c.val[3] = vmvnq_s16(a.val[3]);
 
-// void neon_poly_mod_3_Phi_n(poly *r) name for testing 
+// void neon_poly_mod_3_Phi_n(poly *r) name for testing
 void poly_mod_3_Phi_n(poly *r)
 {
     // 4 SIMD registers
@@ -212,8 +225,8 @@ void poly_mod_3_Phi_n(poly *r)
     }
     // 821, 822, 823
     r->coeffs[NTRU_N] = 0;
-    r->coeffs[NTRU_N+1] = 0;
-    r->coeffs[NTRU_N+2] = 0;
+    r->coeffs[NTRU_N + 1] = 0;
+    r->coeffs[NTRU_N + 2] = 0;
 
     poly_vxor_x1(last, last, last);
     // 824 + 32 = 856
@@ -242,8 +255,8 @@ void poly_mod_q_Phi_n(poly *r)
     }
     // 821, 822, 823
     r->coeffs[NTRU_N] = 0;
-    r->coeffs[NTRU_N+1] = 0;
-    r->coeffs[NTRU_N+2] = 0;
+    r->coeffs[NTRU_N + 1] = 0;
+    r->coeffs[NTRU_N + 2] = 0;
 
     poly_vxor_x1(last, last, last);
     // 824 + 32 = 856
@@ -330,8 +343,8 @@ void poly_Rq_to_S3(poly *r, const poly *a)
     }
     // 821, 822, 823
     r->coeffs[NTRU_N] = 0;
-    r->coeffs[NTRU_N+1] = 0;
-    r->coeffs[NTRU_N+2] = 0;
+    r->coeffs[NTRU_N + 1] = 0;
+    r->coeffs[NTRU_N + 2] = 0;
 
     poly_vxor_x1(last, last, last);
     // 824 + 32 = 856
