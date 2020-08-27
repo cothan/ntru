@@ -11,45 +11,58 @@
 #include <papi.h>
 #endif 
 
-#define NTESTS 1000
+#define NTESTS 10000
 
-static int cmp_llu(const void *a, const void*b)
-{
-  if(*(unsigned long long *)a < *(unsigned long long *)b) return -1;
-  if(*(unsigned long long *)a > *(unsigned long long *)b) return 1;
+static int cmp_llu(const void *a, const void *b) {
+  if (*(unsigned long long *)a < *(unsigned long long *)b)
+    return -1;
+  if (*(unsigned long long *)a > *(unsigned long long *)b)
+    return 1;
   return 0;
 }
 
-static unsigned long long median(unsigned long long *l, size_t llen)
-{
-  qsort(l,llen,sizeof(unsigned long long),cmp_llu);
+static unsigned long long median(unsigned long long *l, size_t llen) {
+  qsort(l, llen, sizeof(unsigned long long), cmp_llu);
 
-  if(llen%2) return l[llen/2];
-  else return (l[llen/2-1]+l[llen/2])/2;
+  if (llen % 2)
+    return l[llen / 2];
+  else
+    return (l[llen / 2 - 1] + l[llen / 2]) / 2;
 }
 
-static unsigned long long average(unsigned long long *t, size_t tlen)
-{
-  unsigned long long acc=0;
+static double average(unsigned long long *t, size_t tlen) {
+  unsigned long long acc = 0;
   size_t i;
-  for(i=0;i<tlen;i++)
+  for (i = 0; i < tlen; i++)
     acc += t[i];
-  return acc/(tlen);
+  return ((double)acc) / (tlen);
 }
 
-static void print_results(const char *s, unsigned long long *t, size_t tlen)
-{
+static void print_results(const char *s, unsigned long long *t, size_t tlen) {
   size_t i;
   printf("%s", s);
-  for(i=0;i<tlen-1;i++)
-  {
-    t[i] = t[i+1] - t[i];
+
+  unsigned long long mint = LONG_MAX;
+  unsigned long long maxt = 0LL;
+  for (i = 0; i < tlen - 1; i++) {
+    t[i] = t[i + 1] - t[i];
+
+    if (t[i] < mint)
+      mint = t[i];
+    if (t[i] > maxt)
+      maxt = t[i];
   }
   printf("\n");
-  printf("median: %llu\n", median(t, tlen));
-  printf("average: %llu\n", average(t, tlen-1));
+  printf("median: %'llu\n", median(t, tlen));
+  printf("average: %'lf\n", average(t, tlen - 1));
   printf("\n");
 }
+
+void handle_error(int retval) {
+  printf("PAPI error %d: %s\n", retval, PAPI_strerror(retval));
+  exit(1);
+}
+
 
 int main()
 {
