@@ -1,4 +1,4 @@
-= NTRU
+| = NTRU
 
 NTRU is a submission to the second round of [NIST's Post-Quantum Cryptography
 project](https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Round-2-Submissions).
@@ -8,7 +8,7 @@ It is a merger of the first round NTRUEncrypt and NTRU-HRSS-KEM submissions. See
 
 ARM NEON instruction acceleration
 
-== Cortex-A72 
+== Cortex-A72 Benchmark
 
 Benchmark on Raspberry Pi 4:
 
@@ -19,53 +19,59 @@ Benchmark on Raspberry Pi 4:
 * Out-of-order: Yes
 * Branch prediction: Yes
 
+.Compiler flags 
 ----
-CC = /usr/bin/clang
 CFLAGS = -O3 -fomit-frame-pointer -mtune=native -fPIC -fPIE -pie -g3
 CFLAGS += -Wall -Wextra -Wpedantic 
 LDFLAGS = -lpapi
 ----
 
-Compiler version:  `clang version 10.0.1, Target: aarch64-unknown-linux-gnu`
-
+Compiler version:  
+- `clang version 10.0.1, Target: aarch64-unknown-linux-gnu`
+- `gcc version 10.2.0 (GCC) aarch64-unknown-linux-gnu`
 
 Timing benchmark in microsecond (us)
 
-.Cortex-A72-HPS2048509
+.A72-HPS2048509
 |====
-| Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
-| REF-NTRU-HPS2048-509 | 809 | 2122 | 696 | 699 
-| NEON-NTRU-HPS2048-509 | 139 | 95 | 25 | 26 
-| *REF/NEON-HPS2048-509* | 5.82 | 22.33 | 27.84 | 26.88
-|====
-
-.Cortex-A72-HRSS701
-|====
-| Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
-| REF-NTRU-HRSS-701 | 1372 | 4017 | 1320 | 1377
-| NEON-NTRU-HRSS-701 | 95 | 176 | 48 | 48
-| *REF/NEON-HRSS-701* | 14.44 | 22.82 | 27.50 | 28.68
+| Parameter | Keygen | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
+| Ref | 15967.9 | 809.2 | 2122.1 | 696.4 | 699.9
+| NEON GCC | 7156.8 | 135.2 | 89.8 | - | - 
+| NEON Clang | 6164.5 | 139.9 | 91.2 | 25 | 26 
+| *Ref/NEON Clang* | 2.59 | 5.78 | 23.26 | 27.84 | 26.88
 |====
 
-.Cortex-A72-HPS2048677
+.A72-HRSS701
 |====
-| Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
-| REF-NTRU-HPS2048-677 | 1389 | 3754 | 1229 | 1238
-| NEON-NTRU-HPS2048-677 | 196 | 141 | 37 | 38
-| *REF/NEON-HPS2048-677* | 7.08 | 26.62 | 33.21 | 32.57
-|====
-
-.Cortex-A72-HPS4096821
-|====
-| Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
-| REF-NTRU-HPS4096-821 | 2007 | 5502 | 1808 | 1815 
-| NEON-NTRU-HPS4096-821 | 245 | 188 | 51 | 53 
-| *REF/NEON-HPS4096-821* | 8.19 | 29.26 | 35.45 | 34.24
+| Parameter | Keygen | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
+| Ref | 30103.0 | 1368.9 | 4011.1 | 1320 | 1377
+| NEON GCC |13352.5 | 92.1 | 174.2 | - | -
+| NEON Clang | 11994.0 | 91.3 | 174.0 | 48 | 48
+| *Ref/NEON Clang * | 2.50 | 14.99 | 23.05 | 27.50 | 28.68
 |====
 
-For cherry picking purpose (pun intended), I can compile `REF` code with `-fno-tree-vectorize` to have better speed up, but I decide this speed up is enough. 
 
-== Cortex-A53
+.A72-HPS2048677
+|====
+| Parameter | Keygen | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
+| Ref | 28207.5 | 1397.3 | 3761.2 | 1229 | 1238
+| NEON GCC | 12681.5 | 195.5 | 144.8 | - | -
+| NEON Clang | 11026.6 | 197.6 | 138.9 | 37 | 38
+| *Ref/NEON Clang* | 2.55 | 7.07 | 27.07 | 33.21 | 32.57
+|====
+
+.A72-HPS4096821
+|====
+| Parameter | Keygen | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
+| Ref | 41108.4 | 1998.9 | 5533.1 | 1808 | 1815 
+| NEON GCC | 18309.7 | 242.0 | 184.8 | - | -
+| NEON Clang | 16278.3 | 248.6 | 186.8 | 51 | 53 
+| *REF/NEON Clang* | 2.52 | 8.04 | 29.62 | 35.45 | 34.24
+|====
+
+For cherry picking purpose (pun intended), I can compile `Ref` code with `-fno-tree-vectorize` to have better speed up, but I decide this speed up is enough. 
+
+== Cortex-A53 Benchmark
 
 * CPU max freq: 1200 Mhz (no overclock)
 * ARMv8 ASIMD instruction 
@@ -87,35 +93,57 @@ Compiler version:  `clang version 10.0.1, Target: aarch64-unknown-linux-gnu`
 
 Timing benchmark in microsecond (us)
 
-.Cortex-A53-HPS2048509
+.A53-HPS2048509
 |====
 | Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
-| REF-NTRU-HPS2048-509 | 1839 | 4710 | 1547 | 1556 
-| NEON-NTRU-HPS2048-509 | 344 | 175 | 47 | 48 
-| *REF/NEON-HPS2048-509* | 5.34 | 26.91 | 32.91 | 32.41
+| Ref  | 1839 | 4710 | 1547 | 1556 
+| NEON Clang | 344 | 175 | 47 | 48 
+| *REF/NEON Clang* | 5.34 | 26.91 | 32.91 | 32.41
 |====
 
-.Cortex-A53-HRSS701
+.A53-HRSS701
 |====
 | Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
-| REF-NTRU-HRSS-701 | 3060 | 8896 | 2923 | 2936
-| NEON-NTRU-HRSS-701 | 207 | 311 | 83 | 84
-| *REF/NEON-HRSS-701* | 14.78 | 28.60 | 35.21 | 34.95
+| Ref | 3060 | 8896 | 2923 | 2936
+| NEON Clang | 207 | 311 | 83 | 84
+| *REF/NEON Clang* | 14.78 | 28.60 | 35.21 | 34.95
 |====
 
-.Cortex-A53-HPS2048677
+.A53-HPS2048677
 |====
 | Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
-| REF-NTRU-HPS2048-677 | 3134 | 8281 | 2728 | 2740
-| NEON-NTRU-HPS2048-677 | 483 | 256 | 70 | 71
-| *REF/NEON-HPS2048-677* | 6.49 | 32.34 | 38.97 | 38.59
+| Ref | 3134 | 8281 | 2728 | 2740
+| NEON Clang | 483 | 256 | 70 | 71
+| *REF/NEON Clang* | 6.49 | 32.34 | 38.97 | 38.59
 |====
 
-.Cortex-A53-HPS4096821
+.A53-HPS4096821
 |====
 | Parameter | Encap  | Decap | poly_Rq_mul | poly_S3_mul 
-| REF-NTRU-HPS4096-821 | 4504 | 12125 | 4005 | 4020 
-| NEON-NTRU-HPS4096-821 | 598 | 327 | 92 | 94 
-| *REF/NEON-HPS4096-821* | 7.53 | 37.08 | 43.53 | 42.76
+| Ref | 4504 | 12125 | 4005 | 4020 
+| NEON Clang | 598 | 327 | 92 | 94 
+| *REF/NEON Clang* | 7.53 | 37.08 | 43.53 | 42.76
 |====
 
+== Questions?
+
+Feel free to create a pull request.
+
+Is NTRU faster than SABER? Want a comparison?
+
+You can find my other repo NEON implementation of SABER here: https://github.com/cothan/SABER
+
+== Analysis 
+
+Until now I've worked with codebase of SABER and NTRU. 
+If I have to make a bet final selection of NIST PQC standard, I will bet it's not NTRU. 
+
+== References 
+
+[1] 
+----
+Cryptology ePrint Archive: Report 2020/795
+
+Implementation and Benchmarking of Round 2 Candidates in the NIST Post-Quantum Cryptography Standardization Process Using Hardware and Software/Hardware Co-design Approaches
+https://eprint.iacr.org/2020/795
+----
