@@ -3,32 +3,32 @@ CFLAGS = -O3 -fomit-frame-pointer -mtune=native -fPIC -fPIE -pie -g3
 CFLAGS += -Wall -Wextra -Wpedantic
 
 SRC = crypto_sort_int32.c \
-      fips202.c \
-      kem.c \
-      owcpa.c \
-      pack3.c \
-      packq.c \
-      poly.c \
-      poly_lift.c \
-      neon_poly_mod.c \
-      poly_r2_inv.c \
-      rq_mul/neon_batch_multiplication.c \
-      rq_mul/neon_matrix_transpose.c \
-      rq_mul/neon_poly_rq_mul.c\
-      neon_poly_rq_mul.c \
-      poly_s3_inv.c \
-      sample.c \
-      sample_iid.c \
-      verify.c
+	fips202.c \
+	kem.c \
+	owcpa.c \
+	pack3.c \
+	packq.c \
+	poly.c \
+	poly_lift.c \
+	neon_poly_mod.c \
+	poly_r2_inv.c \
+	rq_mul/neon_batch_multiplication.c \
+	rq_mul/neon_matrix_transpose.c \
+	rq_mul/neon_poly_rq_mul.c\
+	neon_poly_rq_mul.c \
+	poly_s3_inv.c \
+	sample.c \
+	sample_iid.c \
+	verify.c
 
 HDR = crypto_hash_sha3256.h \
-      crypto_sort_int32.h \
-      kem.h \
-      owcpa.h \
-      params.h \
-      poly.h \
-      sample.h \
-      verify.h
+	crypto_sort_int32.h \
+	kem.h \
+	owcpa.h \
+	params.h \
+	poly.h \
+	sample.h \
+	verify.h
 
 SRC_URAND = $(SRC) randombytes.c
 HDR_URAND = $(HDR) randombytes.h
@@ -86,7 +86,7 @@ test:
 	./test/test_ntru
 	./test/test_pack
 	./test/speed
-      ./test/speed2
+	./test/speed2
 	./test/ram
 
 clean:
@@ -95,6 +95,7 @@ clean:
 	-$(RM) -r test/test_ntru
 	-$(RM) -r test/test_pack
 	-$(RM) -r test/speed
+	-$(RM) -r test/speed2
 	-$(RM) -r test/ram
 	-$(RM) -r test/encap
 	-$(RM) -r test/decap

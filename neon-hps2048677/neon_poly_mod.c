@@ -49,9 +49,6 @@ limitations under the License.
 // load c <= a
 #define poly_vload(c, a) c = vld1q_u16_x4(a);
 
-// store c <= a
-#define poly_vstore(c, a) vst1q_u16_x4(c, a);
-
 #elif defined(__GNUC__)
 
 // load c <= a
@@ -61,16 +58,16 @@ limitations under the License.
     c.val[2] = vld1q_u16(a + 16); \
     c.val[3] = vld1q_u16(a + 24);
 
+#else
+#error "Unsupported compiler"
+#endif
+
 // store c <= a
 #define poly_vstore(c, a)                    \
     vst1q_u16(c + 0, (uint16x8_t)a.val[0]);  \
     vst1q_u16(c + 8, (uint16x8_t)a.val[1]);  \
     vst1q_u16(c + 16, (uint16x8_t)a.val[2]); \
     vst1q_u16(c + 24, (uint16x8_t)a.val[3]);
-
-#else
-#error "Unsupported compiler"
-#endif
 
 // store c <= a
 #define poly_vstore_const(c, a) \

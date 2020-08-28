@@ -4,30 +4,30 @@ CFLAGS += -Wall -Wextra -Wpedantic
 LDFLAGS = -lpapi
 
 SRC = fips202.c \
-      kem.c \
-      owcpa.c \
-      pack3.c \
-      packq.c \
-      poly.c \
-      poly_lift.c \
-      neon_poly_mod.c \
-      rq_mul/neon_batch_multiplication.c \
-      rq_mul/neon_matrix_transpose.c \
-      rq_mul/neon_poly_rq_mul.c\
-      neon_poly_rq_mul.c \
-      poly_r2_inv.c \
-      poly_s3_inv.c \
-      sample.c \
-      sample_iid.c \
-      verify.c
+	kem.c \
+	owcpa.c \
+	pack3.c \
+	packq.c \
+	poly.c \
+	poly_lift.c \
+	neon_poly_mod.c \
+	rq_mul/neon_batch_multiplication.c \
+	rq_mul/neon_matrix_transpose.c \
+	rq_mul/neon_poly_rq_mul.c\
+	neon_poly_rq_mul.c \
+	poly_r2_inv.c \
+	poly_s3_inv.c \
+	sample.c \
+	sample_iid.c \
+	verify.c
 
 HDR = crypto_hash_sha3256.h \
-      kem.h \
-      owcpa.h \
-      params.h \
-      poly.h \
-      sample.h \
-      verify.h
+	kem.h \
+	owcpa.h \
+	params.h \
+	poly.h \
+	sample.h \
+	verify.h
 
 SRC_URAND = $(SRC) randombytes.c
 HDR_URAND = $(HDR) randombytes.h
@@ -85,7 +85,7 @@ test:
 	./test/test_ntru
 	./test/test_pack
 	./test/speed
-      ./test/speed2
+	./test/speed2
 	./test/ram
 
 clean:
