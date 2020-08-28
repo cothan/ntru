@@ -53,8 +53,8 @@ static void print_results(const char *s, unsigned long long *t, size_t tlen)
             maxt = t[i];
     }
     printf("\n");
-    printf("median: %'llu\n", median(t, tlen));
-    printf("average: %'lf\n", average(t, tlen - 1));
+    printf("median: %llu\n", median(t, tlen));
+    printf("average: %lf\n", average(t, tlen - 1));
     printf("\n");
 }
 
@@ -70,64 +70,51 @@ extern int crypto_kem_enc(unsigned char *ct, unsigned char *ss,
 extern int crypto_kem_dec(unsigned char *ss, const unsigned char *ct,
                           const unsigned char *sk);
 
-#define NTESTS 20000
+#define TESTS 10000
 
 int test_kem_cca()
 {
 
-    uint8_t pk[SABER_PUBLICKEYBYTES];
-    uint8_t sk[SABER_SECRETKEYBYTES];
-    uint8_t c[SABER_BYTES_CCA_DEC];
-    uint8_t k_a[SABER_KEYBYTES], k_b[SABER_KEYBYTES];
-
-    int retval;
+    unsigned char* pk = (unsigned char*) malloc(NTRU_PUBLICKEYBYTES);
+    unsigned char* sk = (unsigned char*) malloc(NTRU_SECRETKEYBYTES);
+    unsigned char* c = (unsigned char*) malloc(NTRU_CIPHERTEXTBYTES);
+    unsigned char k_a[32], k_b[32];
 
     unsigned char entropy_input[48];
-
-    uint64_t i, repeat;
-    repeat = NTESTS;
-
-    unsigned long long t[NTESTS];
-
-    for (i = 0; i < NTESTS; i++)
-        ;
-
-    int EventSet = PAPI_NULL;
+    long long unsigned t[TESTS];
+    unsigned int i;
 
     if (PAPI_library_init(PAPI_VER_CURRENT) != PAPI_VER_CURRENT)
         exit(1);
-
-    // Intializes random number generator
-    srand((unsigned)time(&t));
 
     for (i = 0; i < 48; i++)
     {
         entropy_input[i] = i;
     }
-    randombytes_init(entropy_input, NULL, 256);
+    randombytes(entropy_input, sizeof(entropy_input));
     /* =================================== */
-    for (i = 0; i < repeat; i++)
+    for (i = 0; i < TESTS; i++)
     {
         crypto_kem_keypair(pk, sk);
         t[i] = PAPI_get_real_usec();
     }
-    print_results("Keygen:           ", t, NTESTS);
+    print_results("Keygen:           ", t, TESTS);
 
     /* =================================== */
-    for (i = 0; i < repeat; i++)
+    for (i = 0; i < TESTS; i++)
     {
         crypto_kem_enc(c, k_a, pk);
         t[i] = PAPI_get_real_usec();
     }
-    print_results("Encap:           ", t, NTESTS);
+    print_results("Encap:           ", t, TESTS);
 
     /* =================================== */
-    for (i = 0; i < repeat; i++)
+    for (i = 0; i < TESTS; i++)
     {
         crypto_kem_dec(k_b, c, sk);
         t[i] = PAPI_get_real_usec();
     }
-    print_results("Decap:           ", t, NTESTS);
+    print_results("Decap:           ", t, TESTS);
 
     /* =================================== */
     return 0;

@@ -74,7 +74,7 @@ int main()
   unsigned char* cts = (unsigned char*) malloc(NTESTS*NTRU_CIPHERTEXTBYTES);
   unsigned char fgbytes[NTRU_SAMPLE_FG_BYTES];
   unsigned char rmbytes[NTRU_SAMPLE_RM_BYTES];
-  long long t[NTESTS];
+  long long unsigned t[NTESTS];
   uint16_t a1 = 0;
   int i;
   int retval;
