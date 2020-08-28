@@ -70,7 +70,7 @@ extern int crypto_kem_enc(unsigned char *ct, unsigned char *ss,
 extern int crypto_kem_dec(unsigned char *ss, const unsigned char *ct,
                           const unsigned char *sk);
 
-#define TESTS 10000
+#define TESTS 1000
 
 int test_kem_cca()
 {

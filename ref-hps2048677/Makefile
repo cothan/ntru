@@ -55,6 +55,10 @@ test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c $(LDFLAGS)
 
+test/speed2: $(SRC_URAND) $(HDR_URAND) test/speed2.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/speed2.c $(LDFLAGS) -lpapi
+
+
 test/ram: $(SRC_URAND) $(OBJS) $(HDR_URAND) test/ram.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) test/ram.c
 
@@ -80,6 +84,7 @@ test:
 	./test/test_ntru
 	./test/test_pack
 	./test/speed
+	./test/speed2
 	./test/ram
 
 clean:
@@ -88,6 +93,7 @@ clean:
 	-$(RM) -r test/test_ntru
 	-$(RM) -r test/test_pack
 	-$(RM) -r test/speed
+	-$(RM) -r test/speed2
 	-$(RM) -r test/ram
 	-$(RM) -r test/encap
 	-$(RM) -r test/decap
