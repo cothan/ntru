@@ -1,4 +1,4 @@
-| = NTRU
+= NTRU
 
 NTRU is a submission to the second round of [NIST's Post-Quantum Cryptography
 project](https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Round-2-Submissions).
