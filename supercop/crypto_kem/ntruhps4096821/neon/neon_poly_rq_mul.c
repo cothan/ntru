@@ -17,7 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 =============================================================================*/
-#include "rq_mul/neon_poly_rq_mul.h"
+#include "rq_mul/neon_poly_rq_mul.c"
 #include "poly.h"
 #include <arm_neon.h>
 

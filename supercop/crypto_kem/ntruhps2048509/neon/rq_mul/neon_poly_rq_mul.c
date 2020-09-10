@@ -20,8 +20,8 @@ limitations under the License.
 #include <arm_neon.h>
 
 #include "../params.h"
-#include "neon_batch_multiplication.h"
-#include "neon_matrix_transpose.h"
+#include "neon_batch_multiplication.c"
+#include "neon_matrix_transpose.c"
 
 #define SB0 (NTRU_N_PAD / 2) // 256
 #define SB1 (SB0 / 4)        // 64

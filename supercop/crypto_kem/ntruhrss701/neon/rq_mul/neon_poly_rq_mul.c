@@ -20,8 +20,8 @@ limitations under the License.
 #include <arm_neon.h>
 
 #include "../params.h"
-#include "neon_batch_multiplication.h"
-#include "neon_matrix_transpose.h"
+#include "neon_batch_multiplication.c"
+#include "neon_matrix_transpose.c"
 
 #define NTRU_N 701
 #define NTRU_N_PAD 704
