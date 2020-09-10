@@ -13,7 +13,3 @@ rsync --archive --copy-links --recursive neon-hps2048677/ $DIRNAME/ntruhps204867
 
 mkdir -p $DIRNAME/ntruhps4096821/neon
 rsync --archive --copy-links --recursive neon-hps4096821/ $DIRNAME/ntruhps4096821/neon
-
-
-
-tar czf supercop-ntru-$(date +"%Y%m%d").tar.gz DIRNAME
