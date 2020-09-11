@@ -20,8 +20,24 @@ limitations under the License.
 #include <arm_neon.h>
 #include "sample.h"
 
+#if defined(__clang__)
+
 // load c <= a
 #define sp_vload(c, a) c = vld1q_u16_x4(a);
+
+#elif defined(__GNUC__)
+
+// load c <= a
+#define sp_vload(c, a)          \
+    c.val[0] = vld1q_u16(a);      \
+    c.val[1] = vld1q_u16(a + 8);  \
+    c.val[2] = vld1q_u16(a + 16); \
+    c.val[3] = vld1q_u16(a + 24);
+
+#else
+#error "Unsupported compiler"
+#endif
+
 
 // store c <= a
 #define sp_vstore(c, a)                       \
