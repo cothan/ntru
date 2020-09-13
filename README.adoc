@@ -69,8 +69,6 @@ Compiler version:
 | *REF/NEON Clang* | 2.52 | 8.04 | 29.62 | 35.45 | 34.24
 |====
 
-For cherry picking purpose (pun intended), I can compile `Ref` code with `-fno-tree-vectorize` to have better speed up, but I decide this speed up is enough. 
-
 == Cortex-A53 Benchmark
 
 * CPU max freq: 1200 Mhz (no overclock)
