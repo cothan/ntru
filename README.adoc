@@ -133,10 +133,6 @@ Is NTRU faster than SABER? Want a comparison?
 
 You can find my other repo NEON implementation of SABER here: https://github.com/cothan/SABER
 
-== Analysis 
-
-Until now I've worked with codebase of SABER and NTRU. 
-If I have to make a bet final selection of NIST PQC standard, I will bet it's not NTRU. 
 
 == References 
 
