@@ -16,7 +16,10 @@ William Whyte,Keita Xagawa, Takashi Yamakawa, Zhenfei Zhang.
 #define MODQ(X) ((X) & (NTRU_Q-1))
 
 typedef struct{
-  uint16_t coeffs[NTRU_N];
+  // round to nearest multiple of 32 to make it easier to load into vector
+  //   registers without having to do bound checks
+  #define NTRU_N_32 PAD32(NTRU_N)
+  uint16_t coeffs[NTRU_N_PAD] __attribute__((aligned(32)));
 } poly;
 
 #define poly_mod_3_Phi_n CRYPTO_NAMESPACE(poly_mod_3_Phi_n)
