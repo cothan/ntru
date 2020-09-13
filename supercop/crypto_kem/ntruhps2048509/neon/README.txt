@@ -7,25 +7,15 @@ Best regards,
 Duc Tri Nguyen (CERG GMU)
 
 
+
 .
-├── api_bytes.h
 ├── api.h
 ├── architectures
-├── cpucycles.c
-├── cpucycles.h
-├── crypto_hash_sha3256.h
-├── crypto_sort_int32.c
-├── crypto_sort_int32.h
-├── fips202.c
-├── fips202.h
 ├── implementors
 ├── kem.c
 ├── kem.h
-├── Makefile
-├── Makefile-NIST
 ├── neon_poly_mod.c
 ├── neon_poly_rq_mul.c
-├── neon_sample_iid.c
 ├── owcpa.c
 ├── owcpa.h
 ├── pack3.c
@@ -36,12 +26,7 @@ Duc Tri Nguyen (CERG GMU)
 ├── poly_lift.c
 ├── poly_r2_inv.c
 ├── poly_s3_inv.c
-├── PQCgenKAT_kem.c
-├── randombytes.c
-├── randombytes.h
 ├── README.txt
-├── rng.c
-├── rng.h
 ├── rq_mul
 │   ├── neon_batch_multiplication.c
 │   ├── neon_batch_multiplication.h
@@ -55,34 +40,21 @@ Duc Tri Nguyen (CERG GMU)
 ├── verify.c
 └── verify.h
 
-1 directory, 44 files
-25e200c4d1f661a4935e7ce83a737168  ./randombytes.c
-b6582be88dd57af0ceb0af2b30ad9f73  ./rng.h
-680a062081c640588f0941ae12fac45a  ./params.h
-afa3dc30017b49a81ff3fd1d572e90c6  ./randombytes.h
-532f481786028c9e051987c3fa4117ef  ./crypto_hash_sha3256.h
+1 directory, 29 files
+119741c230b3fe5406a373e6de97a2bb  ./params.h
+a436e762f74e39ed34854ee11db14470  ./README.txt
 4a155d76f2689ca06d7e2dd4b1b96dfa  ./neon_poly_rq_mul.c
 38f6e78435cf30a562b4ebfe8ec878ea  ./owcpa.c
-d5df9db931abbbf22e58d1d44750ff23  ./owcpa.h
-a3478f68bbd1e3279fcd5593d6e7887f  ./api.h
-df25acbfd62af425a16bed1cf1f6e923  ./Makefile-NIST
-2c9fa5877a3815e1736f48cedd44755e  ./verify.c
-2528b2860721dadf4d9b42ffbf21d9d3  ./sample.h
-2814a16ed66c85c1d487c46d9dc001b1  ./fips202.h
+deaaaf9aa3b637e6bf119a6309f8b5a9  ./owcpa.h
+f340f8b419fc61270bab0ea76e6d1018  ./api.h
+fc6dba7613ab3c226c5ec2b7c47c0f97  ./verify.c
+5954686b674e2e83beeea9a24b5dbc03  ./sample.h
 a8f27ad8127194670a1525da2627a924  ./sample_iid.c
-c0e9d94b1b3ad114cd1249edbedd3f56  ./Makefile
-fde0e879d85af0ab44b7ed1c02a377bd  ./cpucycles.c
-ada339a819cc97874a3de6c9f8c52528  ./crypto_sort_int32.c
-9bee9edfd6973d0f8f042c9be649101b  ./crypto_sort_int32.h
-f340f8b419fc61270bab0ea76e6d1018  ./api_bytes.h
-09217897c685d11b6a3790a37f8f48b5  ./neon_sample_iid.c
 08eb70977885e30c3487bbd002d2c558  ./implementors
 3970e4f610ffee8a746aa8bee30d28f0  ./packq.c
-dc2401aac4bb5c95019f2760fe36bada  ./cpucycles.h
 c4b12cd8d1f3c328fe10bd01c88cd9f0  ./architectures
 5822ca6494ff6f21be0b5c53db7f6269  ./poly_r2_inv.c
 940e0ad84d1d62cdc0490050a3a4aa55  ./sample.c
-7789171a88deb3f806214dd71943ebdc  ./fips202.c
 9b74a1ca21184f838bca228290c40d02  ./poly_lift.c
 dfe804a49d2d27278bd5d3cb21132d01  ./rq_mul/neon_poly_rq_mul.c
 c2a7ecd4b5360fd29e51585cf3dbfcf5  ./rq_mul/neon_matrix_transpose.c
@@ -92,11 +64,9 @@ aabd6c3287bc201e39957f5821639811  ./rq_mul/neon_poly_rq_mul.h
 84579da93ee608e6e851aaf3b081eb89  ./rq_mul/neon_batch_multiplication.c
 b0302140479f271a90fe2ada6e218cce  ./poly_s3_inv.c
 e8804edee5585be385bc4ad0ac2f4599  ./poly.c
-12481066c57bcde8ecf09ac2fb9f524c  ./PQCgenKAT_kem.c
-6af1c6ab4969d9bfcf07bf3279d2d1d2  ./poly.h
-ebe4130b4cce08b6150dcd9b50c18e5d  ./rng.c
-cac39c2b918edc8c912b08b05a844f90  ./kem.c
+f7ac46834d9108320523b8ce24eae0b4  ./poly.h
+30f0398d933a5120e2f4e8dda90b7cca  ./kem.c
 ecd67ddf1dda34790c74d7c96f2fc40e  ./neon_poly_mod.c
 03d52993b4afce10aee17325b655d4b4  ./pack3.c
-2960e46aa2db04584264c18ab93d1bfa  ./verify.h
-1341a74a4963d6e675d3a77843537609  ./kem.h
+26d7396f27cc8f6448b82a8032427cae  ./verify.h
+522398945f768d060d05d83bee5db162  ./kem.h
