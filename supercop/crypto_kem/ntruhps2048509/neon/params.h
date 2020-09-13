@@ -14,6 +14,10 @@ William Whyte,Keita Xagawa, Takashi Yamakawa, Zhenfei Zhang.
 #define NTRU_N 509
 #define NTRU_LOGQ 11
 
+#ifndef CRYPTO_NAMESPACE
+#define CRYPTO_NAMESPACE(s) s
+#endif
+
 // * Add for NEON code 
 #define NTRU_N_PAD 512
 

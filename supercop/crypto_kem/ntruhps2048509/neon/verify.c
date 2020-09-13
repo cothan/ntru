@@ -10,6 +10,8 @@ William Whyte,Keita Xagawa, Takashi Yamakawa, Zhenfei Zhang.
 #include <string.h>
 #include <stdint.h>
 
+#include "verify.h"
+
 /* returns 0 for equal strings, 1 for non-equal strings */
 int verify(const unsigned char *a, const unsigned char *b, size_t len)
 {

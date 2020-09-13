@@ -13,6 +13,7 @@ William Whyte,Keita Xagawa, Takashi Yamakawa, Zhenfei Zhang.
 #include "verify.h"
 #include "sample.h"
 #include "owcpa.h"
+#include "kem.h"
 
 
 // API FUNCTIONS 

@@ -14,6 +14,10 @@ William Whyte,Keita Xagawa, Takashi Yamakawa, Zhenfei Zhang.
 #define NTRU_N 821
 #define NTRU_LOGQ 12
 
+#ifndef CRYPTO_NAMESPACE
+#define CRYPTO_NAMESPACE(s) s
+#endif
+
 #define NTRU_N32 832
 #define NTRU_N_PAD 864
 
