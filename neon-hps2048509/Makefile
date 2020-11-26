@@ -21,7 +21,7 @@ SRC = cmov.c \
 	  neon_poly_rq_mul.c\
       poly_s3_inv.c \
       sample.c \
-      sample_iid.c
+      neon_sample_iid.c
 
 HDR = cmov.h \
       crypto_hash_sha3256.h \
