@@ -7,10 +7,11 @@
 #include <stdint.h>
 
 #define MODQ(X) ((X) & (NTRU_Q-1))
-#define NTRU_N_32 PAD32(NTRU_N)
+#define NTRU_N_32 704
+#define NTRU_N_PAD 720
 
 typedef struct{
-  uint16_t coeffs[NTRU_N];
+  uint16_t coeffs[NTRU_N_PAD];
 } poly;
 
 #define poly_mod_3_Phi_n CRYPTO_NAMESPACE(poly_mod_3_Phi_n)

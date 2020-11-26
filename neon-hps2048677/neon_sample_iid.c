@@ -59,11 +59,11 @@ limitations under the License.
     c.val[3] = vandq_u16(a.val[3], b);
 
 // c = a & b
-#define sp_vand_sign(c, a, b)                 \
-    c.val[0] = vandq_s16(a.val[0], b.val[0]); \
-    c.val[1] = vandq_s16(a.val[1], b.val[1]); \
-    c.val[2] = vandq_s16(a.val[2], b.val[2]); \
-    c.val[3] = vandq_s16(a.val[3], b.val[3]);
+#define sp_vand_sign(c, a, b)                            \
+    c.val[0] = vandq_s16(a.val[0], (int16x8_t)b.val[0]); \
+    c.val[1] = vandq_s16(a.val[1], (int16x8_t)b.val[1]); \
+    c.val[2] = vandq_s16(a.val[2], (int16x8_t)b.val[2]); \
+    c.val[3] = vandq_s16(a.val[3], (int16x8_t)b.val[3]);
 
 // c = a + b
 #define sp_vadd(c, a, b)                      \
@@ -114,17 +114,16 @@ limitations under the License.
 void sample_iid(poly *r, const unsigned char uniformbytes[NTRU_SAMPLE_IID_BYTES])
 {
     // 35 SIMD registers
-    uint16x8x4_t r0, r1, r2, r3;
+    uint16x8x4_t r1, r2, r3;
     int16x8x4_t t, c, a, b;
-    uint16x8_t hex_0x03, hex_0x0f, hex_0xff, zero;
+    uint16x8_t hex_0x03, hex_0x0f, hex_0xff;
     sp_vdup_x1(hex_0x03, 0x03);
     sp_vdup_x1(hex_0xff, 0xff);
     sp_vdup_x1(hex_0x0f, 0x0f);
-    sp_vdup_x1(zero, 0);
 
-    for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
+    for (uint16_t addr = 0; addr < NTRU_N_32; addr += 32)
     {
-        sp_vload(r3, &uniformbytes[addr]);
+        sp_vload(r3, (uint16_t *) &uniformbytes[addr]);
 
         // r3 = (res >> 8) + (res & 0xff)
         sp_vsr(r1, r3, 8);

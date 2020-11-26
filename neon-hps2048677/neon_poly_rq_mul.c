@@ -25,7 +25,6 @@ limitations under the License.
 #include "neon_matrix_transpose.h"
 
 #define NTRU_N 677
-#define NTRU_N_PAD 720
 #define SB0 (NTRU_N_PAD / 3) // 240
 #define SB1 (SB0 / 4)        // 60
 #define SB1_PAD 64           // 64
@@ -689,7 +688,7 @@ void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
     uint16x8_t mask; 
     uint16x8x3_t res, tmp1, tmp2;
     mask = vdupq_n_u16(MASK);
-    for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 24)
+    for (uint16_t addr = 0; addr < NTRU_N_32; addr += 24)
     {
         vload_x3(tmp2, &tmp[addr]);
         vload_x3(tmp1, &tmp[addr + NTRU_N]);
