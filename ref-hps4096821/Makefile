@@ -58,10 +58,7 @@ test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_pack.c
 
 test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c $(LDFLAGS)
-
-test/speed2: $(SRC_URAND) $(HDR_URAND) test/speed2.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/speed2.c $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c
 
 test/gen_owcpa_vecs: test/gen_owcpa_vecs.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/gen_owcpa_vecs.c
