@@ -168,7 +168,7 @@ void poly_mod_3_Phi_n(poly *r)
     uint16x8x4_t r0, r1, r2, r3;
     int16x8x4_t t, c, a, b;
 
-    for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
+    for (uint16_t addr = 0; addr < NTRU_N_32; addr += 32)
     {
         poly_vload(r0, &r->coeffs[addr]);
 
@@ -225,7 +225,7 @@ void poly_mod_q_Phi_n(poly *r)
 
     // 8 SIMD registers
     uint16x8x4_t r0, r3;
-    for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
+    for (uint16_t addr = 0; addr < NTRU_N_32; addr += 32)
     {
         poly_vload(r0, &r->coeffs[addr]);
 
@@ -266,7 +266,7 @@ void poly_Rq_to_S3(poly *r, const poly *a)
     uint16x8x4_t r0, r1, r2, r3;
     int16x8x4_t t, c, aa, bb;
 
-    for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
+    for (uint16_t addr = 0; addr < NTRU_N_32; addr += 32)
     {
         poly_vload(r0, &a->coeffs[addr]);
         poly_vand_const(r0, r0, modQ);

@@ -24,7 +24,7 @@ limitations under the License.
 #include "neon_batch_multiplication.h"
 #include "neon_matrix_transpose.h"
 
-#define SB0 (NTRU_N_PAD / 2) // 256
+#define SB0 (NTRU_N_32 / 2) // 256
 #define SB1 (SB0 / 4)        // 64
 #define SB2 (SB1 / 2)        // 32
 #define SB3 (SB2 / 2)        // 16
@@ -132,7 +132,7 @@ limitations under the License.
 
 // Evaluate and copy
 static
-void karat_neon_evaluate_SB0(uint16_t *restrict w[3], uint16_t poly[NTRU_N_PAD])
+void karat_neon_evaluate_SB0(uint16_t *restrict w[3], uint16_t poly[NTRU_N_32])
 {
     uint16_t *c0 = poly,
              *c1 = &poly[SB0],
@@ -565,7 +565,7 @@ void poly_neon_reduction(uint16_t *poly, uint16_t *tmp)
     uint16x8_t mask;
     uint16x8x4_t res, tmp1, tmp2;
     mask = vdupq_n_u16(MASK);
-    for (uint16_t addr = 0; addr < NTRU_N_PAD; addr += 32)
+    for (uint16_t addr = 0; addr < NTRU_N_32; addr += 32)
     {
         vload(tmp2, &tmp[addr]);
         vload(tmp1, &tmp[addr + NTRU_N]);
