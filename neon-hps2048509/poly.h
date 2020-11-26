@@ -7,9 +7,9 @@
 #include <stdint.h>
 
 #define MODQ(X) ((X) & (NTRU_Q-1))
+#define NTRU_N_32 512
 
 typedef struct{
-  #define NTRU_N_32 PAD32(NTRU_N)
   uint16_t coeffs[NTRU_N_32];
 } poly;
 
