@@ -27,6 +27,10 @@ void poly_Sq_mul(poly *r, poly *a, poly *b)
 
 void poly_S3_mul(poly *r, poly *a, poly *b)
 {
+
+  /* Our S3 multiplications do not overflow mod q,    */
+  /* so we can re-purpose poly_Rq_mul, as long as we  */
+  /* follow with an explicit reduction mod q.         */
   poly_Rq_mul(r, a, b);
   poly_mod_3_Phi_n(r);
 }
