@@ -11,6 +11,8 @@
 */test/keypair
 */test/speed
 */test/speed2
+*/test/test_gp_compat
+*/test/test_owcpa
 */PQCgenKAT_kem
 *.rsp
 *.req
