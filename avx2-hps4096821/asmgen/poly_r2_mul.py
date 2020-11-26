@@ -1,3 +1,5 @@
+from params import *
+
 p = print
 
 def mult_128x128(xy, x, y, t1, t2):
@@ -141,8 +143,7 @@ def mul1024_and_accumulate(s, r, t):
 
 if __name__ == '__main__':
     p(".data")
-    p(".section .rodata")
-    p(".align 32")
+    p(".p2align 5")
 
     p("mask1100:")
     for i in [0]*8 + [65535]*8:
@@ -164,11 +165,11 @@ if __name__ == '__main__':
         p(".word {}".format(i))
 
     p(".text")
-    p(".hidden poly_R2_mul")
-    p(".global poly_R2_mul")
-    p(".att_syntax prefix")
+    p(".global {}poly_R2_mul".format(NAMESPACE))
+    p(".global _{}poly_R2_mul".format(NAMESPACE))
 
-    p("poly_R2_mul:")
+    p("{}poly_R2_mul:".format(NAMESPACE))
+    p("_{}poly_R2_mul:".format(NAMESPACE))
     # rdi holds result, rsi holds a, rdx holds b
     # TODO: allow rdi=rsi
 

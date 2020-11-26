@@ -152,19 +152,17 @@ def transpose_16x96_to_96x16(dst, src, src_off=0, dst_off=0):
 
 if __name__ == '__main__':
     p(".data")
-    p(".section .rodata")
-    p(".align 32")
+    p(".p2align 5")
 
     p(".text")
-    p(".hidden transpose_48x16_to_16x44")
     p(".global transpose_48x16_to_16x44")
-    p(".hidden transpose_48x16_to_16x44_stackbased")
+    p(".global _transpose_48x16_to_16x44")
     p(".global transpose_48x16_to_16x44_stackbased")
-    p(".hidden transpose_16x96_to_96x16")
+    p(".global _transpose_48x16_to_16x44_stackbased")
     p(".global transpose_16x96_to_96x16")
-    p(".hidden transpose_16x96_to_96x16_stackbased")
+    p(".global _transpose_16x96_to_96x16")
     p(".global transpose_16x96_to_96x16_stackbased")
-    p(".att_syntax prefix")
+    p(".global _transpose_16x96_to_96x16_stackbased")
 
     p("transpose_48x16_to_16x44:")
     p("mov %rsp, %r8")  # Use r8 to store the old stack pointer during execution.

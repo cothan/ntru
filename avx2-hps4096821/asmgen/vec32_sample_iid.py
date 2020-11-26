@@ -6,8 +6,7 @@ from math import ceil
 
 if __name__ == '__main__':
     p(".data")
-    p(".section .rodata")
-    p(".align 32")
+    p(".p2align 5")
 
     p("cast8_to_16:")
     for i in range(8):
@@ -20,11 +19,11 @@ if __name__ == '__main__':
     mod3_masks()
 
     p(".text")
-    p(".hidden vec32_sample_iid")
-    p(".global vec32_sample_iid")
-    p(".att_syntax prefix")
+    p(".global {}vec32_sample_iid".format(NAMESPACE))
+    p(".global _{}vec32_sample_iid".format(NAMESPACE))
 
-    p("vec32_sample_iid:")
+    p("{}vec32_sample_iid:".format(NAMESPACE))
+    p("_{}vec32_sample_iid:".format(NAMESPACE))
     # rdi holds r
     # rsi holds uniformbytes
 

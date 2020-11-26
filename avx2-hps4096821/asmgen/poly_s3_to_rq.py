@@ -1,5 +1,7 @@
 from math import ceil
 
+from params import *
+
 p = print
 
 
@@ -35,7 +37,7 @@ def mod3(a, r=13, t=14, c=15):
 
 if __name__ == '__main__':
     p(".data")
-    p(".align 32")
+    p(".p2align 5")
 
     p("mask_ff:")
     for i in range(16):
@@ -117,7 +119,7 @@ if __name__ == '__main__':
 
     p(".text")
     p(".global poly_lift")
-    p(".att_syntax prefix")
+    p(".global _poly_lift")
 
     p("poly_lift:")
 

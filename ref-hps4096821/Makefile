@@ -1,9 +1,12 @@
-CC = /usr/bin/cc
-CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie -g3
-CFLAGS += -Wall -Wextra -Wpedantic
-LDFLAGS = -lkeccak -lpapi
+NTRU_NAMESPACE ?= ntru_
 
-SRC = crypto_sort_int32.c \
+CC ?= /usr/bin/cc
+CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie
+CFLAGS += -Wall -Wextra -Wpedantic
+CFLAGS += -DCRYPTO_NAMESPACE\(s\)=${NTRU_NAMESPACE}\#\#s
+
+SRC = cmov.c \
+      crypto_sort_int32.c \
       fips202.c \
       kem.c \
       owcpa.c \
@@ -16,17 +19,16 @@ SRC = crypto_sort_int32.c \
       poly_rq_mul.c \
       poly_s3_inv.c \
       sample.c \
-      sample_iid.c \
-      verify.c
+      sample_iid.c
 
-HDR = crypto_hash_sha3256.h \
+HDR = cmov.h \
+      crypto_hash_sha3256.h \
       crypto_sort_int32.h \
       kem.h \
       owcpa.h \
       params.h \
       poly.h \
-      sample.h \
-      verify.h
+      sample.h
 
 SRC_URAND = $(SRC) randombytes.c
 HDR_URAND = $(HDR) randombytes.h
@@ -34,20 +36,23 @@ HDR_URAND = $(HDR) randombytes.h
 SRC_KAT = $(SRC) rng.c PQCgenKAT_kem.c
 HDR_KAT = $(HDR) rng.h api.h
 
-all: test/test_polymul \
-     test/test_ntru \
-     test/test_pack \
-     test/ram \
-     test/speed \
+all: test/decap \
      test/encap \
-     test/decap \
-     test/keypair
+     test/keypair \
+     test/speed \
+     test/test_gp_compat \
+     test/test_ntru \
+     test/test_owcpa \
+     test/test_pack
 
-test/test_polymul: $(SRC_URAND) $(HDR_URAND) test/test_polymul.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_polymul.c
+test/test_gp_compat: $(SRC_URAND) $(HDR_URAND) test/test_gp_compat.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_gp_compat.c
 
 test/test_ntru: $(SRC_URAND) $(HDR_URAND) test/test_ntru.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_ntru.c
+
+test/test_owcpa: $(SRC_URAND) $(HDR_URAND) test/test_owcpa.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_owcpa.c
 
 test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_pack.c
@@ -57,9 +62,6 @@ test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
 
 test/speed2: $(SRC_URAND) $(HDR_URAND) test/speed2.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/speed2.c $(LDFLAGS)
-
-test/ram: $(SRC_URAND) $(OBJS) $(HDR_URAND) test/ram.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) $(OBJS) test/ram.c
 
 test/gen_owcpa_vecs: test/gen_owcpa_vecs.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/gen_owcpa_vecs.c
@@ -78,23 +80,21 @@ PQCgenKAT_kem: $(SRC_KAT) $(HDR_KAT)
 
 .PHONY: clean test
 
-test:
-	./test/test_polymul
+test: all
+	./test/speed
+	./test/test_gp_compat | gp -q
 	./test/test_ntru
 	./test/test_pack
-	./test/speed
-	./test/ram
 
 clean:
 	-$(RM) *.o
-	-$(RM) -r test/test_polymul
+	-$(RM) -r test/decap
+	-$(RM) -r test/encap
+	-$(RM) -r test/keypair
+	-$(RM) -r test/speed
+	-$(RM) -r test/test_gp_compat
 	-$(RM) -r test/test_ntru
 	-$(RM) -r test/test_pack
-	-$(RM) -r test/speed
-	-$(RM) -r test/ram
-	-$(RM) -r test/encap
-	-$(RM) -r test/decap
-	-$(RM) -r test/keypair
 	-$(RM) PQCgenKAT_kem
 	-$(RM) PQCkemKAT_*.req
 	-$(RM) PQCkemKAT_*.rsp

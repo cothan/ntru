@@ -5,15 +5,14 @@ from params import *
 
 if __name__ == '__main__':
     p(".data")
-    p(".section .rodata")
-    p(".align 32")
+    p(".p2align 5")
 
     p(".text")
-    p(".hidden poly_mod_q_Phi_n")
-    p(".global poly_mod_q_Phi_n")
-    p(".att_syntax prefix")
+    p(".global {}poly_mod_q_Phi_n".format(NAMESPACE))
+    p(".global _{}poly_mod_q_Phi_n".format(NAMESPACE))
 
-    p("poly_mod_q_Phi_n:")
+    p("{}poly_mod_q_Phi_n:".format(NAMESPACE))
+    p("_{}poly_mod_q_Phi_n:".format(NAMESPACE))
     # rdi holds r
 
     N_min_1 = 0

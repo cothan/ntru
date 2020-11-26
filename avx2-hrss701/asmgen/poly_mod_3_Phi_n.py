@@ -5,17 +5,16 @@ from mod3 import mod3, mod3_masks
 
 if __name__ == '__main__':
     p(".data")
-    p(".section .rodata")
-    p(".align 32")
+    p(".p2align 5")
 
     mod3_masks()
 
     p(".text")
-    p(".hidden poly_mod_3_Phi_n")
-    p(".global poly_mod_3_Phi_n")
-    p(".att_syntax prefix")
+    p(".global {}poly_mod_3_Phi_n".format(NAMESPACE))
+    p(".global _{}poly_mod_3_Phi_n".format(NAMESPACE))
 
-    p("poly_mod_3_Phi_n:")
+    p("{}poly_mod_3_Phi_n:".format(NAMESPACE))
+    p("_{}poly_mod_3_Phi_n:".format(NAMESPACE))
     # rdi holds r
 
     N_min_1 = 0

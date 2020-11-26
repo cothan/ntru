@@ -1,3 +1,4 @@
+from params import *
 
 def mult_128x128(xy, x, y, t1, t2):
     t0 = xy  # careful about pipelining here
@@ -52,8 +53,7 @@ p = print
 
 if __name__ == '__main__':
     p(".data")
-    p(".section .rodata")
-    p(".align 32")
+    p(".p2align 5")
     p("mask1100:")
     for i in [0]*8 + [65535]*8:
         p(".word {}".format(i))
@@ -74,11 +74,11 @@ if __name__ == '__main__':
         p(".word {}".format(i))
 
     p(".text")
-    p(".hidden poly_R2_mul")
-    p(".global poly_R2_mul")
-    p(".att_syntax prefix")
+    p(".global {}poly_R2_mul".format(NAMESPACE))
+    p(".global _{}poly_R2_mul".format(NAMESPACE))
 
-    p("poly_R2_mul:")
+    p("{}poly_R2_mul:".format(NAMESPACE))
+    p("_{}poly_R2_mul:".format(NAMESPACE))
 
     # Since we have the vpclmulqdq instruction to multiply 64-bit polynomials over GF(2^k)
     # we try to reduce our computation to multiplications of 64-bit polynomials. In this implementation

@@ -22,17 +22,16 @@ def print_memfunc(f, in_size, out_size, per_reg=256, initialize=False):
     f(out_data, in_data)
 
     print(".data")
-    print(".section .rodata")
-    print(".align 32")
+    print(".p2align 5")
     for mask in data.DATASECTION:
         print(mask.data())
 
     print(".text")
-    print(".att_syntax prefix")
-    print(".hidden {}".format(f.__name__))
     print(".global {}".format(f.__name__))
+    print(".global _{}".format(f.__name__))
 
     print("{}:".format(f.__name__))
+    print("_{}:".format(f.__name__))
     for ins in instructions.INSTRUCTIONS:
         print(ins)
 

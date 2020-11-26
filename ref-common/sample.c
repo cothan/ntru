@@ -43,13 +43,13 @@ void sample_iid_plus(poly *r, const unsigned char uniformbytes[NTRU_SAMPLE_IID_B
 
   /* s = <x*r, r>.  (r[n-1] = 0) */
   for(i=0; i<NTRU_N-1; i++)
-    s += r->coeffs[i+1] * r->coeffs[i];
+    s += (uint16_t)((uint32_t)r->coeffs[i + 1] * (uint32_t)r->coeffs[i]);
 
   /* Extract sign of s (sign(0) = 1) */
   s = 1 | (-(s>>15));
 
   for(i=0; i<NTRU_N; i+=2)
-    r->coeffs[i] = s * r->coeffs[i];
+    r->coeffs[i] = (uint16_t)((uint32_t)s * (uint32_t)r->coeffs[i]);
 
   /* Map {0,1,2^16-1} -> {0, 1, 2} */
   for(i=0; i<NTRU_N; i++)
@@ -58,7 +58,6 @@ void sample_iid_plus(poly *r, const unsigned char uniformbytes[NTRU_SAMPLE_IID_B
 #endif
 
 #ifdef NTRU_HPS
-#include "crypto_sort_int32.h"
 void sample_fixed_type(poly *r, const unsigned char u[NTRU_SAMPLE_FT_BYTES])
 {
   // Assumes NTRU_SAMPLE_FT_BYTES = ceil(30*(n-1)/8)
@@ -69,15 +68,15 @@ void sample_fixed_type(poly *r, const unsigned char u[NTRU_SAMPLE_FT_BYTES])
   // Use 30 bits of u per word
   for (i = 0; i < (NTRU_N-1)/4; i++)
   {
-    s[4*i+0] =                              (u[15*i+ 0] << 2) + (u[15*i+ 1] << 10) + (u[15*i+ 2] << 18) + (u[15*i+ 3] << 26);
-    s[4*i+1] = ((u[15*i+ 3] & 0xc0) >> 4) + (u[15*i+ 4] << 4) + (u[15*i+ 5] << 12) + (u[15*i+ 6] << 20) + (u[15*i+ 7] << 28);
-    s[4*i+2] = ((u[15*i+ 7] & 0xf0) >> 2) + (u[15*i+ 8] << 6) + (u[15*i+ 9] << 14) + (u[15*i+10] << 22) + (u[15*i+11] << 30);
-    s[4*i+3] =  (u[15*i+11] & 0xfc)       + (u[15*i+12] << 8) + (u[15*i+13] << 15) + (u[15*i+14] << 24);
+    s[4*i+0] =                              (u[15*i+ 0] << 2) + (u[15*i+ 1] << 10) + (u[15*i+ 2] << 18) + ((uint32_t) u[15*i+ 3] << 26);
+    s[4*i+1] = ((u[15*i+ 3] & 0xc0) >> 4) + (u[15*i+ 4] << 4) + (u[15*i+ 5] << 12) + (u[15*i+ 6] << 20) + ((uint32_t) u[15*i+ 7] << 28);
+    s[4*i+2] = ((u[15*i+ 7] & 0xf0) >> 2) + (u[15*i+ 8] << 6) + (u[15*i+ 9] << 14) + (u[15*i+10] << 22) + ((uint32_t) u[15*i+11] << 30);
+    s[4*i+3] =  (u[15*i+11] & 0xfc)       + (u[15*i+12] << 8) + (u[15*i+13] << 16) + ((uint32_t) u[15*i+14] << 24);
   }
 #if (NTRU_N - 1) > ((NTRU_N - 1) / 4) * 4 // (N-1) = 2 mod 4
   i = (NTRU_N-1)/4;
-  s[4*i+0] =                              (u[15*i+ 0] << 2) + (u[15*i+ 1] << 10) + (u[15*i+ 2] << 18) + (u[15*i+ 3] << 26);
-  s[4*i+1] = ((u[15*i+ 3] & 0xc0) >> 4) + (u[15*i+ 4] << 4) + (u[15*i+ 5] << 12) + (u[15*i+ 6] << 20) + (u[15*i+ 7] << 28);
+  s[4*i+0] =                              (u[15*i+ 0] << 2) + (u[15*i+ 1] << 10) + (u[15*i+ 2] << 18) + ((uint32_t) u[15*i+ 3] << 26);
+  s[4*i+1] = ((u[15*i+ 3] & 0xc0) >> 4) + (u[15*i+ 4] << 4) + (u[15*i+ 5] << 12) + (u[15*i+ 6] << 20) + ((uint32_t) u[15*i+ 7] << 28);
 #endif
 
   for (i = 0; i<NTRU_WEIGHT/2; i++) s[i] |=  1;

@@ -1,3 +1,4 @@
+from params import *
 
 from K2_K2_64x44 import K2_K2_transpose_64x44
 
@@ -108,8 +109,7 @@ def idx2off(i):
 
 if __name__ == '__main__':
     p(".data")
-    p(".section .rodata")
-    p(".align 32")
+    p(".p2align 5")
 
     p("mask_low9words:")
     for i in [65535]*9 + [0]*7:
@@ -171,16 +171,12 @@ if __name__ == '__main__':
         p(".word 65535")
     p(".word 0")
 
-    p("mask_mod2048:")
-    for i in range(16):
-        p(".word 2047")
-
     p(".text")
-    p(".hidden poly_Rq_mul")
-    p(".global poly_Rq_mul")
-    p(".att_syntax prefix")
+    p(".global {}poly_Rq_mul".format(NAMESPACE))
+    p(".global _{}poly_Rq_mul".format(NAMESPACE))
 
-    p("poly_Rq_mul:")
+    p("{}poly_Rq_mul:".format(NAMESPACE))
+    p("_{}poly_Rq_mul:".format(NAMESPACE))
     # assume a and b in rsi and rdx respectively
     # assume destination pointer in rdi
     r_real = '%rdi'
@@ -570,14 +566,12 @@ if __name__ == '__main__':
                 if coeff == 2:
                     if i == 3 and j >= 4:  # this part exceeds 704
                         return
-                    p("vpand mask_mod2048(%rip), %ymm{}, %ymm{}".format(limbreg, limbreg))
                     p("vmovdqu %xmm{}, {}({})".format(limbreg, (off + i*176 + j * 44 + coeff*16) * 2, r_real))
                     p("vextracti128 $1, %ymm{}, %xmm{}".format(limbreg, limbreg))
                     p("vmovq %xmm{}, {}({})".format(limbreg, (off + i*176 + j * 44 + coeff*16 + 8) * 2, r_real))
                 else:
                     if i == 3 and j >= 4:  # this part exceeds 704
                         return
-                    p("vpand mask_mod2048(%rip), %ymm{}, %ymm{}".format(limbreg, limbreg))
                     p("vmovdqu %ymm{}, {}({})".format(limbreg, (off + i*176 + j * 44 + coeff*16) * 2, r_real))
 
             tmp = alloc()
