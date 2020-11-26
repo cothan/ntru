@@ -21,7 +21,7 @@ SRC = cmov.c \
       neon_poly_rq_mul.c \
       poly_s3_inv.c \
       sample.c \
-      neon_sample_iid.c
+      sample_iid.c
 
 HDR = cmov.h \
       crypto_hash_sha3256.h \
@@ -60,7 +60,7 @@ test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_pack.c
 
 test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c -lpapi
 
 test/gen_owcpa_vecs: test/gen_owcpa_vecs.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/gen_owcpa_vecs.c
