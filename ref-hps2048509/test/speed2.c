@@ -1,1 +1,0 @@
-../../test/speed2.c

@@ -7,7 +7,6 @@
 #include "randombytes.h"
 #include "sample.h"
 
-
 // API FUNCTIONS 
 int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
 {
@@ -33,7 +32,6 @@ int crypto_kem_enc(unsigned char *c, unsigned char *k, const unsigned char *pk)
 
   poly_S3_tobytes(rm, &r);
   poly_S3_tobytes(rm+NTRU_PACK_TRINARY_BYTES, &m);
-
   crypto_hash_sha3256(k, rm, NTRU_OWCPA_MSGBYTES);
 
   poly_Z3_to_Zq(&r);
@@ -51,6 +49,7 @@ int crypto_kem_dec(unsigned char *k, const unsigned char *c, const unsigned char
   fail = owcpa_dec(rm, c, sk);
   /* If fail = 0 then c = Enc(h, rm). There is no need to re-encapsulate. */
   /* See comment in owcpa_dec for details.                                */
+
   crypto_hash_sha3256(k, rm, NTRU_OWCPA_MSGBYTES);
 
   /* shake(secret PRF key || input ciphertext) */
@@ -58,7 +57,6 @@ int crypto_kem_dec(unsigned char *k, const unsigned char *c, const unsigned char
     buf[i] = sk[i+NTRU_OWCPA_SECRETKEYBYTES];
   for(i=0;i<NTRU_CIPHERTEXTBYTES;i++)
     buf[NTRU_PRFKEYBYTES + i] = c[i];
-  
   crypto_hash_sha3256(rm, buf, NTRU_PRFKEYBYTES+NTRU_CIPHERTEXTBYTES);
 
   cmov(k, rm, NTRU_SHAREDKEYBYTES, (unsigned char) fail);
