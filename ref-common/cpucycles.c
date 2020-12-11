@@ -6,7 +6,8 @@
 
 long long cpucycles(void)
 {
-  long long result = PAPI_get_real_usec();
+  //long long result = PAPI_get_real_usec();
+  long long result = PAPI_get_real_cyc();
   return result;
 }
 
