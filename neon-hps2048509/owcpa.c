@@ -68,13 +68,12 @@ void owcpa_keypair(unsigned char *pk,
                    unsigned char *sk,
                    const unsigned char seed[NTRU_SAMPLE_FG_BYTES])
 {
-  int i;
 
-  poly x1, x2, x3, x4, x5;
+  poly x1, x2, x3, x4, x5, x6;
 
   poly *f=&x1, *g=&x2, *invf_mod3=&x3;
-  poly *gf=&x3, *invgf=&x4, *tmp=&x5;
-  poly *invh=&x3, *h=&x3;
+  poly *gf=&x3, *invgf=&x4, *tmp1=&x5, *tmp2=&x6;
+  poly *invh=&x3, *h=&x4;
 
   sample_fg(f,g,seed);
 
@@ -88,28 +87,25 @@ void owcpa_keypair(unsigned char *pk,
 
 #ifdef NTRU_HRSS
   /* g = 3*(x-1)*g */
-  for(i=NTRU_N-1; i>0; i--)
-    g->coeffs[i] = 3*(g->coeffs[i-1] - g->coeffs[i]);
-  g->coeffs[0] = -(3*g->coeffs[0]);
+  polyhrss_mul3(g);
 #endif
 
 #ifdef NTRU_HPS
   /* g = 3*g */
-  for(i=0; i<NTRU_N; i++)
-    g->coeffs[i] = 3 * g->coeffs[i];
+  polyhps_mul3(g);
 #endif
 
   poly_Rq_mul(gf, g, f);
 
   poly_Rq_inv(invgf, gf);
 
-  poly_Rq_mul(tmp, invgf, f);
-  poly_Sq_mul(invh, tmp, f);
-  poly_Sq_tobytes(sk+2*NTRU_PACK_TRINARY_BYTES, invh);
+  poly_Rq_mul(tmp1, invgf, f);
+  poly_Rq_mul(tmp2, invgf, g);
+  poly_Sq_mul(invh, tmp1, f);
+  poly_Rq_mul(h, tmp2, g);
 
-  poly_Rq_mul(tmp, invgf, g);
-  poly_Rq_mul(h, tmp, g);
-  poly_Rq_sum_zero_tobytes(pk, h);
+  poly_Rq_sum_zero_tobytes(pk, h); // x4
+  poly_Sq_tobytes(sk+2*NTRU_PACK_TRINARY_BYTES, invh); // x3
 }
 
 
@@ -118,18 +114,16 @@ void owcpa_enc(unsigned char *c,
                const poly *m,
                const unsigned char *pk)
 {
-  int i;
   poly x1, x2;
-  poly *h = &x1, *liftm = &x1;
+  poly *h = &x1;
   poly *ct = &x2;
 
   poly_Rq_sum_zero_frombytes(h, pk);
 
   poly_Rq_mul(ct, r, h);
 
-  poly_lift(liftm, m);
-  for(i=0; i<NTRU_N; i++)
-    ct->coeffs[i] = ct->coeffs[i] + liftm->coeffs[i];
+  // c += Lift(m);
+  poly_lift_add(ct, m);
 
   poly_Rq_sum_zero_tobytes(c, ct);
 }
@@ -138,23 +132,22 @@ int owcpa_dec(unsigned char *rm,
               const unsigned char *ciphertext,
               const unsigned char *secretkey)
 {
-  int i;
   int fail;
   poly x1, x2, x3, x4;
 
-  poly *c = &x1, *f = &x2, *cf = &x3;
-  poly *mf = &x2, *finv3 = &x3, *m = &x4;
-  poly *liftm = &x2, *invh = &x3, *r = &x4;
+  poly *c = &x1, *f = &x2, *finv3 = &x3, *cf = &x4;
+  poly *mf = &x2, *m = &x4;
+  poly *invh = &x3, *r = &x4;
   poly *b = &x1;
 
   poly_Rq_sum_zero_frombytes(c, ciphertext);
   poly_S3_frombytes(f, secretkey);
-  poly_Z3_to_Zq(f);
+  poly_S3_frombytes(finv3, secretkey+NTRU_PACK_TRINARY_BYTES);
 
+  poly_Z3_to_Zq(f);
   poly_Rq_mul(cf, c, f);
   poly_Rq_to_S3(mf, cf);
 
-  poly_S3_frombytes(finv3, secretkey+NTRU_PACK_TRINARY_BYTES);
   poly_S3_mul(m, mf, finv3);
   poly_S3_tobytes(rm+NTRU_PACK_TRINARY_BYTES, m);
 
@@ -170,14 +163,12 @@ int owcpa_dec(unsigned char *rm,
 #ifdef NTRU_HPS
   fail |= owcpa_check_m(m);
 #endif
+  poly_Sq_frombytes(invh, secretkey+2*NTRU_PACK_TRINARY_BYTES);
 
   /* b = c - Lift(m) mod (q, x^n - 1) */
-  poly_lift(liftm, m);
-  for(i=0; i<NTRU_N; i++)
-    b->coeffs[i] = c->coeffs[i] - liftm->coeffs[i];
+  poly_lift_sub(b, c, m);
 
   /* r = b / h mod (q, Phi_n) */
-  poly_Sq_frombytes(invh, secretkey+2*NTRU_PACK_TRINARY_BYTES);
   poly_Sq_mul(r, b, invh);
 
   /* NOTE: Our definition of r as b/h mod (q, Phi_n) follows Figure 4 of     */

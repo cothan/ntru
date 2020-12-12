@@ -13,11 +13,11 @@ SRC = cmov.c \
       pack3.c \
       packq.c \
       poly.c \
-      poly_lift.c \
+      neon_poly_lift.c \
       neon_poly_mod.c \
       poly_r2_inv.c \
-	  neon_batch_multiplication.c \
-	  neon_matrix_transpose.c \
+	neon_batch_multiplication.c \
+	neon_matrix_transpose.c \
       neon_poly_rq_mul.c \
       poly_s3_inv.c \
       sample.c \
