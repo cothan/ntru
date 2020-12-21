@@ -1,24 +1,5 @@
 #include "poly.h"
 
-/* Map {0, 1, 2} -> {0,1,q-1} in place */
-void poly_Z3_to_Zq(poly *r)
-{
-  int i;
-  for(i=0; i<NTRU_N; i++)
-    r->coeffs[i] = r->coeffs[i] | ((-(r->coeffs[i]>>1)) & (NTRU_Q-1));
-}
-
-/* Map {0, 1, q-1} -> {0,1,2} in place */
-void poly_trinary_Zq_to_Z3(poly *r)
-{
-  int i;
-  for(i=0; i<NTRU_N; i++)
-  {
-    r->coeffs[i] = MODQ(r->coeffs[i]);
-    r->coeffs[i] = 3 & (r->coeffs[i] ^ (r->coeffs[i]>>(NTRU_LOGQ-1)));
-  }
-}
-
 void poly_Sq_mul(poly *r, poly *a, poly *b)
 {
   poly_Rq_mul(r, a, b);
