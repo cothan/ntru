@@ -35,7 +35,7 @@ void poly_lift(poly *r, const poly *a)
 {
     int i;
     poly b;
-    uint16x8x3_t neon_a, tmp, sum;
+    uint16x8x3_t neon_a, tmp, sum, neon_3, neon_4, neon_5;
 
     b.coeffs[0] = a->coeffs[0];
     b.coeffs[0] += a->coeffs[2];
@@ -91,10 +91,58 @@ void poly_lift(poly *r, const poly *a)
     b.coeffs[1] += a->coeffs[700] * 2;
     b.coeffs[2] += a->coeffs[700] * 1;
 
-    for (i = 3; i < NTRU_N; i++)
+    for (i = 3; i < NTRU_N - 24; i += 24)
     {
-        b.coeffs[i] = b.coeffs[i - 3] + 2 * (a->coeffs[i] + a->coeffs[i - 1] + a->coeffs[i - 2]);
+        neon_3 = vld3q_u16(&a->coeffs[i - 2]);
+        neon_4 = vld3q_u16(&a->coeffs[i - 1]);
+        neon_5 = vld3q_u16(&a->coeffs[i]);
+
+        // 3k
+        poly_vadd(sum.val[0], neon_3.val[0], neon_3.val[1]);
+        poly_vadd(sum.val[0], sum.val[0], neon_3.val[2]);
+        poly_vsl(sum.val[0], sum.val[0], 1);
+
+        // 3k
+        b.coeffs[i + 3 * 0] = b.coeffs[i - 3 * 1] + vgetq_lane_u16(sum.val[0], 0);
+        b.coeffs[i + 3 * 1] = b.coeffs[i + 3 * 0] + vgetq_lane_u16(sum.val[0], 1);
+        b.coeffs[i + 3 * 2] = b.coeffs[i + 3 * 1] + vgetq_lane_u16(sum.val[0], 2);
+        b.coeffs[i + 3 * 3] = b.coeffs[i + 3 * 2] + vgetq_lane_u16(sum.val[0], 3);
+        b.coeffs[i + 3 * 4] = b.coeffs[i + 3 * 3] + vgetq_lane_u16(sum.val[0], 4);
+        b.coeffs[i + 3 * 5] = b.coeffs[i + 3 * 4] + vgetq_lane_u16(sum.val[0], 5);
+        b.coeffs[i + 3 * 6] = b.coeffs[i + 3 * 5] + vgetq_lane_u16(sum.val[0], 6);
+        b.coeffs[i + 3 * 7] = b.coeffs[i + 3 * 6] + vgetq_lane_u16(sum.val[0], 7);
+
+        // 3k+1
+        poly_vadd(sum.val[1], neon_4.val[0], neon_4.val[1]);
+        poly_vadd(sum.val[1], sum.val[1], neon_4.val[2]);
+        poly_vsl(sum.val[1], sum.val[1], 1);
+
+        b.coeffs[1 + i + 3 * 0] = b.coeffs[1 + i - 3 * 1] + vgetq_lane_u16(sum.val[1], 0);
+        b.coeffs[1 + i + 3 * 1] = b.coeffs[1 + i + 3 * 0] + vgetq_lane_u16(sum.val[1], 1);
+        b.coeffs[1 + i + 3 * 2] = b.coeffs[1 + i + 3 * 1] + vgetq_lane_u16(sum.val[1], 2);
+        b.coeffs[1 + i + 3 * 3] = b.coeffs[1 + i + 3 * 2] + vgetq_lane_u16(sum.val[1], 3);
+        b.coeffs[1 + i + 3 * 4] = b.coeffs[1 + i + 3 * 3] + vgetq_lane_u16(sum.val[1], 4);
+        b.coeffs[1 + i + 3 * 5] = b.coeffs[1 + i + 3 * 4] + vgetq_lane_u16(sum.val[1], 5);
+        b.coeffs[1 + i + 3 * 6] = b.coeffs[1 + i + 3 * 5] + vgetq_lane_u16(sum.val[1], 6);
+        b.coeffs[1 + i + 3 * 7] = b.coeffs[1 + i + 3 * 6] + vgetq_lane_u16(sum.val[1], 7);
+
+        // 3k + 2
+        poly_vadd(sum.val[2], neon_5.val[0], neon_5.val[1]);
+        poly_vadd(sum.val[2], sum.val[2], neon_5.val[2]);
+        poly_vsl(sum.val[2], sum.val[2], 1);
+
+        b.coeffs[2 + i + 3 * 0] = b.coeffs[2 + i - 3 * 1] + vgetq_lane_u16(sum.val[2], 0);
+        b.coeffs[2 + i + 3 * 1] = b.coeffs[2 + i + 3 * 0] + vgetq_lane_u16(sum.val[2], 1);
+        b.coeffs[2 + i + 3 * 2] = b.coeffs[2 + i + 3 * 1] + vgetq_lane_u16(sum.val[2], 2);
+        b.coeffs[2 + i + 3 * 3] = b.coeffs[2 + i + 3 * 2] + vgetq_lane_u16(sum.val[2], 3);
+        b.coeffs[2 + i + 3 * 4] = b.coeffs[2 + i + 3 * 3] + vgetq_lane_u16(sum.val[2], 4);
+        b.coeffs[2 + i + 3 * 5] = b.coeffs[2 + i + 3 * 4] + vgetq_lane_u16(sum.val[2], 5);
+        b.coeffs[2 + i + 3 * 6] = b.coeffs[2 + i + 3 * 5] + vgetq_lane_u16(sum.val[2], 6);
+        b.coeffs[2 + i + 3 * 7] = b.coeffs[2 + i + 3 * 6] + vgetq_lane_u16(sum.val[2], 7);
     }
+    b.coeffs[699] = b.coeffs[696] + 2*(a->coeffs[697] + a->coeffs[698] + a->coeffs[699]);
+    b.coeffs[700] = b.coeffs[697] + 2*(a->coeffs[698] + a->coeffs[699] + a->coeffs[700]);
+
 
     /* Finish reduction mod Phi by subtracting Phi * b[N-1] */
     poly_mod_3_Phi_n(&b);
