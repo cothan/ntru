@@ -156,6 +156,35 @@ void poly_lift(poly *r, const poly *a)
     {
         r->coeffs[i + 1] = b.coeffs[i] - b.coeffs[i + 1];
     }
+
+    // TODO: Debug this code. Out of bound write. 
+    // uint16x8x2_t neon_b, neon_b1, res;
+    // for (i = 0; i < NTRU_N_32 - 16; i += 16)
+    // {
+    //     // r->coeffs[i + 1] = b.coeffs[i]   - b.coeffs[i + 1];
+    //     // r->coeffs[i + 2] = b.coeffs[i+1] - b.coeffs[i + 2];
+    //     neon_b  = vld2q_u16(&b.coeffs[i]);
+    //     neon_b1 = vld2q_u16(&b.coeffs[i+1]);
+
+    //     // Odd
+    //     poly_vsub(sum.val[0], neon_b.val[0], neon_b.val[1]);
+    //     // Even
+    //     poly_vsub(sum.val[1], neon_b1.val[0], neon_b1.val[1]);
+
+    //     res.val[0] = vzip1q_u16(sum.val[0], sum.val[1]);
+    //     res.val[1] = vzip2q_u16(sum.val[0], sum.val[1]);
+
+    //     vst1q_u16_x2(&r->coeffs[i+1], res);
+    //     // printf("%d: %d -- %d\n", i, r->coeffs[i + 1], r->coeffs[i + 2]);
+    //     // printf("-----------\n");
+    // }
+
+    // printf("\n[");
+    // for (i = 0; i < NTRU_N_32; i++)
+    // {
+    //     printf("%u, ", r->coeffs[i]);
+    // }
+    // printf("]\n");
 }
 
 // // ct += a
