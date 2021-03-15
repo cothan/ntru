@@ -7,14 +7,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "../../test/print.h"
+#include "../../test/m1cycles.h"
 
 #define NTESTS 1000000
 
-#define TIME(s) clock_gettime(CLOCK_MONOTONIC_RAW, &s);
+#define TIME(s) s = rdtsc();
 // Result is nanosecond per call
-#define CALC(start, stop) \
-  ((double)((stop.tv_sec - start.tv_sec) * 1000000000 + (stop.tv_nsec - start.tv_nsec))) / NTESTS;
+#define CALC(start, stop) (stop - start) / NTESTS;
 
 int main()
 {
@@ -28,8 +27,8 @@ int main()
   unsigned char rmbytes[NTRU_SAMPLE_RM_BYTES];
   uint16_t a1 = 0;
   int i;
-  struct timespec start, stop;
-  long ns;
+  long long start, stop;
+  long long ns;
 
   printf("-- api --\n\n");
 
