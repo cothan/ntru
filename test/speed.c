@@ -30,16 +30,18 @@ int main()
   long long start, stop;
   long long ns;
 
+  setup_rdtsc();
+
   printf("-- api --\n\n");
 
-  TIME(start);
-  for (i = 0; i < NTESTS; i++)
-  {
-    crypto_kem_keypair(pks, sks);
-  }
-  TIME(stop);
-  ns = CALC(start, stop);
-  print("crypto_kem_keypair:", ns);
+  // TIME(start);
+  // for (i = 0; i < NTESTS; i++)
+  // {
+  //   crypto_kem_keypair(pks, sks);
+  // }
+  // TIME(stop);
+  // ns = CALC(start, stop);
+  // printf("crypto_kem_keypair: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -48,7 +50,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("crypto_kem_enc:", ns);
+  printf("crypto_kem_enc: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -57,7 +59,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("crypto_kem_dec:", ns);
+  printf("crypto_kem_dec: %lld\n", ns);
 
 
   printf("-- internals --\n\n");
@@ -74,7 +76,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("poly_Rq_mul:", ns);
+  printf("poly_Rq_mul: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -83,30 +85,30 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("poly_S3_mul:", ns);
+  printf("poly_S3_mul: %lld\n", ns);
 
   // a as generated in test_polymul
   for (i = 0; i < NTRU_N; i++)
     a1 += a.coeffs[i];
   a.coeffs[0] = (a.coeffs[0] + (1 ^ (a1 & 1))) & 3;
 
-  TIME(start);
-  for (i = 0; i < NTESTS; i++)
-  {
-    poly_Rq_inv(&r, &a);
-  }
-  TIME(stop);
-  ns = CALC(start, stop);
-  print("poly_Rq_inv:", ns);
+  // TIME(start);
+  // for (i = 0; i < NTESTS; i++)
+  // {
+  //   poly_Rq_inv(&r, &a);
+  // }
+  // TIME(stop);
+  // ns = CALC(start, stop);
+  // printf("poly_Rq_inv: %lld\n", ns);
 
-  TIME(start);
-  for (i = 0; i < NTESTS; i++)
-  {
-    poly_S3_inv(&r, &a);
-  }
-  TIME(stop);
-  ns = CALC(start, stop);
-  print("poly_S3_inv:", ns);
+  // TIME(start);
+  // for (i = 0; i < NTESTS; i++)
+  // {
+  //   poly_S3_inv(&r, &a);
+  // }
+  // TIME(stop);
+  // ns = CALC(start, stop);
+  // printf("poly_S3_inv: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -115,7 +117,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("randombytes:", ns);
+  printf("randombytes: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -124,7 +126,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("randombytes:", ns);
+  printf("randombytes: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -133,7 +135,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("sample_iid:", ns);
+  printf("sample_iid: %lld\n", ns);
 
 #ifdef NTRU_HRSS
   TIME(start);
@@ -143,7 +145,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("sample_iid_plus:", ns);
+  printf("sample_iid_plus: %lld\n", ns);
 #endif
 
 #ifdef NTRU_HPS
@@ -155,7 +157,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("sample_fixed_type:", ns);
+  printf("sample_fixed_type: %lld\n", ns);
 
 #endif
 
@@ -166,7 +168,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("poly_lift:", ns);
+  printf("poly_lift: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -175,7 +177,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("poly_Rq_to_S3:", ns);
+  printf("poly_Rq_to_S3: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -184,7 +186,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("poly_Rq_sum_zero_tobytes:", ns);
+  printf("poly_Rq_sum_zero_tobytes: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -193,7 +195,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("poly_Rq_sum_zero_frombytes:", ns);
+  printf("poly_Rq_sum_zero_frombytes: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -202,7 +204,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("poly_S3_tobytes:", ns);
+  printf("poly_S3_tobytes: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
@@ -211,7 +213,7 @@ int main()
   }
   TIME(stop);
   ns = CALC(start, stop);
-  print("poly_S3_frombytes:", ns);
+  printf("poly_S3_frombytes: %lld\n", ns);
 
   free(pks);
   free(sks);
