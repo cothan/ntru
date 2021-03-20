@@ -1,7 +1,7 @@
 NTRU_NAMESPACE ?= ntru_
 
 CC ?= /usr/bin/cc
-CFLAGS = -O3 -fomit-frame-pointer -march=native -fPIC -fPIE -pie
+CFLAGS = -O3 -fomit-frame-pointer -mtune=native -fPIC -fPIE -pie
 CFLAGS += -Wall -Wextra -Wpedantic
 CFLAGS += -DCRYPTO_NAMESPACE\(s\)=${NTRU_NAMESPACE}\#\#s
 
@@ -57,8 +57,8 @@ test/test_owcpa: $(SRC_URAND) $(HDR_URAND) test/test_owcpa.c
 test/test_pack: $(SRC_URAND) $(HDR_URAND) test/test_pack.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/test_pack.c
 
-test/speed: $(SRC_URAND) $(HDR_URAND) cpucycles.h cpucycles.c test/speed.c
-	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) cpucycles.c test/speed.c
+test/speed: $(SRC_URAND) $(HDR_URAND) test/speed.c
+	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/speed.c
 
 test/gen_owcpa_vecs: test/gen_owcpa_vecs.c
 	$(CC) $(CFLAGS) -o $@ $(SRC_URAND) test/gen_owcpa_vecs.c

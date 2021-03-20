@@ -1,17 +1,17 @@
 #include "../kem.h"
 #include "../params.h"
- #include "../cpucycles.h"
+//  #include "../cpucycles.h"
 #include "../randombytes.h"
 #include "../poly.h"
 #include "../sample.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-// #include "../../test/m1cycles.h"
+#include "../../test/m1cycles.h"
 
 #define NTESTS 1000000
 
-#define TIME(s) s = cpucycles();
+#define TIME(s) s = rdtsc();
 // Result is nanosecond per call
 #define CALC(start, stop) (stop - start) / NTESTS;
 
@@ -30,18 +30,18 @@ int main()
   long long start, stop;
   long long ns;
 
-  // setup_rdtsc();
+  setup_rdtsc();
 
   printf("-- api --\n\n");
 
-  // TIME(start);
-  // for (i = 0; i < NTESTS; i++)
-  // {
-  //   crypto_kem_keypair(pks, sks);
-  // }
-  // TIME(stop);
-  // ns = CALC(start, stop);
-  // printf("crypto_kem_keypair: %lld\n", ns);
+  TIME(start);
+  for (i = 0; i < NTESTS; i++)
+  {
+    crypto_kem_keypair(pks, sks);
+  }
+  TIME(stop);
+  ns = CALC(start, stop);
+  printf("crypto_kem_keypair: %lld\n", ns);
 
   TIME(start);
   for (i = 0; i < NTESTS; i++)
